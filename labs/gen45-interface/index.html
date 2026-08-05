@@ -1,1307 +1,2105 @@
-<title>Targeting MITF — Gen-4.5 Storyboard Session</title>
+<title>MITF Modulation Hypothesis — 60s Explainer</title>
 <style>
   :root{
-    --void:#000000;
-    --panel:#0B0B0C;
-    --raise:#16161A;
-    --raise-hi:#212127;
-    --hairline:rgba(255,255,255,.10);
-    --hairline-soft:rgba(255,255,255,.055);
-    --type:#EDEDEA;
-    --type-mid:#A2A2A9;
-    --type-dim:#74747C;
-    --type-faint:#4A4A52;
-    --amber:#D99B3C;
-    --live:#6EE7B7;
+    /* ── semantic biology palette — meanings are fixed, never reuse ── */
+    --background-deep:#020B14;
+    --background-cellular:#071D2C;
+
+    --keratinocyte:#7397B5;
+    --keratinocyte-highlight:#A9C7DB;
+
+    --melanocyte:#A55B2A;
+    --melanocyte-highlight:#D38A4A;
+
+    --mc1r:#7658F3;
+    --mc1r-active:#9B82FF;
+
+    --alpha-msh:#2BE7F2;
+    --camp-signal:#55F2FF;
+
+    --pka:#FFD166;
+    --creb:#F5C451;
+    --crtc3:#F7A84D;
+
+    --mitf:#8B4C23;
+    --mitf-highlight:#D18A45;
+    --mitf-shadow:#3B1F12;
+
+    --dna:#9B68F5;
+    --dna-highlight:#C1A2FF;
+
+    --tyr:#FF9F32;
+    --tyrp1:#F5813E;
+    --dct:#FFB75C;
+
+    --melanosome-membrane:#285B78;
+    --plasma-membrane:#5FA9C8;
+    --melanin:#1A0B06;
+    --melanin-highlight:#5B2C16;
+
+    --candidate-molecule:#FFFFFF;
+    --candidate-glow:#DFF8FF;
+
+    --thiamidol:#63C8F4;
+    --thiamidol-glow:#BEEFFF;
+
+    --activation-arrow:#62EEFF;
+    --downregulation-arrow:#78A8D8;
+
+    --established-border:#39D6E8;
+    --hypothesis-border:#F3B34B;
+    --warning:#FFB347;
+
+    /* ── editor chrome (deliberately duller than the stage) ── */
+    --chrome-bg:#08090B;
+    --chrome-panel:#0D0F12;
+    --chrome-raise:#171A1F;
+    --chrome-raise-hi:#22262D;
+    --chrome-line:rgba(255,255,255,.09);
+    --chrome-text:#D8DBE0;
+    --chrome-dim:#767C86;
+    --chrome-faint:#4A4F58;
+
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
-    --rail:56px;
-    --shots:246px;
-    --r-sm:7px;
-    --r-md:11px;
-    --r-lg:16px;
     --ease:cubic-bezier(.22,.61,.36,1);
   }
 
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{
-    margin:0;background:var(--void);color:var(--type);
-    font-family:var(--sans);font-size:13px;line-height:1.45;letter-spacing:-.005em;
+    margin:0;background:var(--chrome-bg);color:var(--chrome-text);
+    font-family:var(--sans);font-size:13px;line-height:1.45;
     -webkit-font-smoothing:antialiased;overflow:hidden;
   }
-  button,input,textarea{font:inherit;color:inherit;letter-spacing:inherit;}
+  button,input{font:inherit;color:inherit;}
   button{background:none;border:0;padding:0;cursor:pointer;}
-  :focus-visible{outline:1.5px solid var(--type);outline-offset:2px;border-radius:4px;}
-  ::selection{background:var(--type);color:var(--void);}
-
-  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0;}
-  .eyebrow{font-size:9.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--type-faint);font-weight:600;}
+  :focus-visible{outline:1.5px solid var(--established-border);outline-offset:2px;border-radius:4px;}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+  .eyebrow{font-size:9.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--chrome-faint);font-weight:600;}
 
   .app{display:flex;height:100vh;height:100dvh;overflow:hidden;}
 
-  /* ─── rail ──────────────────────────────────────────── */
+  /* ── rail ── */
   .rail{
-    width:var(--rail);flex:none;border-right:1px solid var(--hairline-soft);
-    background:var(--panel);display:flex;flex-direction:column;align-items:center;
-    padding:12px 0;gap:3px;
+    width:54px;flex:none;border-right:1px solid var(--chrome-line);background:var(--chrome-panel);
+    display:flex;flex-direction:column;align-items:center;padding:11px 0;gap:3px;
   }
-  .mark{
-    width:30px;height:30px;margin-bottom:14px;display:grid;place-items:center;
-    border-radius:8px;background:var(--type);color:var(--void);
-  }
-  .rail-btn{
-    width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
-    color:var(--type-dim);transition:background .15s var(--ease),color .15s var(--ease);
-  }
-  .rail-btn:hover{background:var(--raise);color:var(--type);}
-  .rail-btn[aria-current="true"]{background:var(--raise-hi);color:var(--type);}
+  .mark{width:30px;height:30px;margin-bottom:13px;display:grid;place-items:center;border-radius:8px;
+    background:linear-gradient(150deg,var(--mitf-highlight),var(--mitf));color:#150A04;}
+  .rail-btn{width:35px;height:35px;border-radius:9px;display:grid;place-items:center;color:var(--chrome-dim);
+    transition:background .15s var(--ease),color .15s var(--ease);}
+  .rail-btn:hover{background:var(--chrome-raise);color:var(--chrome-text);}
+  .rail-btn[aria-pressed="true"],.rail-btn[aria-current="true"]{background:var(--chrome-raise-hi);color:#fff;}
   .rail-spacer{flex:1;}
-  .avatar{
-    width:28px;height:28px;border-radius:50%;
-    background:linear-gradient(150deg,#3A3A44,#1A1A20);border:1px solid var(--hairline);
-    display:grid;place-items:center;font-size:10px;font-weight:650;color:var(--type-mid);
-  }
 
   .shell{flex:1;min-width:0;display:flex;flex-direction:column;}
 
-  /* ─── topbar ────────────────────────────────────────── */
-  .topbar{
-    height:46px;flex:none;border-bottom:1px solid var(--hairline-soft);
-    display:flex;align-items:center;gap:9px;padding:0 14px;background:var(--panel);
-  }
+  /* ── topbar ── */
+  .topbar{height:44px;flex:none;border-bottom:1px solid var(--chrome-line);display:flex;align-items:center;
+    gap:9px;padding:0 13px;background:var(--chrome-panel);}
   .crumb{display:flex;align-items:center;gap:7px;min-width:0;}
-  .crumb-org{color:var(--type-dim);}
-  .crumb-sep{color:var(--type-faint);}
+  .crumb-org{color:var(--chrome-dim);}
   .crumb-name{font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .badge{
-    display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 8px;
-    border-radius:5px;border:1px solid var(--hairline);color:var(--type-mid);
-    font-size:10.5px;font-weight:550;white-space:nowrap;
-  }
-  .badge.replica{border-style:dashed;color:var(--type-faint);}
-  .badge.claim{border-color:rgba(217,155,60,.4);color:var(--amber);}
+  .tag{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 8px;border-radius:5px;
+    border:1px solid var(--chrome-line);color:var(--chrome-dim);font-size:10.5px;font-weight:550;white-space:nowrap;}
+  .tag.fact{border-color:rgba(57,214,232,.42);color:var(--established-border);}
+  .tag.hyp{border-color:rgba(243,179,75,.45);color:var(--hypothesis-border);border-style:dashed;}
   .top-spacer{flex:1;}
-  .credits{display:flex;align-items:center;gap:8px;}
-  .credit-bar{width:52px;height:3px;border-radius:2px;background:var(--raise-hi);overflow:hidden;}
-  .credit-bar i{display:block;height:100%;background:var(--type-mid);transition:width .5s var(--ease),background .3s;}
-  .credits.low .credit-bar i{background:var(--amber);}
-  .credits.low .credit-val{color:var(--amber);}
-  .credit-val{font-size:11.5px;color:var(--type-mid);}
 
+  /* ── stage ── */
   .workarea{flex:1;min-height:0;display:flex;}
-
-  /* ─── stage ─────────────────────────────────────────── */
-  .stage{
-    flex:1;min-width:0;position:relative;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;padding:18px 26px 176px;
-    background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.028),transparent 62%),var(--void);
-  }
+  .stage{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;padding:14px 20px 128px;background:#000;overflow:auto;}
   .gate{
-    position:relative;aspect-ratio:var(--ar,9/16);
-    max-width:min(100%,520px);max-height:100%;
-    background:#02070E;border:1px solid var(--hairline);border-radius:var(--r-md);
-    overflow:hidden;transition:aspect-ratio .35s var(--ease),border-color .3s var(--ease);
+    position:relative;flex:none;
+    aspect-ratio:9/16;height:100%;max-height:100%;
+    background:var(--background-deep);border-radius:10px;overflow:hidden;
+    box-shadow:0 0 0 1px rgba(255,255,255,.09),0 22px 60px -20px #000;
   }
-  .gate canvas{display:block;width:100%;height:100%;}
+  .gate canvas,.gate svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  .gate canvas{z-index:0;}
+  .gate svg{z-index:1;}
 
-  /* label overlay */
-  .labels{position:absolute;inset:0;pointer-events:none;}
-  .lab{
-    position:absolute;display:flex;align-items:center;gap:0;
-    transform:translateY(-50%);white-space:nowrap;
-    opacity:0;animation:labIn .5s var(--ease) forwards;
-  }
-  .lab .dot{width:4px;height:4px;border-radius:50%;background:#fff;flex:none;box-shadow:0 0 6px rgba(255,255,255,.8);}
-  .lab .lead{height:1px;background:rgba(255,255,255,.55);flex:none;}
-  .lab .txt{
-    font-size:10.5px;font-weight:550;color:#fff;letter-spacing:.005em;
-    text-shadow:0 0 10px rgba(0,0,0,.95),0 1px 3px rgba(0,0,0,.9);padding:0 5px;
-  }
-  .lab.main .txt{font-size:12.5px;font-weight:600;}
-  .lab.rtl{flex-direction:row-reverse;transform:translate(-100%,-50%);}
-  @keyframes labIn{from{opacity:0;transform:translateY(-50%) translateX(-4px)}to{opacity:1}}
-  .lab.rtl{animation-name:labInR;}
-  @keyframes labInR{from{opacity:0}to{opacity:1}}
+  /* actual-size render mode: true 1080×1920 pixels */
+  .stage.render-mode{align-items:flex-start;justify-content:flex-start;padding:20px;}
+  .stage.render-mode .gate{width:1080px;height:1920px;aspect-ratio:auto;max-height:none;border-radius:0;}
 
-  .caption{
-    position:absolute;left:0;right:0;bottom:52px;text-align:center;
-    font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;
-    color:rgba(255,255,255,.82);text-shadow:0 1px 8px rgba(0,0,0,.9);
-  }
-  .shot-tag{
-    position:absolute;top:10px;left:11px;display:flex;align-items:center;gap:7px;
-    font-size:10px;color:rgba(255,255,255,.6);
-    text-shadow:0 1px 6px rgba(0,0,0,.9);
-  }
-  .shot-tag b{color:#fff;font-weight:600;}
-  .safe{position:absolute;inset:6.5%;border:1px solid rgba(255,255,255,.09);border-radius:4px;pointer-events:none;}
-
-  .render-status{
-    position:absolute;inset:0;display:none;flex-direction:column;align-items:center;
-    justify-content:center;gap:14px;background:rgba(2,5,9,.86);backdrop-filter:blur(2px);
-  }
-  .gate.busy .render-status{display:flex;}
-  .gate.busy{border-color:rgba(255,255,255,.22);}
-  .status-label{font-size:12px;color:var(--type-mid);}
-  .status-track{width:min(200px,60%);height:2px;background:var(--raise-hi);border-radius:2px;overflow:hidden;}
-  .status-track i{display:block;height:100%;width:0;background:var(--type);transition:width .25s linear;}
-  .status-pct{font-size:11px;color:var(--type-dim);}
-  .scanline{
-    position:absolute;left:0;right:0;height:120px;pointer-events:none;
-    background:linear-gradient(180deg,transparent,rgba(255,255,255,.05),transparent);
-    animation:sweep 2.1s var(--ease) infinite;
-  }
-  @keyframes sweep{from{top:-120px}to{top:100%}}
-
-  /* ─── composer / timeline dock ──────────────────────── */
+  /* ── transport dock ── */
   .dock{
-    position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
-    width:min(820px,calc(100% - 52px));
-    background:rgba(14,14,16,.9);backdrop-filter:blur(18px) saturate(1.2);
-    border:1px solid var(--hairline);border-radius:var(--r-lg);
-    box-shadow:0 18px 44px -14px rgba(0,0,0,.9);
-    padding:10px 11px 9px;display:flex;flex-direction:column;gap:9px;z-index:5;
+    position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+    width:min(880px,calc(100% - 40px));
+    background:rgba(13,15,18,.94);backdrop-filter:blur(16px);
+    border:1px solid var(--chrome-line);border-radius:14px;
+    box-shadow:0 18px 44px -14px #000;padding:9px 11px;display:flex;flex-direction:column;gap:8px;z-index:5;
   }
+  .tl-track{display:flex;gap:2px;height:20px;}
+  .tl-seg{flex:1;border-radius:3px;background:var(--chrome-raise);position:relative;overflow:hidden;
+    transition:background .15s var(--ease);}
+  .tl-seg:hover{background:var(--chrome-raise-hi);}
+  .tl-seg i{position:absolute;inset:0 auto 0 0;width:0;background:rgba(255,255,255,.20);}
+  .tl-seg b{position:absolute;left:0;right:0;bottom:0;height:2.5px;}
+  .tl-seg[data-c="fact"] b{background:var(--established-border);}
+  .tl-seg[data-c="hyp"] b{background:var(--hypothesis-border);}
+  .tl-seg[data-c="cmp"] b{background:linear-gradient(90deg,var(--mitf-highlight) 50%,var(--thiamidol) 50%);}
+  .tl-seg[data-c="question"] b{background:var(--warning);}
+  .tl-seg[aria-current="true"]{background:rgba(255,255,255,.72);}
+  .tl-seg[aria-current="true"] i{background:rgba(0,0,0,.20);}
+  .tl-meta{display:flex;align-items:center;gap:9px;}
+  .tp{width:26px;height:26px;display:grid;place-items:center;color:var(--chrome-text);border-radius:6px;flex:none;}
+  .tp:hover{background:rgba(255,255,255,.11);}
+  .tp[aria-pressed="false"]{color:var(--chrome-faint);}
+  .tp.primary{background:#fff;color:#000;}
+  .tp.primary:hover{background:#fff;transform:scale(1.05);}
+  .tc{font-size:11px;color:var(--chrome-dim);}
+  .tl-title{flex:1;min-width:0;font-size:11.5px;color:var(--chrome-dim);overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;}
+  .btn{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:6px;
+    border:1px solid var(--chrome-line);color:var(--chrome-dim);font-size:11px;font-weight:500;white-space:nowrap;
+    transition:border-color .15s var(--ease),color .15s var(--ease),background .15s var(--ease);}
+  .btn:hover{border-color:rgba(255,255,255,.28);color:#fff;background:rgba(255,255,255,.04);}
+  .btn[aria-pressed="true"]{background:var(--chrome-raise-hi);color:#fff;border-color:transparent;}
+  .toast{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);
+    padding:6px 11px;border-radius:6px;background:rgba(57,214,232,.12);border:1px solid rgba(57,214,232,.3);
+    color:var(--established-border);font-size:11.5px;white-space:nowrap;opacity:0;pointer-events:none;
+    transition:opacity .2s var(--ease);}
+  .toast.show{opacity:1;}
 
-  .timeline{display:flex;flex-direction:column;gap:5px;}
-  .tl-track{display:flex;gap:2px;height:16px;}
-  .tl-seg{
-    flex:1;border-radius:3px;background:var(--raise);position:relative;overflow:hidden;
-    transition:background .15s var(--ease);
-  }
-  .tl-seg:hover{background:var(--raise-hi);}
-  .tl-seg[aria-current="true"]{background:rgba(255,255,255,.82);}
-  .tl-seg i{
-    position:absolute;inset:0 auto 0 0;width:0;background:rgba(255,255,255,.22);
-  }
-  .tl-seg[aria-current="true"] i{background:rgba(0,0,0,.22);}
-  .tl-meta{display:flex;align-items:center;gap:10px;}
-  .tl-meta .tc{font-size:10.5px;color:var(--type-mid);}
-  .tp-btn{width:22px;height:22px;display:grid;place-items:center;color:var(--type);border-radius:5px;}
-  .tp-btn:hover{background:rgba(255,255,255,.12);}
-  .tp-btn[aria-pressed="false"]{color:var(--type-dim);}
-  .tl-title{flex:1;min-width:0;font-size:11.5px;color:var(--type-mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-  .prompt-row{display:flex;gap:9px;align-items:flex-start;}
-  .ref{
-    width:42px;height:42px;flex:none;border-radius:var(--r-sm);
-    border:1px dashed rgba(255,255,255,.2);color:var(--type-faint);
-    display:grid;place-items:center;position:relative;overflow:hidden;
-    transition:border-color .15s var(--ease),color .15s var(--ease);
-  }
-  .ref:hover{border-color:rgba(255,255,255,.4);color:var(--type-mid);}
-  .ref.filled{border-style:solid;border-color:var(--hairline);}
-  .ref canvas{position:absolute;inset:0;width:100%;height:100%;}
-  #prompt{
-    flex:1;min-width:0;background:none;border:0;resize:none;
-    padding:6px 2px 0;min-height:40px;max-height:104px;
-    font-size:12.5px;line-height:1.45;color:var(--type-mid);overflow-y:auto;
-  }
-  #prompt:focus{outline:none;color:var(--type);}
-
-  .controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-  .seg{display:inline-flex;align-items:center;background:var(--raise);border-radius:var(--r-sm);padding:2px;gap:2px;}
-  .seg button{
-    height:23px;padding:0 9px;border-radius:5px;font-size:11px;font-weight:500;
-    color:var(--type-dim);transition:background .13s var(--ease),color .13s var(--ease);
-  }
-  .seg button:hover{color:var(--type-mid);}
-  .seg button[aria-pressed="true"]{background:var(--raise-hi);color:var(--type);box-shadow:0 1px 2px rgba(0,0,0,.4);}
-  .ctl-label{padding-left:3px;}
-  .chip{
-    display:inline-flex;align-items:center;gap:6px;height:27px;padding:0 10px;
-    border-radius:var(--r-sm);background:var(--raise);font-size:11.5px;color:var(--type-mid);
-    transition:background .13s var(--ease),color .13s var(--ease);
-  }
-  .chip:hover{background:var(--raise-hi);color:var(--type);}
-  .ctl-spacer{flex:1;}
-  .cost{font-size:11px;color:var(--type-dim);white-space:nowrap;}
-  .go{
-    width:30px;height:30px;flex:none;border-radius:50%;background:var(--type);color:var(--void);
-    display:grid;place-items:center;transition:transform .13s var(--ease),opacity .13s var(--ease);
-  }
-  .go:hover{transform:scale(1.06);}
-  .go:disabled{opacity:.28;cursor:not-allowed;transform:none;}
-  .notice{
-    display:none;margin:0;padding:7px 9px;border-radius:var(--r-sm);
-    background:rgba(217,155,60,.1);border:1px solid rgba(217,155,60,.25);
-    color:var(--amber);font-size:11.5px;
-  }
-  .notice.show{display:block;}
-  .notice.ok{background:rgba(110,231,183,.08);border-color:rgba(110,231,183,.24);color:var(--live);}
-
-  /* ─── shots column ──────────────────────────────────── */
-  .shots{
-    width:var(--shots);flex:none;border-left:1px solid var(--hairline-soft);
-    background:var(--panel);display:flex;flex-direction:column;min-height:0;
-  }
-  .shots-head{
-    height:38px;flex:none;display:flex;align-items:center;justify-content:space-between;
-    padding:0 13px;border-bottom:1px solid var(--hairline-soft);
-  }
-  .link-btn{font-size:10.5px;color:var(--type-dim);}
-  .link-btn:hover{color:var(--type);}
-  .shots-list{
-    flex:1;min-height:0;overflow-y:auto;padding:9px;display:flex;flex-direction:column;gap:7px;
-    scrollbar-width:thin;scrollbar-color:var(--raise-hi) transparent;
-  }
+  /* ── shot list ── */
+  .shots{width:236px;flex:none;border-left:1px solid var(--chrome-line);background:var(--chrome-panel);
+    display:flex;flex-direction:column;min-height:0;}
+  .shots-head{height:36px;flex:none;display:flex;align-items:center;justify-content:space-between;
+    padding:0 12px;border-bottom:1px solid var(--chrome-line);}
+  .shots-list{flex:1;min-height:0;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;
+    scrollbar-width:thin;scrollbar-color:var(--chrome-raise-hi) transparent;}
   .shots-list::-webkit-scrollbar{width:8px;}
-  .shots-list::-webkit-scrollbar-thumb{background:var(--raise-hi);border-radius:8px;border:2px solid var(--panel);}
-  .shot{
-    display:flex;gap:8px;width:100%;text-align:left;padding:6px;
-    border-radius:var(--r-sm);border:1px solid transparent;background:var(--raise);
-    transition:border-color .15s var(--ease);
-  }
-  .shot:hover{border-color:var(--hairline);}
-  .shot[aria-current="true"]{border-color:rgba(255,255,255,.34);}
-  .shot-thumb{
-    width:38px;flex:none;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#02070E;
-  }
-  .shot-thumb canvas{display:block;width:100%;height:100%;}
-  .shot-body{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px;}
-  .shot-idx{font-size:9.5px;color:var(--type-faint);display:flex;justify-content:space-between;}
-  .shot-title{
-    font-size:11.5px;color:var(--type-mid);line-height:1.3;
-    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-  }
-  .shot[aria-current="true"] .shot-title{color:var(--type);}
-
-  /* ─── inspector drawer ──────────────────────────────── */
-  .drawer{
-    position:fixed;top:0;right:0;bottom:0;width:330px;z-index:20;
-    background:var(--panel);border-left:1px solid var(--hairline);
-    transform:translateX(100%);transition:transform .28s var(--ease);
-    display:flex;flex-direction:column;box-shadow:-24px 0 60px -30px rgba(0,0,0,.9);
-  }
-  .drawer.open{transform:none;}
-  .drawer-head{
-    height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;
-    padding:0 13px;border-bottom:1px solid var(--hairline-soft);
-  }
-  .drawer-body{padding:15px 13px 20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto;}
-  .field{display:flex;flex-direction:column;gap:5px;}
-  .field p{margin:0;font-size:12px;color:var(--type-mid);line-height:1.5;}
-  .field p.vo{color:var(--type);font-style:italic;}
-  .chips{display:flex;flex-wrap:wrap;gap:4px;}
-  .tagchip{
-    padding:2px 7px;border-radius:4px;background:var(--raise);
-    font-size:10.5px;color:var(--type-mid);
-  }
-  .promptbox{
-    background:var(--raise);border-radius:var(--r-sm);padding:9px;
-    font-family:var(--mono);font-size:10.5px;line-height:1.55;color:var(--type-mid);
-    max-height:190px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;
-  }
-  .drawer-foot{
-    margin-top:auto;padding:11px 13px;border-top:1px solid var(--hairline-soft);
-    font-size:10.5px;color:var(--type-faint);line-height:1.5;
-  }
-  .act{
-    display:inline-flex;align-items:center;justify-content:center;gap:6px;
-    height:29px;padding:0 11px;border-radius:var(--r-sm);
-    border:1px solid var(--hairline);color:var(--type-mid);font-size:11.5px;font-weight:500;
-    transition:border-color .15s var(--ease),color .15s var(--ease),background .15s var(--ease);
-  }
-  .act:hover{border-color:rgba(255,255,255,.3);color:var(--type);background:rgba(255,255,255,.04);}
-  .act.solid{background:var(--type);color:var(--void);border-color:var(--type);}
-  .act.solid:hover{background:#fff;color:var(--void);}
-  .act-row{display:flex;gap:6px;}
-  .act-row .act{flex:1;}
+  .shots-list::-webkit-scrollbar-thumb{background:var(--chrome-raise-hi);border-radius:8px;border:2px solid var(--chrome-panel);}
+  .shot{display:flex;gap:8px;width:100%;text-align:left;padding:6px;border-radius:7px;
+    border:1px solid transparent;background:var(--chrome-raise);transition:border-color .15s var(--ease);}
+  .shot:hover{border-color:var(--chrome-line);}
+  .shot[aria-current="true"]{border-color:rgba(255,255,255,.32);}
+  .shot-n{width:22px;flex:none;font-size:10px;color:var(--chrome-faint);padding-top:1px;}
+  .shot-b{min-width:0;flex:1;}
+  .shot-t{font-size:11.5px;color:var(--chrome-dim);line-height:1.32;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .shot[aria-current="true"] .shot-t{color:#fff;}
+  .shot-c{margin-top:3px;font-size:9px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;}
+  .shot-c.fact{color:var(--established-border);}
+  .shot-c.hyp{color:var(--hypothesis-border);}
+  .shot-c.cmp{color:var(--mitf-highlight);}
+  .shot-c.question{color:var(--warning);}
 
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 
-  @media (max-width:1040px){ .shots{display:none;} }
-  @media (max-width:640px){
-    .rail{display:none;}
-    .dock{width:calc(100% - 20px);bottom:12px;}
-    .ctl-label{display:none;}
-    .stage{padding:12px 12px 190px;}
-  }
-  @media (prefers-reduced-motion:reduce){
-    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
-    .scanline{display:none;}
-    .lab{opacity:1;}
-  }
+  @media (max-width:1040px){.shots{display:none;}}
+  @media (max-width:640px){.rail{display:none;}.dock{width:calc(100% - 16px);bottom:10px;}}
+  @media (prefers-reduced-motion:reduce){*{transition-duration:.001ms !important;}}
 </style>
 
 <div class="app">
   <nav class="rail" aria-label="Workspace">
     <div class="mark" aria-hidden="true">
-      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2.6 14 8 2l5.4 12" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.4 10.2h5.2" stroke="currentColor" stroke-width="1.5"/></svg>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M3 12.5c0-4 2.2-6 5-6s5 2 5 6" stroke-linecap="round"/><circle cx="8" cy="4" r="1.6" fill="currentColor" stroke="none"/>
+      </svg>
     </div>
-    <button class="rail-btn" aria-current="true" title="Generate" aria-label="Generate">
-      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M10 2.6 11.8 8 17 9.8 11.8 11.6 10 17 8.2 11.6 3 9.8 8.2 8 10 2.6Z" stroke-linejoin="round"/></svg>
+    <button class="rail-btn" aria-current="true" title="Reel" aria-label="Reel">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M7.6 4v12M12.4 4v12"/></svg>
     </button>
-    <button class="rail-btn" id="railStoryboard" title="Storyboard" aria-label="Storyboard">
-      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.8" y="4" width="14.4" height="12" rx="2"/><path d="M7.4 4v12M12.6 4v12"/></svg>
+    <button class="rail-btn" id="btnSilent" aria-pressed="false" title="Silent-viewer test — hide all text" aria-label="Silent-viewer test">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.6 10S5.4 5 10 5s7.4 5 7.4 5-2.8 5-7.4 5-7.4-5-7.4-5Z"/><circle cx="10" cy="10" r="2.1"/><path d="m3.5 16.5 13-13" stroke-linecap="round"/></svg>
     </button>
-    <button class="rail-btn" title="Assets" aria-label="Assets">
-      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.8" y="3.6" width="14.4" height="12.8" rx="2"/><path d="M2.8 12.6 7 9l4 3.4 2.6-2.2 3.6 3"/><circle cx="7.2" cy="7.4" r="1.2"/></svg>
+    <button class="rail-btn" id="btnGrid" aria-pressed="false" title="Safe-area guides" aria-label="Safe-area guides">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="14" height="14" rx="1.5" stroke-dasharray="2.6 2.2"/><rect x="6" y="6" width="8" height="8" rx="1"/></svg>
     </button>
     <div class="rail-spacer"></div>
-    <button class="rail-btn" id="railInspect" title="Shot inspector" aria-label="Shot inspector" aria-expanded="false">
-      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="9" cy="9" r="5.2"/><path d="m13 13 4 4" stroke-linecap="round"/></svg>
+    <button class="rail-btn" id="btnFull" title="Full-screen preview" aria-label="Full-screen preview">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 7.4V3.6a.6.6 0 0 1 .6-.6h3.8M17 12.6v3.8a.6.6 0 0 1-.6.6h-3.8M12.6 3h3.8a.6.6 0 0 1 .6.6v3.8M7.4 17H3.6a.6.6 0 0 1-.6-.6v-3.8"/></svg>
     </button>
-    <div class="avatar" title="Signed in">MK</div>
   </nav>
 
   <div class="shell">
     <header class="topbar">
       <div class="crumb">
         <span class="crumb-org">Hamiltonian Labs</span>
-        <span class="crumb-sep">/</span>
-        <span class="crumb-name">Targeting MITF to Reduce Pigmentation</span>
+        <span style="color:var(--chrome-faint)">/</span>
+        <span class="crumb-name">MITF modulation hypothesis — 60s reel</span>
       </div>
-      <span class="badge"><svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="currentColor"/></svg>Gen-4.5</span>
-      <span class="badge claim" title="Every downstream claim in this reel is framed as proposed and awaiting wet-lab validation.">Proposed mechanism</span>
-      <span class="badge replica" title="Independent interface study. Not affiliated with Runway. Frames are drawn locally in your browser.">Interface replica</span>
+      <span class="tag fact">Shots 1–7 established</span>
+      <span class="tag hyp">Shots 8–10 hypothesis</span>
       <div class="top-spacer"></div>
-      <div class="credits" id="credits">
-        <span class="credit-val num" id="creditVal">2,480</span>
-        <span class="credit-bar"><i id="creditFill" style="width:82%"></i></span>
-      </div>
+      <span class="tag" id="tagStruct" title="The hero molecular shot is rendered from real deposited coordinates.">PDB 9H7Q · real coordinates</span>
     </header>
 
     <div class="workarea">
       <section class="stage" id="stage">
-        <div class="gate" id="gate" style="--ar:9/16">
-          <canvas id="canvas" aria-label="Storyboard frame"></canvas>
-          <div class="safe" aria-hidden="true"></div>
-          <div class="labels" id="labels"></div>
-          <div class="shot-tag"><b id="tagNum">SHOT 01</b><span id="tagTime" class="num">00:00–00:05</span></div>
-          <div class="caption" id="caption">Melanocyte signaling</div>
-          <div class="render-status" id="renderStatus">
-            <span class="scanline" aria-hidden="true"></span>
-            <span class="status-label" id="statusLabel">Queued</span>
-            <span class="status-track"><i id="statusFill"></i></span>
-            <span class="status-pct num" id="statusPct">0%</span>
-          </div>
+        <div class="gate" id="gate">
+          <canvas id="depth"></canvas>
+          <svg id="scene" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid meet" aria-label="Storyboard frame"></svg>
         </div>
 
-        <form class="dock" id="dock" autocomplete="off">
-          <p class="notice" id="notice" role="status"></p>
-
-          <div class="timeline">
-            <div class="tl-track" id="tlTrack" role="group" aria-label="Timeline, 12 shots"></div>
-            <div class="tl-meta">
-              <button type="button" class="tp-btn" id="playBtn" aria-label="Pause">
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="1.5" width="2.6" height="9" rx=".6"/><rect x="6.9" y="1.5" width="2.6" height="9" rx=".6"/></svg>
-              </button>
-              <span class="tc num" id="timecode">00:00 / 01:00</span>
-              <span class="tl-title" id="tlTitle">Pigmentation starts with signaling</span>
-              <button type="button" class="tp-btn" id="loopBtn" aria-pressed="true" aria-label="Loop reel">
-                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2.4 6.2V5.4A2.4 2.4 0 0 1 4.8 3h6.8M11.6 7.8v.8A2.4 2.4 0 0 1 9.2 11H2.4" stroke-linecap="round"/><path d="M9.8 1.4 11.8 3 9.8 4.6M4.2 9.4 2.2 11l2 1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="prompt-row">
-            <button type="button" class="ref" id="refBtn" title="Use previous shot as reference frame" aria-label="Use previous shot as reference frame">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 3v8M3 7h8" stroke-linecap="round"/></svg>
+        <div class="dock" id="dock">
+          <div class="toast" id="toast"></div>
+          <div class="tl-track" id="tlTrack" role="group" aria-label="Timeline, 12 shots"></div>
+          <div class="tl-meta">
+            <button class="tp" id="prevBtn" aria-label="Previous shot"><svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor"><path d="M10.6 2.2v9.6a.5.5 0 0 1-.78.42L4.4 8.42V11a.5.5 0 0 1-1 0V3a.5.5 0 0 1 1 0v2.58l5.42-3.8a.5.5 0 0 1 .78.42Z"/></svg></button>
+            <button class="tp primary" id="playBtn" aria-label="Pause"><svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="1.5" width="2.6" height="9" rx=".6"/><rect x="6.9" y="1.5" width="2.6" height="9" rx=".6"/></svg></button>
+            <button class="tp" id="nextBtn" aria-label="Next shot"><svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor"><path d="M3.4 2.2v9.6a.5.5 0 0 0 .78.42L9.6 8.42V11a.5.5 0 0 0 1 0V3a.5.5 0 0 0-1 0v2.58L4.18 1.78a.5.5 0 0 0-.78.42Z"/></svg></button>
+            <span class="tc num" id="timecode">00:00 / 01:00</span>
+            <span class="tl-title" id="tlTitle"></span>
+            <button class="tp" id="muteBtn" aria-pressed="false" aria-label="Voiceover (placeholder)" title="Voiceover track — placeholder, no audio bundled">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M7 2.2a1.7 1.7 0 0 1 1.7 1.7v3a1.7 1.7 0 0 1-3.4 0v-3A1.7 1.7 0 0 1 7 2.2Z"/><path d="M3.6 6.6v.6a3.4 3.4 0 0 0 6.8 0v-.6M7 10.6v1.4"/></svg>
             </button>
-            <textarea id="prompt" rows="2" aria-label="Shot prompt"></textarea>
-          </div>
-
-          <div class="controls">
-            <div class="seg" id="modelSeg" role="group" aria-label="Model">
-              <button type="button" data-model="gen45" data-rate="12" aria-pressed="true">Gen-4.5</button>
-              <button type="button" data-model="turbo" data-rate="5" aria-pressed="false">Turbo</button>
-            </div>
-            <div class="seg" id="ratioSeg" role="group" aria-label="Aspect ratio">
-              <span class="eyebrow ctl-label">Ratio</span>
-              <button type="button" data-ar="9/16" aria-pressed="true">9:16</button>
-              <button type="button" data-ar="1/1" aria-pressed="false">1:1</button>
-              <button type="button" data-ar="16/9" aria-pressed="false">16:9</button>
-            </div>
-            <div class="seg" id="durSeg" role="group" aria-label="Duration">
-              <button type="button" data-dur="5" aria-pressed="true">5s</button>
-              <button type="button" data-dur="10" aria-pressed="false">10s</button>
-            </div>
-            <button type="button" class="chip" id="copyShot">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4.4" y="4.4" width="7.2" height="7.2" rx="1.4"/><path d="M9.6 4.4V3.2A1.2 1.2 0 0 0 8.4 2H3.6a1.2 1.2 0 0 0-1.2 1.2V8a1.2 1.2 0 0 0 1.2 1.2h1.2"/></svg>
-              Copy prompt
+            <button class="tp" id="loopBtn" aria-pressed="true" aria-label="Loop reel">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2.4 6.2V5.4A2.4 2.4 0 0 1 4.8 3h6.8M11.6 7.8v.8A2.4 2.4 0 0 1 9.2 11H2.4" stroke-linecap="round"/><path d="M9.8 1.4 11.8 3 9.8 4.6M4.2 9.4 2.2 11l2 1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <span class="ctl-spacer"></span>
-            <span class="cost"><span class="num" id="costVal">60</span> cr</span>
-            <button type="submit" class="go" id="go" aria-label="Regenerate this shot">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 11.5V2.5M3.4 6 7 2.5 10.6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
+            <button class="btn" id="btnRender" aria-pressed="false">1080×1920</button>
+            <button class="btn" id="btnPng">Save PNG</button>
           </div>
-        </form>
+        </div>
       </section>
 
       <aside class="shots" aria-label="Shots">
         <div class="shots-head">
-          <span class="eyebrow">Shots · <span class="num">12</span> × 5s</span>
-          <button class="link-btn" id="exportAll" type="button">Export all →</button>
+          <span class="eyebrow">12 shots × 5s</span>
+          <button class="btn" id="btnExport" style="height:22px;padding:0 8px">Export script</button>
         </div>
         <div class="shots-list" id="shotsList"></div>
       </aside>
     </div>
   </div>
-
-  <div class="drawer" id="drawer" role="dialog" aria-label="Shot inspector" aria-hidden="true">
-    <div class="drawer-head">
-      <span class="eyebrow" id="drawerTitle">Shot 01</span>
-      <button class="rail-btn" id="drawerClose" aria-label="Close inspector" style="width:28px;height:28px">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 4l6 6M10 4l-6 6" stroke-linecap="round"/></svg>
-      </button>
-    </div>
-    <div class="drawer-body">
-      <div class="field"><span class="eyebrow">Scene</span><p id="iScene">—</p></div>
-      <div class="field"><span class="eyebrow">Camera</span><p id="iCamera">—</p></div>
-      <div class="field"><span class="eyebrow">Voiceover</span><p class="vo" id="iVO">—</p></div>
-      <div class="field"><span class="eyebrow">Purpose</span><p id="iPurpose">—</p></div>
-      <div class="field"><span class="eyebrow">On-screen labels</span><div class="chips" id="iLabels"></div></div>
-      <div class="field">
-        <span class="eyebrow">Generation prompt</span>
-        <div class="promptbox" id="iPrompt">—</div>
-        <div class="act-row">
-          <button class="act solid" id="iCopy" type="button">Copy this shot</button>
-          <button class="act" id="iSave" type="button">Save frame</button>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-foot">
-      Independent interface study — not affiliated with Runway. Frames are drawn locally from shot parameters; no model is called and nothing leaves this page. The MITF-binding route is shown as a computational hypothesis awaiting wet-lab validation.
-    </div>
-  </div>
 </div>
+
+<script>
+const MITF9H7Q={"A":[[-12.03,10.55,24.7,219],[-14.3,10.73,21.65,220],[-12.95,14.19,20.85,221],[-9.44,12.79,21.35,222],[-9.98,9.98,18.85,223],[-11.59,12.22,16.25,224],[-8.65,14.6,16.66,225],[-6.35,11.63,16.08,226],[-8.27,10.76,12.9,227],[-7.88,14.32,11.64,228],[-4.11,14.25,12.13,229],[-3.8,11.0,10.14,230],[-5.52,12.39,7.03,231],[-3.21,13.97,4.42,232],[-3.73,17.7,3.84,233],[-6.03,17.99,6.88,234],[-4.0,21.05,7.92,235],[-5.13,22.87,4.77,236],[-6.68,26.22,5.8,237],[-10.02,25.38,4.15,238],[-10.47,22.09,6.07,239],[-12.91,22.44,8.97,240],[-12.29,20.19,11.98,241],[-15.85,19.8,13.19,242],[-16.53,16.16,14.01,243],[-18.78,15.54,11.01,244],[-16.22,16.84,8.52,245],[-13.37,14.79,10.02,246],[-13.37,14.8,10.01,246],[-15.49,11.63,10.09,247],[-16.52,12.14,6.47,248],[-12.89,12.73,5.5,249],[-11.96,9.54,7.38,250],[-14.47,7.44,5.42,251],[-13.24,8.92,2.13,252],[-9.58,8.38,3.05,253],[-10.13,4.73,3.99,254],[-11.9,4.15,0.67,255],[-8.98,5.73,-1.2,256],[-6.47,3.59,0.72,257],[-8.5,0.45,0.0,258],[-8.61,1.34,-3.7,259],[-4.83,1.72,-3.81,260],[-4.45,-1.45,-1.73,261],[-6.01,-3.24,-4.71,262],[-3.29,-2.06,-7.1,263],[-0.73,-3.51,-4.67,264],[-1.53,-6.96,-6.09,265],[0.55,-5.95,-9.13,266],[3.57,-6.43,-6.86,267],[2.95,-10.19,-6.92,268],[2.84,-10.15,-10.73,269],[6.09,-8.2,-10.93,270],[7.7,-10.48,-8.35,271],[6.91,-13.58,-10.4,272],[8.35,-11.91,-13.5,273],[11.53,-11.05,-11.58,274],[11.82,-14.7,-10.51,275],[11.44,-15.81,-14.14,276],[11.43,-15.78,-14.14,276],[14.14,-13.31,-15.14,277],[16.44,-14.7,-12.44,278],[15.98,-18.26,-13.71,279],[16.63,-17.15,-17.3,280],[19.86,-15.31,-16.44,281],[21.0,-18.27,-14.33,282],[20.56,-20.74,-17.19,283],[22.58,-18.56,-19.55,284],[25.4,-18.2,-17.0,285],[25.41,-21.96,-16.37,286],[25.76,-22.54,-20.12,287],[28.71,-20.14,-20.35,288],[30.4,-21.84,-17.39,289],[29.94,-25.32,-18.88,290],[29.93,-25.32,-18.88,290],[31.49,-24.25,-22.19,291],[34.56,-22.6,-20.65,292],[37.95,-24.23,-21.21,293]],"B":[[-25.31,16.76,13.06,216],[-26.02,14.24,15.83,217],[-27.48,11.46,13.68,218],[-25.01,12.47,10.96,219],[-22.13,11.66,13.33,220],[-23.6,8.27,14.23,221],[-24.19,7.56,10.53,222],[-20.55,8.25,9.67,223],[-19.39,6.07,12.55,224],[-21.41,3.15,11.19,225],[-19.84,3.8,7.78,226],[-16.44,3.49,9.47,227],[-17.69,0.36,11.24,228],[-18.6,-1.2,7.89,229],[-15.25,-0.31,6.28,230],[-13.11,-1.82,9.07,231],[-12.4,-5.6,8.6,232],[-13.41,-6.27,12.21,233],[-16.7,-7.02,13.94,234],[-18.02,-4.26,16.2,235],[-21.33,-3.62,17.92,236],[-23.04,-0.61,16.3,237],[-24.77,0.55,19.49,238],[-23.9,4.26,19.52,239],[-24.81,4.73,23.19,240],[-21.68,2.83,24.28,241],[-19.55,1.81,21.27,242],[-18.54,5.07,19.55,243],[-15.1,5.18,21.17,244],[-14.35,1.54,20.34,245],[-15.23,1.99,16.67,246],[-13.25,5.23,16.39,247],[-10.23,3.57,18.01,248],[-10.49,0.7,15.52,249],[-10.73,3.28,12.73,250],[-7.52,4.96,13.92,251],[-5.83,1.56,14.15,252],[-7.01,0.52,10.68,253],[-5.81,3.73,9.0,254],[-2.4,3.39,10.65,255],[-2.17,-0.22,9.46,256],[-3.14,0.77,5.9,257],[-0.58,3.58,5.95,258],[2.16,1.17,7.04,259],[1.18,-1.21,4.24,260],[1.14,1.64,1.71,261],[4.71,2.52,2.66,262],[5.74,-1.16,2.53,263],[4.26,-1.4,-0.97,264],[6.03,1.75,-2.17,265],[9.36,0.43,-0.87,266],[8.88,-3.02,-2.41,267],[7.96,-1.47,-5.76,268],[11.15,0.6,-5.67,269],[13.3,-2.44,-4.85,270],[11.6,-4.35,-7.68,271],[12.33,-1.6,-10.21,272],[15.94,-1.33,-9.03,273],[16.28,-5.08,-9.57,274],[14.78,-4.8,-13.06,275],[17.49,-2.24,-13.85,276],[20.16,-4.54,-12.42,277],[18.9,-7.46,-14.52,278],[19.11,-5.39,-17.72,279],[22.78,-4.69,-17.03,280],[22.76,-4.66,-16.89,280],[23.52,-8.33,-16.19,281],[21.75,-9.5,-19.36,282],[23.88,-7.2,-21.53,283],[27.08,-8.57,-20.0,284],[25.86,-12.14,-20.54,285],[24.99,-11.38,-24.16,286],[28.45,-9.88,-24.68,287],[30.1,-12.97,-23.18,288],[28.0,-15.19,-25.46,289],[29.23,-13.32,-28.54,290],[32.84,-13.43,-27.36,291],[32.49,-17.2,-26.89,292],[31.5,-17.42,-30.57,293]],"lig":{"a":[["C",-0.82,2.9,-2.4],["C",-1.82,1.82,-0.68],["C",-2.54,1.49,0.46],["C",-2.47,0.2,0.95],["C",-0.39,1.58,-2.47],["C",1.86,1.36,-3.56],["C",2.21,-0.09,-5.43],["C",-0.97,-0.42,-0.86],["C",-1.04,0.88,-1.36],["C",0.53,0.96,-3.47],["C",2.69,0.84,-4.53],["C",0.89,-0.5,-5.36],["C",0.06,0.02,-4.38],["C",-0.5,4.1,-3.24],["C",-1.68,-0.74,0.28],["N",-1.68,3.04,-1.33],["O",0.29,3.93,-4.2],["O",-1.02,5.18,-2.9],["CL",-1.53,-2.34,0.94]],"b":[[0,4],[0,13],[0,15],[1,2],[1,8],[1,15],[2,3],[3,14],[4,8],[4,9],[5,9],[5,10],[6,10],[6,11],[7,8],[7,14],[9,12],[11,12],[13,16],[13,17],[14,18]]},"pocket":[["A",257,"LEU"],["A",260,"GLU"],["A",261,"GLN"],["A",263,"ARG"],["A",264,"ALA"],["A",267,"LEU"],["B",257,"LEU"],["B",260,"GLU"],["B",261,"GLN"],["B",264,"ALA"],["B",265,"LYS"],["B",268,"GLU"]]};
+</script>
 
 <script>
 (() => {
   "use strict";
   const $ = (id) => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ── palette (shot world) ──────────────────────────── */
-  const C = {
-    deep:   "#02070E",
-    teal:   "#0E4C5E",
-    blue:   "#123A6B",
-    memb:   "#4FA8C8",
-    nuc:    "#3E7FD0",
-    dna:    "#9B6BE8",
-    mitf:   "#8A5A2E",
-    mitfHi: "#C08A4E",
-    cand:   "#FFFFFF",
-    mc1r:   "#7C6BD8",
-    amsh:   "#3FE2E8",
-    camp:   "#38D6C4",
-    creb:   "#F0B942",
-    tyr:    "#F08A2E",
-    mel:    "#1A0E06",
-    thia:   "#AFC4DC"
+  /* ═══ palette mirror (for canvas) ═══ */
+  const P = {};
+  {
+    const cs = getComputedStyle(document.documentElement);
+    ["background-deep","background-cellular","keratinocyte","keratinocyte-highlight","melanocyte",
+     "melanocyte-highlight","mc1r","mc1r-active","alpha-msh","camp-signal","pka","creb","crtc3","mitf",
+     "mitf-highlight","mitf-shadow","dna","dna-highlight","tyr","tyrp1","dct","melanosome-membrane",
+     "melanin","melanin-highlight","candidate-molecule","candidate-glow","thiamidol","thiamidol-glow",
+     "activation-arrow","downregulation-arrow","established-border","hypothesis-border","warning"]
+      .forEach(k => P[k] = cs.getPropertyValue("--" + k).trim());
+  }
+  const V = (k) => `var(--${k})`;
+  const hexA = (hex, a) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
   };
 
-  /* ── storyboard data ───────────────────────────────── */
-  const STYLE = "Cinematic scientific 3D animation, vertical 9:16, immersive deep blue and teal cellular environment, translucent membranes, soft volumetric lighting, floating particles, glossy premium biology-education render, high contrast, slow fluid camera, stable clean sans-serif white labels with subtle glow and fine leader lines, correctly spelled scientific terms, no watermark, no garbled text.";
+  /* ═══ geometry constants — viewBox is exactly the export frame ═══ */
+  const W = 1080, H = 1920;
+  const CX = W / 2;
+  const SAFE = 62;
+  const TOPBAR_Y = 84;          // shot number + certainty badge
+  const TITLE_Y = 178;          // 36px title
+  const SUB_Y = 222;            // 24px subtitle
+  const SC_TOP = 280, SC_BOT = 1552;   // scene band
+  const SC_MID = (SC_TOP + SC_BOT) / 2;
+  const FOOT_Y = 1668;          // footer caption
 
+  /* type scale — these are literal pixels in the 1080×1920 export */
+  const FS = { title: 36, sub: 24, label: 22, small: 18, foot: 20, badge: 17, tiny: 17 };
+
+  /* ═══ SVG helpers ═══ */
+  const E = (tag, attrs = {}, parent = null) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) {
+      if (attrs[k] === null || attrs[k] === undefined) continue;
+      n.setAttribute(k, attrs[k]);
+    }
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  const T = (str, x, y, o = {}, parent) => {
+    const t = E("text", {
+      x, y,
+      fill: o.fill || "#fff",
+      "font-size": o.size || FS.label,
+      "font-weight": o.weight || 600,
+      "font-family": "var(--sans)",
+      "text-anchor": o.anchor || "middle",
+      "letter-spacing": o.ls || 0,
+      opacity: o.opacity ?? 1
+    }, parent);
+    t.textContent = str;
+    return t;
+  };
+  const lerp = (a, b, u) => a + (b - a) * u;
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  /* eased ramp: 0 before `from`, 1 after `to`, smoothstep between */
+  const ramp = (t, from, to) => {
+    const u = clamp((t - from) / (to - from));
+    return u * u * (3 - 2 * u);
+  };
+  const rng = (s) => () => {
+    s |= 0; s = (s + 0x6D2B79F5) | 0;
+    let x = Math.imul(s ^ (s >>> 15), 1 | s);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+
+  /* ═══ shared defs ═══ */
+  function buildDefs(svg) {
+    const d = E("defs", {}, svg);
+    const rg = (id, stops, o = {}) => {
+      const g = E("radialGradient", { id, cx: o.cx ?? "38%", cy: o.cy ?? "34%", r: o.r ?? "72%" }, d);
+      stops.forEach(([off, col, op]) => E("stop", { offset: off, "stop-color": col, "stop-opacity": op ?? 1 }, g));
+    };
+    const lg = (id, stops, o = {}) => {
+      const g = E("linearGradient", { id, x1: o.x1 ?? "0", y1: o.y1 ?? "0", x2: o.x2 ?? "0", y2: o.y2 ?? "1" }, d);
+      stops.forEach(([off, col, op]) => E("stop", { offset: off, "stop-color": col, "stop-opacity": op ?? 1 }, g));
+    };
+    rg("gKera", [[0, V("keratinocyte-highlight"), .55], [.62, V("keratinocyte"), .34], [1, V("keratinocyte"), .10]]);
+    rg("gMelano", [[0, V("melanocyte-highlight"), 1], [.6, V("melanocyte"), .95], [1, "#5E3016", .9]]);
+    rg("gMitf", [[0, V("mitf-highlight"), 1], [.58, V("mitf"), 1], [1, V("mitf-shadow"), 1]]);
+    rg("gNuc", [[0, "#2E5F9E", .48], [.7, "#132F55", .34], [1, "#0A1B33", .16]]);
+    rg("gMsome", [[0, "#4A88A8", .40], [.68, V("melanosome-membrane"), .30], [1, "#12293A", .22]]);
+    rg("gCand", [[0, "#FFFFFF", 1], [.55, "#F0F7FF", 1], [1, "#AFC4D6", 1]]);
+    rg("gThia", [[0, V("thiamidol-glow"), 1], [.6, V("thiamidol"), 1], [1, "#2E7CA0", 1]]);
+    lg("gEpi", [[0, "#12354C", 1], [.55, "#0C2739", 1], [1, "#071D2C", 1]]);
+    lg("gMembrane", [[0, "#5FA9C8", .0], [.5, "#5FA9C8", .30], [1, "#5FA9C8", .0]], { x2: "1", y2: "0" });
+
+    // soft glow filters
+    const mk = (id, dev) => {
+      const f = E("filter", { id, x: "-70%", y: "-70%", width: "240%", height: "240%" }, d);
+      E("feGaussianBlur", { stdDeviation: dev, result: "b" }, f);
+      const m = E("feMerge", {}, f);
+      E("feMergeNode", { in: "b" }, m);
+      E("feMergeNode", { in: "SourceGraphic" }, m);
+    };
+    mk("glowS", 6); mk("glowM", 14); mk("glowL", 30);
+    const bo = E("filter", { id: "blurOnly", x: "-70%", y: "-70%", width: "240%", height: "240%" }, d);
+    E("feGaussianBlur", { stdDeviation: 22 }, bo);
+
+    // arrowheads
+    [["ahAct", V("activation-arrow")], ["ahDown", V("downregulation-arrow")], ["ahHyp", V("hypothesis-border")],
+     ["ahTyr", V("tyr")], ["ahThia", V("thiamidol")]].forEach(([id, col]) => {
+      const m = E("marker", { id, viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 5.5, markerHeight: 5.5, orient: "auto-start-reverse" }, d);
+      E("path", { d: "M0 0.6 L9.4 5 L0 9.4 Z", fill: col }, m);
+    });
+    return d;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     REUSABLE BIOLOGY COMPONENTS
+     Each returns its root <g> plus any parts needing animation.
+     ═══════════════════════════════════════════════════════ */
+
+  /* Phospholipid bilayer — heads + tails, unmistakably a membrane */
+  function CellMembrane(parent, { x1, x2, y, curve = 0, thickness = 46, opacity = 1, color = V("plasma-membrane") }) {
+    const g = E("g", { opacity }, parent);
+    const yAt = (x) => y + curve * Math.sin(((x - x1) / (x2 - x1)) * Math.PI);
+    const path = (off) => {
+      let p = "";
+      for (let x = x1; x <= x2; x += 12) p += (p ? "L" : "M") + x + " " + (yAt(x) + off);
+      return p;
+    };
+    E("path", { d: path(-thickness / 2), stroke: color, "stroke-width": 3, fill: "none", opacity: .5 }, g);
+    E("path", { d: path(thickness / 2), stroke: color, "stroke-width": 3, fill: "none", opacity: .5 }, g);
+    const tails = E("g", { opacity: .45 }, g);
+    const heads = E("g", {}, g);
+    for (let x = x1 + 10; x < x2; x += 26) {
+      const yy = yAt(x);
+      E("line", { x1: x, y1: yy - thickness / 2 + 8, x2: x + 3, y2: yy - 6, stroke: "#7FB6D4", "stroke-width": 2.4 }, tails);
+      E("line", { x1: x, y1: yy + thickness / 2 - 8, x2: x + 3, y2: yy + 6, stroke: "#7FB6D4", "stroke-width": 2.4 }, tails);
+      // deliberately small and dim: the bilayer must not compete with the cyan
+      // peptide/second-messenger vocabulary drawn on top of it
+      E("circle", { cx: x, cy: yy - thickness / 2, r: 6, fill: "#8CC4DE", opacity: .6 }, heads);
+      E("circle", { cx: x, cy: yy + thickness / 2, r: 6, fill: "#6FA6C4", opacity: .5 }, heads);
+    }
+    return { g, yAt };
+  }
+
+  /* Keratinocyte — cool blue, rounded polygon, visible nucleus */
+  function Keratinocyte(parent, { x, y, r, seed = 1, pigment = 0 }) {
+    const g = E("g", { transform: `translate(${x} ${y})` }, parent);
+    const rd = rng(seed);
+    let p = "";
+    const n = 7;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + rd() * .2;
+      const rr = r * (.86 + rd() * .26);
+      p += (i ? "L" : "M") + (Math.cos(a) * rr).toFixed(1) + " " + (Math.sin(a) * rr * .84).toFixed(1);
+    }
+    p += "Z";
+    E("path", { d: p, fill: "url(#gKera)", stroke: V("keratinocyte-highlight"), "stroke-width": 2.6, "stroke-opacity": .55, "stroke-linejoin": "round" }, g);
+    E("circle", { cx: 0, cy: r * .08, r: r * .30, fill: V("keratinocyte"), opacity: .5 }, g);
+    E("circle", { cx: 0, cy: r * .08, r: r * .30, fill: "none", stroke: V("keratinocyte-highlight"), "stroke-width": 2, opacity: .5 }, g);
+    // supranuclear pigment cap (melanin umbrella) — grows with `pigment`
+    const cap = E("path", {
+      d: `M ${-r * .40} ${-r * .18} A ${r * .40} ${r * .34} 0 0 1 ${r * .40} ${-r * .18}`,
+      fill: "none", stroke: V("melanin"), "stroke-width": r * .18, "stroke-linecap": "round", opacity: 0
+    }, g);
+    const capDots = E("g", { opacity: 0 }, g);
+    for (let i = 0; i < 6; i++) {
+      E("circle", { cx: -r * .34 + i * r * .135, cy: -r * .20 + Math.abs(i - 2.5) * r * .045, r: r * .075, fill: V("melanin") }, capDots);
+    }
+    return { g, setPigment(v) { cap.setAttribute("opacity", v * .8); capDots.setAttribute("opacity", v); } };
+  }
+
+  /* Melanocyte — warm brown dendritic cell, the dominant object in shots 1 & 7 */
+  function Melanocyte(parent, { x, y, r, dendrites = 5, spread = Math.PI * 2, rot = -Math.PI / 2, seed = 3 }) {
+    const g = E("g", { transform: `translate(${x} ${y})` }, parent);
+    const halo = E("ellipse", { rx: r * 2.5, ry: r * 2.5, fill: V("melanocyte-highlight"), opacity: .12, filter: "url(#blurOnly)" }, g);
+    const arms = [];
+    const dg = E("g", {}, g);
+    for (let i = 0; i < dendrites; i++) {
+      const a = rot + (i / Math.max(1, dendrites - 1) - .5) * spread;
+      const L = r * (2.5 + (i % 2) * .7);
+      const ex = Math.cos(a) * L, ey = Math.sin(a) * L;
+      const mx = Math.cos(a + .34) * L * .55, my = Math.sin(a + .34) * L * .55;
+      const d = `M0 0 Q ${mx.toFixed(1)} ${my.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+      E("path", { d, stroke: V("melanocyte"), "stroke-width": r * .30, fill: "none", "stroke-linecap": "round", opacity: .95 }, dg);
+      E("path", { d, stroke: V("melanocyte-highlight"), "stroke-width": r * .10, fill: "none", "stroke-linecap": "round", opacity: .5 }, dg);
+      arms.push({ a, L, mx, my, ex, ey, d });
+    }
+    E("ellipse", { rx: r, ry: r * .94, fill: "url(#gMelano)", stroke: V("melanocyte-highlight"), "stroke-width": 3, "stroke-opacity": .6 }, g);
+    E("circle", { cx: 0, cy: r * .05, r: r * .34, fill: "#3A1E0D", opacity: .55 }, g);
+    E("circle", { cx: 0, cy: r * .05, r: r * .34, fill: "none", stroke: V("melanocyte-highlight"), "stroke-width": 2, opacity: .45 }, g);
+    // internal melanosomes
+    const rd = rng(seed);
+    const msomes = E("g", {}, g);
+    for (let i = 0; i < 5; i++) {
+      const a = rd() * 6.283, rr = r * (.48 + rd() * .32);
+      E("ellipse", {
+        cx: Math.cos(a) * rr, cy: Math.sin(a) * rr * .9, rx: r * .16, ry: r * .11,
+        transform: `rotate(${rd() * 180} ${Math.cos(a) * rr} ${Math.sin(a) * rr * .9})`,
+        fill: V("melanin"), stroke: V("melanin-highlight"), "stroke-width": 1.6
+      }, msomes);
+    }
+    return { g, arms, halo, r };
+  }
+
+  /* MC1R — seven transmembrane helices, purple, membrane-spanning */
+  function MC1R(parent, { x, y, h = 150, w = 118 }) {
+    const g = E("g", { transform: `translate(${x} ${y})` }, parent);
+    const halo = E("ellipse", { rx: w * 1.5, ry: h * .95, fill: V("mc1r-active"), opacity: 0, filter: "url(#blurOnly)" }, g);
+    const helices = [];
+    for (let i = 0; i < 7; i++) {
+      const dx = (i - 3) * (w / 7.2);
+      const tilt = (i - 3) * 3.4;
+      const hh = h * (i === 3 ? 1.02 : .90 + (i % 2) * .07);
+      const r = E("rect", {
+        x: dx - 13, y: -hh / 2, width: 26, height: hh, rx: 13,
+        fill: V("mc1r"), stroke: V("mc1r-active"), "stroke-width": 2, "stroke-opacity": .45,
+        transform: `rotate(${tilt} ${dx} 0)`
+      }, g);
+      helices.push(r);
+    }
+    // extracellular loops so it reads as a GPCR, not a barcode
+    E("path", { d: `M ${-w / 2.4} ${-h / 2} q 18 -26 36 0`, fill: "none", stroke: V("mc1r"), "stroke-width": 7, "stroke-linecap": "round", opacity: .8 }, g);
+    E("path", { d: `M ${w / 9} ${-h / 2} q 18 -30 36 0`, fill: "none", stroke: V("mc1r"), "stroke-width": 7, "stroke-linecap": "round", opacity: .8 }, g);
+    E("path", { d: `M ${-w / 5} ${h / 2} q 20 26 40 0`, fill: "none", stroke: V("mc1r"), "stroke-width": 7, "stroke-linecap": "round", opacity: .7 }, g);
+    return {
+      g, halo,
+      activate(v) {
+        helices.forEach(r => { r.setAttribute("fill", v > .5 ? V("mc1r-active") : V("mc1r")); });
+        halo.setAttribute("opacity", v * .34);
+      }
+    };
+  }
+
+  /* α-MSH — a short cyan peptide chain, explicitly not a blob */
+  function AlphaMSH(parent, { beads = 6, r = 13 }) {
+    const g = E("g", {}, parent);
+    E("g", {}, g);
+    const pts = [];
+    for (let i = 0; i < beads; i++) {
+      const x = (i - (beads - 1) / 2) * r * 1.85;
+      const y = Math.sin(i * 1.25) * r * 1.15;
+      pts.push([x, y]);
+    }
+    E("path", { d: pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" "), stroke: V("alpha-msh"), "stroke-width": 9, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round", opacity: .95 }, g);
+    // outlined residues at a larger radius — reads as a linked peptide, distinct
+    // from both the membrane head groups and the loose cAMP dots of shot 3
+    pts.forEach(([x, y], i) => E("circle", {
+      cx: x, cy: y, r: (i === 0 || i === beads - 1 ? r * .82 : r) * 1.25,
+      fill: V("alpha-msh"), stroke: "#06323A", "stroke-width": 2.6, opacity: 1,
+      filter: i === 2 ? "url(#glowS)" : null
+    }, g));
+    return { g };
+  }
+
+  /* DNA — recognisable antiparallel double helix with base rungs */
+  function DNAHelix(parent, { x1, x2, y, amp = 44, turns = 5, tilt = 0 }) {
+    const g = E("g", { transform: `rotate(${tilt} ${(x1 + x2) / 2} ${y})` }, parent);
+    const strand = (ph, col, op) => {
+      let p = "";
+      for (let i = 0; i <= 120; i++) {
+        const u = i / 120, x = lerp(x1, x2, u);
+        p += (i ? "L" : "M") + x.toFixed(1) + " " + (y + Math.sin(u * turns * 6.283 + ph) * amp).toFixed(1);
+      }
+      return E("path", { d: p, stroke: col, "stroke-width": 9, fill: "none", "stroke-linecap": "round", opacity: op }, g);
+    };
+    const rungs = E("g", { opacity: .42 }, g);
+    for (let i = 0; i <= 34; i++) {
+      const u = i / 34, x = lerp(x1, x2, u);
+      const a = y + Math.sin(u * turns * 6.283) * amp, b = y + Math.sin(u * turns * 6.283 + Math.PI) * amp;
+      E("line", { x1: x, y1: a, x2: x, y2: b, stroke: V("dna-highlight"), "stroke-width": 3.4 }, rungs);
+    }
+    const s1 = strand(0, V("dna"), .95);
+    const s2 = strand(Math.PI, V("dna-highlight"), .8);
+    return { g, s1, s2, rungs, yAt: (u, ph = 0) => y + Math.sin(u * turns * 6.283 + ph) * amp };
+  }
+
+  /* MITF — a dimeric bHLH-LZ: two brown helical subunits with a zipper kink.
+     Deliberately NOT a globular blob. */
+  function MITFDimer(parent, { x, y, s = 1, ligand = false }) {
+    const g = E("g", { transform: `translate(${x} ${y}) scale(${s})` }, parent);
+    const halo = E("ellipse", { rx: 190, ry: 160, fill: V("mitf-highlight"), opacity: .10, filter: "url(#blurOnly)" }, g);
+
+    // coiled-coil helix: a ribbon that visibly coils, drawn twice for depth
+    const helix = (x0, y0, x1b, y1b, width, coils, col, colHi) => {
+      const gg = E("g", {}, g);
+      const dx = x1b - x0, dy = y1b - y0, L = Math.hypot(dx, dy);
+      const nx = -dy / L, ny = dx / L;
+      let core = "";
+      for (let i = 0; i <= 60; i++) {
+        const u = i / 60;
+        const px = x0 + dx * u, py = y0 + dy * u;
+        core += (i ? "L" : "M") + px.toFixed(1) + " " + py.toFixed(1);
+      }
+      E("path", { d: core, stroke: col, "stroke-width": width, fill: "none", "stroke-linecap": "round" }, gg);
+      // coil turns
+      for (let i = 0; i <= coils; i++) {
+        const u = i / coils;
+        const px = x0 + dx * u, py = y0 + dy * u;
+        E("ellipse", {
+          cx: px, cy: py, rx: width * .60, ry: width * .30,
+          transform: `rotate(${(Math.atan2(dy, dx) * 180) / Math.PI + 24} ${px.toFixed(1)} ${py.toFixed(1)})`,
+          fill: "none", stroke: colHi, "stroke-width": width * .17, opacity: .75
+        }, gg);
+      }
+      E("path", {
+        d: `M ${(x0 + nx * width * .22).toFixed(1)} ${(y0 + ny * width * .22).toFixed(1)} L ${(x1b + nx * width * .22).toFixed(1)} ${(y1b + ny * width * .22).toFixed(1)}`,
+        stroke: colHi, "stroke-width": width * .13, opacity: .5, "stroke-linecap": "round"
+      }, gg);
+      return gg;
+    };
+
+    // subunit A: basic region (down, on DNA) → HLH → leucine zipper (up)
+    helix(-96, 128, -40, -6, 40, 7, V("mitf"), V("mitf-highlight"));      // basic + helix 1
+    helix(-40, -6, -26, -132, 36, 6, V("mitf"), V("mitf-highlight"));      // zipper A  (kink at -40,-6)
+    // subunit B: mirror
+    helix(96, 128, 40, -6, 40, 7, V("mitf"), V("mitf-highlight"));
+    helix(40, -6, 26, -132, 36, 6, V("mitf"), V("mitf-highlight"));
+    // loop joining the two lobes
+    E("path", { d: "M -40 -6 Q 0 -46 40 -6", stroke: V("mitf-shadow"), "stroke-width": 20, fill: "none", "stroke-linecap": "round", opacity: .9 }, g);
+    E("path", { d: "M -26 -132 Q 0 -164 26 -132", stroke: V("mitf"), "stroke-width": 18, fill: "none", "stroke-linecap": "round", opacity: .85 }, g);
+
+    // the kink pocket sits between the zipper helices, just above the crossing
+    const pocket = E("ellipse", { cx: 0, cy: -74, rx: 58, ry: 42, fill: "#000", opacity: .42 }, g);
+    const pocketHalo = E("ellipse", { cx: 0, cy: -74, rx: 62, ry: 48, fill: V("hypothesis-border"), opacity: 0, filter: "url(#blurOnly)" }, g);
+
+    let lig = null;
+    if (ligand) { lig = Molecule(g, { x: 0, y: -74, s: .78, kind: "candidate" }); }
+    return {
+      g, halo, pocket, pocketHalo, lig,
+      pocketAt: [x, y - 74 * s],
+      setPocketGlow(v) { pocketHalo.setAttribute("opacity", v * .55); }
+    };
+  }
+
+  /* Melanosome — pigment organelle: membrane ring + accumulating granules */
+  function Melanosome(parent, { x, y, rx, ry, rot = 0, seed = 5, granules = 22 }) {
+    const g = E("g", { transform: `translate(${x} ${y}) rotate(${rot})` }, parent);
+    E("ellipse", { rx, ry, fill: "url(#gMsome)" }, g);
+    E("ellipse", { rx, ry, fill: "none", stroke: V("melanosome-membrane"), "stroke-width": Math.max(4, rx * .05) }, g);
+    E("ellipse", { rx: rx * .93, ry: ry * .93, fill: "none", stroke: V("melanosome-membrane"), "stroke-width": Math.max(2, rx * .022), opacity: .5 }, g);
+    const inner = E("ellipse", { rx: rx * .9, ry: ry * .9, fill: V("melanin"), opacity: 0 }, g);
+    const gr = E("g", {}, g);
+    const rd = rng(seed);
+    const dots = [];
+    for (let i = 0; i < granules; i++) {
+      const a = rd() * 6.283, rr = Math.sqrt(rd()) * .82;
+      const c = E("circle", {
+        cx: Math.cos(a) * rx * rr, cy: Math.sin(a) * ry * rr,
+        r: Math.max(4, rx * (.055 + rd() * .05)), fill: V("melanin"),
+        stroke: V("melanin-highlight"), "stroke-width": 1.4, opacity: 0
+      }, gr);
+      dots.push(c);
+    }
+    return {
+      g, inner, dots,
+      /** fill 0..1 — how many granules have formed */
+      setFill(v) {
+        inner.setAttribute("opacity", clamp(v) * .62);
+        dots.forEach((d, i) => d.setAttribute("opacity", i / dots.length < v ? 1 : 0));
+      }
+    };
+  }
+
+  /* Small molecule — real ball-and-stick.
+     `candidate`  = the 9H7Q ligand geometry, projected to 2D (white)
+     `thiamidol`  = a distinct light-blue comparator scaffold */
+  function Molecule(parent, { x, y, s = 1, kind = "candidate", rot = 0 }) {
+    const g = E("g", { transform: `translate(${x} ${y}) scale(${s}) rotate(${rot})` }, parent);
+    const CPK = { C: "#F2F6FA", N: "#8FB4FF", O: "#FF6B6B", CL: "#9BE88A", S: "#FFD166" };
+    let atoms, bonds;
+    if (kind === "candidate" && typeof MITF9H7Q !== "undefined") {
+      // orthographic projection of the deposited ligand, scaled to ~130 units wide
+      const a = MITF9H7Q.lig.a;
+      const xs = a.map(p => p[1]), ys = a.map(p => p[2]);
+      const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+      const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) || 1;
+      const k = 132 / span;
+      atoms = a.map(p => ({ el: p[0].toUpperCase(), x: (p[1] - cx) * k, y: (p[2] - cy) * k, z: p[3] }));
+      bonds = MITF9H7Q.lig.b;
+    } else {
+      // comparator scaffold: resorcinol-like ring + linker + heterocycle
+      atoms = [
+        { el: "C", x: -58, y: 6 }, { el: "C", x: -34, y: -18 }, { el: "C", x: -2, y: -12 },
+        { el: "C", x: 6, y: 18 }, { el: "C", x: -18, y: 42 }, { el: "C", x: -50, y: 36 },
+        { el: "O", x: -66, y: -22 }, { el: "O", x: -26, y: 72 },
+        { el: "C", x: 38, y: 28 }, { el: "N", x: 60, y: 6 }, { el: "C", x: 88, y: 18 },
+        { el: "N", x: 84, y: 50 }, { el: "C", x: 54, y: 56 }
+      ];
+      bonds = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[0,6],[4,7],[3,8],[8,9],[9,10],[10,11],[11,12],[12,8]];
+    }
+    // White is reserved for the candidate. The comparator must sit unmistakably
+    // in --thiamidol, or shot 11 shows two near-identical pale molecules.
+    const cand = kind === "candidate";
+    const base = cand ? CPK : { C: "#63C8F4", N: "#4FA9E0", O: "#E0736B", CL: "#7FD48F", S: "#E0B04A" };
+    const bg = E("g", {}, g);
+    bonds.forEach(([i, j]) => {
+      const a = atoms[i], b = atoms[j];
+      E("line", { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: cand ? "#E6EEF6" : V("thiamidol"), "stroke-width": 11, "stroke-linecap": "round", opacity: .95 }, bg);
+    });
+    atoms.forEach(a => {
+      const col = base[a.el] || base.C;
+      E("circle", { cx: a.x, cy: a.y, r: a.el === "C" ? 13 : 14.5, fill: col, stroke: "#0A1018", "stroke-width": 2, "stroke-opacity": cand ? .35 : .5 }, g);
+      // specular highlight reads as "white object" — candidate only
+      E("circle", { cx: a.x - 4, cy: a.y - 4.5, r: 4.2, fill: cand ? "#fff" : V("thiamidol-glow"), opacity: cand ? .55 : .38 }, g);
+    });
+    const glow = E("ellipse", { rx: 120, ry: 90, fill: kind === "candidate" ? V("candidate-glow") : V("thiamidol-glow"), opacity: .18, filter: "url(#blurOnly)" }, g);
+    g.insertBefore(glow, bg);
+    return { g, glow, atoms, setGlow(v) { glow.setAttribute("opacity", v); } };
+  }
+
+  /* Directional pathway arrow */
+  function PathwayArrow(parent, { x1, y1, x2, y2, color = V("activation-arrow"), dashed = false, width = 5, marker = "ahAct", curve = 0 }) {
+    const mx = (x1 + x2) / 2 + curve, my = (y1 + y2) / 2;
+    const d = curve ? `M ${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}` : `M ${x1} ${y1} L ${x2} ${y2}`;
+    return E("path", {
+      d, stroke: color, "stroke-width": width, fill: "none", "stroke-linecap": "round",
+      "stroke-dasharray": dashed ? "14 12" : null, "marker-end": `url(#${marker})`
+    }, parent);
+  }
+
+  /* Gene track — labelled box + transcribed RNA wave whose amplitude carries output level */
+  function GeneTrack(parent, { x, y, w = 300, name, color, seed = 1 }) {
+    const g = E("g", {}, parent);
+    const box = E("rect", { x, y: y - 26, width: 132, height: 52, rx: 9, fill: hexA("#000000", .34), stroke: color, "stroke-width": 3 }, g);
+    T(name, x + 66, y + 9, { size: FS.small, fill: color, weight: 700, ls: .5 }, g);
+    // ghost of the full-output wave, so a reduced level has an on-screen baseline
+    const ghost = E("path", { d: "", stroke: color, "stroke-width": 3, fill: "none", "stroke-linecap": "round", "stroke-dasharray": "9 9", opacity: 0 }, g);
+    const wave = E("path", { d: "", stroke: color, "stroke-width": 6, fill: "none", "stroke-linecap": "round" }, g);
+    const head = E("circle", { cx: x + 146, cy: y, r: 8, fill: color, opacity: 0 }, g);
+    const x0 = x + 146, x1 = x + 146 + w;
+    const wavePath = (A, phase) => {
+      let p = "";
+      for (let i = 0; i <= 70; i++) {
+        const u = i / 70, xx = lerp(x0, x1, u);
+        p += (i ? "L" : "M") + xx.toFixed(1) + " " + (y + Math.sin(u * 9 - phase * 6.283) * A * (1 - u * .25)).toFixed(1);
+      }
+      return p;
+    };
+    return {
+      g, box, wave, head,
+      /** show a dashed reference wave at full output behind the live one */
+      showBaseline(on, phase) {
+        ghost.setAttribute("opacity", on ? .34 : 0);
+        if (on) ghost.setAttribute("d", wavePath(35, phase));
+      },
+      /** level 0..1 = transcriptional output; phase animates the wave travelling */
+      set(level, phase) {
+        const A = 5 + level * 30;
+        let p = "";
+        for (let i = 0; i <= 70; i++) {
+          const u = i / 70, xx = lerp(x0, x1, u);
+          p += (i ? "L" : "M") + xx.toFixed(1) + " " + (y + Math.sin(u * 9 - phase * 6.283) * A * (1 - u * .25)).toFixed(1);
+        }
+        wave.setAttribute("d", p);
+        wave.setAttribute("opacity", .35 + level * .65);
+        box.setAttribute("stroke-opacity", .4 + level * .6);
+        head.setAttribute("opacity", level > .12 ? .9 : 0);
+        head.setAttribute("cx", lerp(x0, x1, (phase % 1)));
+        head.setAttribute("cy", y + Math.sin((phase % 1) * 9 - phase * 6.283) * A);
+      }
+    };
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     3D MOLECULAR RENDERER — real PDB 9H7Q coordinates
+     Chains A + B of the MITF bHLH-LZ dimer, with the deposited
+     ligand 5-chloro-3-phenyl-1H-indole-2-carboxylic acid.
+     ═══════════════════════════════════════════════════════ */
+  const Mol3D = (() => {
+    const ok = typeof MITF9H7Q !== "undefined";
+    if (!ok) return null;
+    const A = MITF9H7Q.A, B = MITF9H7Q.B, LIG = MITF9H7Q.lig;
+    const pocketRes = new Set(MITF9H7Q.pocket.map(p => p[0] + ":" + p[1]));
+    // pocket centre = centroid of the real contact residues' CA atoms
+    const pc = [0, 0, 0]; let n = 0;
+    [["A", A], ["B", B]].forEach(([ch, arr]) => arr.forEach(p => {
+      if (pocketRes.has(ch + ":" + p[3])) { pc[0] += p[0]; pc[1] += p[1]; pc[2] += p[2]; n++; }
+    }));
+    if (n) { pc[0] /= n; pc[1] /= n; pc[2] /= n; }
+    const CPK = { C: [242, 246, 250], N: [143, 180, 255], O: [255, 107, 107], CL: [155, 232, 138], S: [255, 209, 102] };
+
+    function project(p, ang, cx, cy, zoom, tilt) {
+      const ca = Math.cos(ang), sa = Math.sin(ang);
+      let x = p[0] * ca - p[2] * sa;
+      let z = p[0] * sa + p[2] * ca;
+      let y = p[1];
+      const ct = Math.cos(tilt), st = Math.sin(tilt);
+      const y2 = y * ct - z * st, z2 = y * st + z * ct;
+      const persp = 620 / (620 + z2 * 1.5);
+      return [cx + x * zoom * persp, cy + y2 * zoom * persp, z2, persp];
+    }
+
+    /* Catmull-Rom through the Cα trace — turns the raw zig-zag into a smooth
+       helical ribbon, which is what a cartoon representation actually looks like. */
+    function smooth(arr, steps) {
+      const out = [];
+      const at = (i) => arr[clamp(i, 0, arr.length - 1)];
+      for (let i = 0; i < arr.length - 1; i++) {
+        const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
+        for (let s = 0; s < steps; s++) {
+          const u = s / steps, u2 = u * u, u3 = u2 * u;
+          const c = [];
+          for (let k = 0; k < 3; k++) {
+            c.push(0.5 * ((2 * p1[k]) + (-p0[k] + p2[k]) * u +
+              (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * u2 +
+              (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * u3));
+          }
+          c.push(p1[3]);
+          out.push(c);
+        }
+      }
+      out.push(arr[arr.length - 1]);
+      return out;
+    }
+    const smA = smooth(A, 6), smB = smooth(B, 6);
+
+    function draw(ctx, w, h, t, opts = {}) {
+      const ang = (opts.angle ?? 0) + t * Math.PI * 0.5;
+      const tilt = -0.28;
+
+      /* auto-fit: project once at unit scale, measure, then centre and scale to
+         the target box so the complex never drifts off-frame as it orbits. */
+      let zoom = 1, cx = 0, cy = 0;
+      {
+        const xs = [], ys = [];
+        for (const p of A.concat(B)) {
+          const q = project(p, ang, 0, 0, 1, tilt);
+          xs.push(q[0]); ys.push(q[1]);
+        }
+        const x0 = Math.min(...xs), x1 = Math.max(...xs);
+        const y0 = Math.min(...ys), y1 = Math.max(...ys);
+        const fit = (opts.fit ?? .80);
+        zoom = Math.min((w * fit) / (x1 - x0 || 1), (h * fit * .52) / (y1 - y0 || 1));
+        cx = w * .5 - ((x0 + x1) / 2) * zoom;
+        cy = h * (opts.cy ?? .5) - ((y0 + y1) / 2) * zoom;
+      }
+
+      // ligand slides into the pocket then settles with a slight thermal jitter
+      const settle = ramp(t, .05, .45);
+      const jitter = settle >= 1 ? Math.sin(t * 34) * .22 : 0;
+      const approach = (1 - settle) * 26;
+
+      const prims = [];
+
+      // backbone ribbon: interpolated CA trace, drawn as depth-sorted segments
+      const addChain = (pts, raw, chain) => {
+        for (let i = 0; i < pts.length - 1; i++) {
+          const a = project(pts[i], ang, cx, cy, zoom, tilt);
+          const b = project(pts[i + 1], ang, cx, cy, zoom, tilt);
+          const near = pocketRes.has(chain + ":" + pts[i][3]);
+          prims.push({ z: (a[2] + b[2]) / 2, kind: "tube", a, b, near, chain });
+        }
+        // soft surface impression
+        for (let i = 0; i < raw.length; i += 1) {
+          const a = project(raw[i], ang, cx, cy, zoom, tilt);
+          prims.push({ z: a[2] - 1.4, kind: "surf", a, r: 7.2 * zoom * a[3] });
+        }
+      };
+      addChain(smA, A, "A"); addChain(smB, B, "B");
+
+      /* callouts anchor to the real projected Cα of the named contact residues */
+      const residues = {};
+      [["E260", "A", 260], ["Q261", "A", 261], ["K265", "B", 265]].forEach(([name, ch, num]) => {
+        const arr = ch === "A" ? A : B;
+        const hit = arr.find(p => p[3] === num);
+        if (hit) residues[name] = project(hit, ang, cx, cy, zoom, tilt);
+      });
+
+      // deposited ligand
+      const lp = LIG.a.map(p => {
+        const dir = [p[1] - pc[0], p[2] - pc[1], p[3] - pc[2]];
+        const off = [
+          p[1] + dir[0] * 0 + approach * 1.1 + jitter,
+          p[2] + approach * .5 + jitter * .6,
+          p[3] + approach * .8
+        ];
+        return { el: p[0].toUpperCase(), p: project(off, ang, cx, cy, zoom, tilt) };
+      });
+      LIG.b.forEach(([i, j]) => {
+        prims.push({ z: (lp[i].p[2] + lp[j].p[2]) / 2 + 40, kind: "bond", a: lp[i].p, b: lp[j].p });
+      });
+      lp.forEach(a => prims.push({ z: a.p[2] + 41, kind: "atom", a: a.p, el: a.el }));
+
+      prims.sort((u, v) => u.z - v.z);
+
+      // amber pocket halo behind everything
+      const pcp = project([pc[0], pc[1], pc[2]], ang, cx, cy, zoom, tilt);
+      const hg = ctx.createRadialGradient(pcp[0], pcp[1], 0, pcp[0], pcp[1], 150 * zoom / 6);
+      hg.addColorStop(0, hexA(P["hypothesis-border"], .40));
+      hg.addColorStop(1, hexA(P["hypothesis-border"], 0));
+      ctx.fillStyle = hg;
+      ctx.fillRect(0, 0, w, h);
+
+      for (const pr of prims) {
+        const depth = clamp((pr.z + 40) / 80, 0, 1);
+        if (pr.kind === "surf") {
+          const g = ctx.createRadialGradient(pr.a[0], pr.a[1], 0, pr.a[0], pr.a[1], pr.r);
+          g.addColorStop(0, hexA(P["mitf"], .16));
+          g.addColorStop(1, hexA(P["mitf"], 0));
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(pr.a[0], pr.a[1], pr.r, 0, 6.283); ctx.fill();
+        } else if (pr.kind === "tube") {
+          const shade = .34 + depth * .66;
+          const col = pr.near ? P["mitf-highlight"] : P["mitf"];
+          ctx.strokeStyle = hexA(col, .38 + shade * .62);
+          ctx.lineWidth = (pr.near ? 8.4 : 7.2) * zoom / 6 * pr.a[3];
+          ctx.lineCap = "round";
+          ctx.beginPath(); ctx.moveTo(pr.a[0], pr.a[1]); ctx.lineTo(pr.b[0], pr.b[1]); ctx.stroke();
+          ctx.strokeStyle = hexA(P["mitf-highlight"], .20 * shade);
+          ctx.lineWidth = (pr.near ? 3.4 : 2.6) * zoom / 6 * pr.a[3];
+          ctx.beginPath(); ctx.moveTo(pr.a[0], pr.a[1] - 1.6); ctx.lineTo(pr.b[0], pr.b[1] - 1.6); ctx.stroke();
+        } else if (pr.kind === "bond") {
+          ctx.strokeStyle = "rgba(232,240,248,.96)";
+          ctx.lineWidth = 5.2 * zoom / 6 * pr.a[3];
+          ctx.lineCap = "round";
+          ctx.beginPath(); ctx.moveTo(pr.a[0], pr.a[1]); ctx.lineTo(pr.b[0], pr.b[1]); ctx.stroke();
+        } else if (pr.kind === "atom") {
+          const c = CPK[pr.el] || CPK.C;
+          const r = (pr.el === "C" ? 6.4 : 7.2) * zoom / 6 * pr.a[3];
+          const g = ctx.createRadialGradient(pr.a[0] - r * .35, pr.a[1] - r * .4, r * .1, pr.a[0], pr.a[1], r);
+          g.addColorStop(0, "#ffffff");
+          g.addColorStop(.55, `rgb(${c[0]},${c[1]},${c[2]})`);
+          g.addColorStop(1, `rgba(${c[0] * .55 | 0},${c[1] * .55 | 0},${c[2] * .55 | 0},1)`);
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(pr.a[0], pr.a[1], r, 0, 6.283); ctx.fill();
+        }
+      }
+      return { pocket: pcp, ligand: lp.length ? lp[Math.floor(lp.length / 2)].p : pcp, zoom, residues };
+    }
+    return { draw, pocketCenter: pc, nRes: A.length + B.length, nAtoms: LIG.a.length };
+  })();
+
+  /* ═══════════════════════════════════════════════════════
+     SHOT DATA
+     ═══════════════════════════════════════════════════════ */
   const SHOTS = [
     {
-      n:1, title:"Pigmentation starts with signaling", caption:"Melanocyte signaling",
-      scene:"Microscopic cross-section of skin. Camera pushes inward through the epidermis toward a single melanocyte surrounded by keratinocytes; the melanocyte carries a soft glow.",
-      camera:"Slow vertical dive into the skin, easing to a pause on the melanocyte.",
-      vo:"Skin pigmentation begins inside melanocytes.",
-      purpose:"Establish location and biological context.",
-      labels:["Skin","Melanocyte","Keratinocytes"],
-      pins:[["Skin",.66,.14],["Keratinocytes",.46,.34,1],["Melanocyte",.60,.62]],
-      layers:["skin"]
+      id: 1, start: 0, end: 5, phase: "skin", certainty: "fact", visualType: "epidermis",
+      title: "Pigmentation begins in the melanocyte", subtitle: "Skin context",
+      footer: "Melanocytes make and distribute pigment through the epidermis.",
+      motion: "Slow camera push toward the basal layer; melanocyte pulses warm.",
+      vo: "Skin pigmentation begins inside melanocytes.",
+      labels: [
+        { key: "mel", text: "Melanocyte", color: "melanocyte-highlight", side: "r", slot: 1180 },
+        { key: "ker", text: "Keratinocytes", color: "keratinocyte-highlight", side: "l", slot: 560 },
+        { key: "epi", text: "Epidermis", color: "keratinocyte", side: "r", slot: 380 }
+      ]
     },
     {
-      n:2, title:"MC1R receives the pigmentation signal", caption:"MC1R activation",
-      scene:"Zoom to the melanocyte membrane. MC1R sits embedded in the translucent lipid bilayer; a glowing cyan α-MSH peptide drifts in and docks into the receptor, which blooms with light.",
-      camera:"Slow push to the membrane, slight lateral drift as α-MSH docks.",
-      vo:"When α-MSH binds MC1R, the pigmentation pathway switches on.",
-      purpose:"Introduce the upstream trigger.",
-      labels:["MC1R receptor","α-MSH","Melanocyte membrane"],
-      pins:[["α-MSH",.62,.20],["MC1R receptor",.50,.45],["Melanocyte membrane",.90,.58,1]],
-      layers:["membrane","mc1r","amsh"]
+      id: 2, start: 5, end: 10, phase: "membrane", certainty: "fact", visualType: "receptor",
+      title: "α-MSH activates MC1R", subtitle: "Ligand binding at the cell surface",
+      footer: "Keratinocyte-derived α-MSH switches on melanocyte MC1R.",
+      motion: "Peptide travels from a keratinocyte and docks; receptor brightens and pulses inward.",
+      vo: "When α-MSH binds MC1R, the pigmentation pathway switches on.",
+      labels: [
+        { key: "amsh", text: "α-MSH", color: "alpha-msh", side: "r", slot: 470 },
+        { key: "mc1r", text: "MC1R", color: "mc1r-active", side: "r", slot: 900 },
+        { key: "memb", text: "Melanocyte membrane", color: "plasma-membrane", side: "l", slot: 1130 }
+      ]
     },
     {
-      n:3, title:"Signal transduction", caption:"cAMP pathway",
-      scene:"Inside the melanocyte, turquoise cAMP particles stream from the activated receptor down toward the nucleus in an elegant kinase cascade.",
-      camera:"Camera follows the particle flow inward, gentle acceleration.",
-      vo:"This activates intracellular cAMP signaling.",
-      purpose:"Show the pathway travelling inward.",
-      labels:["cAMP","Signal transduction","Activated pathway"],
-      pins:[["Activated pathway",.34,.22],["cAMP",.36,.46,1],["Signal transduction",.30,.68]],
-      layers:["membrane","mc1r","stream","nucleus"]
+      id: 3, start: 10, end: 15, phase: "cytoplasm", certainty: "fact", visualType: "cascade",
+      title: "The signal moves to the nucleus", subtitle: "Signal transduction cascade",
+      footer: "cAMP activates PKA, which phosphorylates CREB.",
+      motion: "cAMP multiplies below the receptor; PKA lights gold; pCREB carries the signal inward.",
+      vo: "This activates intracellular cAMP signalling.",
+      labels: [
+        { key: "camp", text: "cAMP", color: "camp-signal", side: "r", slot: 640 },
+        { key: "pka", text: "PKA", color: "pka", side: "l", slot: 900 },
+        { key: "pcreb", text: "pCREB", color: "creb", side: "r", slot: 1150 }
+      ]
     },
     {
-      n:4, title:"CREB activates MITF", caption:"MITF activation",
-      scene:"Camera moves into the nucleus. CREB glows gold as it is phosphorylated near violet DNA, then brown MITF resolves into view beside the helix.",
-      camera:"Continuous push through the nuclear envelope, settling on MITF.",
-      vo:"The signal reaches the nucleus and drives MITF, a master regulator of melanogenesis.",
-      purpose:"Introduce MITF as the central target.",
-      labels:["Nucleus","CREB","MITF","DNA"],
-      pins:[["Nucleus",.60,.14],["CREB",.86,.34,1],["MITF",.64,.62],["DNA",.30,.74,1]],
-      layers:["nucleusBig","dna","creb","mitf"]
+      id: 4, start: 15, end: 20, phase: "nucleus", certainty: "fact", visualType: "transcription",
+      title: "CREB drives the MITF programme", subtitle: "Nuclear events",
+      footer: "CREB signalling increases the melanogenic MITF programme.",
+      motion: "pCREB docks at the MITF regulatory region; a transcript emerges; two subunits form the dimer.",
+      vo: "The signal reaches the nucleus and increases MITF, a master regulator of melanogenesis.",
+      labels: [
+        { key: "pcreb", text: "pCREB", color: "creb", side: "l", slot: 620 },
+        { key: "gene", text: "MITF gene", color: "dna-highlight", side: "r", slot: 860 },
+        { key: "dimer", text: "MITF dimer", color: "mitf-highlight", side: "r", slot: 1290 }
+      ]
     },
     {
-      n:5, title:"MITF turns on pigment genes", caption:"Pigment gene transcription",
-      scene:"Brown MITF binds the violet DNA. The binding region lights up and transcription pulses travel outward; the gene names TYR, TYRP1 and DCT ignite in orange along the helix.",
-      camera:"Slow lateral track along the DNA as pulses move outward.",
-      vo:"MITF activates genes like TYR, TYRP1, and DCT.",
-      purpose:"Show exactly what MITF controls.",
-      labels:["MITF bound to DNA","TYR","TYRP1","DCT"],
-      pins:[["MITF bound to DNA",.32,.28],["TYR",.34,.52,1],["TYRP1",.34,.62,1],["DCT",.34,.72,1]],
-      layers:["nucleusBig","dna","mitfBound","genes"]
+      id: 5, start: 20, end: 25, phase: "nucleus", certainty: "fact", visualType: "genes",
+      title: "MITF activates pigment genes", subtitle: "One factor, three targets",
+      footer: "MITF increases TYR, TYRP1 and DCT expression.",
+      motion: "MITF binds the M-box; the three gene tracks illuminate and transcribe in sequence.",
+      vo: "MITF activates genes like TYR, TYRP1 and DCT.",
+      labels: [
+        { key: "dimer", text: "MITF dimer", color: "mitf-highlight", side: "l", slot: 560 },
+        { key: "genes", text: "Pigment genes", color: "tyr", side: "r", slot: 1010 }
+      ]
     },
     {
-      n:6, title:"Melanin production increases", caption:"Melanin synthesis",
-      scene:"Melanosomes form in the cytoplasm. Orange tyrosinase machinery works across their surfaces as dark brown pigment granules accumulate and deepen.",
-      camera:"Slow orbit around a cluster of melanosomes as they darken.",
-      vo:"These genes drive melanin production inside melanosomes.",
-      purpose:"Show the biological output: pigmentation.",
-      labels:["Melanosome","Tyrosinase","Melanin synthesis"],
-      pins:[["Melanin synthesis",.30,.20],["Tyrosinase",.56,.44],["Melanosome",.44,.66,1]],
-      layers:["melanosomes"], melanin:1
+      id: 6, start: 25, end: 30, phase: "melanosome", certainty: "fact", visualType: "melanin",
+      title: "Melanin is made inside melanosomes", subtitle: "Enzymatic pigment synthesis",
+      footer: "Tyrosinase initiates pigment synthesis inside melanosomes.",
+      motion: "Membrane-bound tyrosinase pulses; substrate converts stepwise; granules accumulate and darken.",
+      vo: "These genes drive melanin production inside melanosomes.",
+      labels: [
+        { key: "tyro", text: "Tyrosinase", color: "tyr", side: "l", slot: 700 },
+        { key: "msome", text: "Melanosome", color: "melanosome-membrane", side: "l", slot: 470 },
+        { key: "melanin", text: "Melanin", color: "melanin-highlight", side: "r", slot: 1330 }
+      ]
     },
     {
-      n:7, title:"Introducing the candidate molecule", caption:"Candidate entry",
-      scene:"The environment darkens for emphasis. A small, bright pearl-white candidate molecule enters frame with a soft glow and moves through the nuclear space toward brown MITF.",
-      camera:"Slow, elegant tracking follow behind the white molecule.",
-      vo:"Our strategy is to introduce a small molecule designed to bind MITF directly.",
-      purpose:"Introduce the intervention.",
-      labels:["Candidate molecule","Proposed MITF binder"],
-      pins:[["Candidate molecule",.34,.24],["Proposed MITF binder",.92,.70,1]],
-      layers:["nucleusBig","dna","mitf","candidate"], dim:.45
+      id: 7, start: 30, end: 35, phase: "tissue", certainty: "fact", visualType: "transfer",
+      title: "Melanosomes move into keratinocytes", subtitle: "Pigment distribution",
+      footer: "Transferred melanosomes create visible epidermal pigmentation.",
+      motion: "Granules travel directionally along dendrites; keratinocytes build supranuclear pigment caps.",
+      vo: "Melanosomes are transferred to keratinocytes, producing visible skin pigmentation.",
+      labels: [
+        { key: "dend", text: "Melanocyte dendrite", color: "melanocyte-highlight", side: "l", slot: 620 },
+        { key: "transfer", text: "Melanosome transfer", color: "melanin-highlight", side: "r", slot: 900 },
+        { key: "ker", text: "Keratinocyte", color: "keratinocyte-highlight", side: "r", slot: 1230 }
+      ]
     },
     {
-      n:8, title:"Binding to the MITF kink pocket", caption:"MITF binding",
-      scene:"Close-up molecular shot. Brown MITF rendered in a premium molecular-surface style; the white candidate settles into a defined groove — the kink pocket — with a subtle glow at the contact interface.",
-      camera:"Tight close-up, micro-dolly in, tiny stabilisation ripple on contact.",
-      vo:"The molecule binds the MITF kink pocket, aiming to disrupt its function.",
-      purpose:"Show the exact molecular hypothesis visually.",
-      labels:["MITF","Kink pocket","Small-molecule binding"],
-      pins:[["MITF",.64,.24],["Kink pocket",.40,.52,1],["Small-molecule binding",.26,.76]],
-      layers:["mitfClose","candidateDocked"]
+      id: 8, start: 35, end: 40, phase: "hypothesis", certainty: "hyp", visualType: "entry",
+      title: "The Hamiltonian candidate", subtitle: "Computational hypothesis",
+      footer: "Any activity would require cell entry, nuclear access and target engagement.",
+      motion: "Candidate travels an amber dashed path across the membrane toward the nucleus.",
+      vo: "Our strategy is a small molecule proposed to bind MITF directly.",
+      labels: [
+        { key: "cand", text: "Candidate molecule", color: "candidate-molecule", side: "r", slot: 470 },
+        { key: "entry", text: "Proposed cellular entry", color: "hypothesis-border", side: "l", slot: 820 },
+        { key: "target", text: "Proposed MITF target", color: "mitf-highlight", side: "r", slot: 1240 }
+      ]
     },
     {
-      n:9, title:"MITF activity falls", caption:"Transcription decreases",
-      scene:"MITF dims with the candidate bound. The DNA glow fades, transcription pulses slow and stop, and the TYR, TYRP1 and DCT labels shrink and darken.",
-      camera:"Hold steady, very slow pull back as the light drains.",
-      vo:"If MITF activity drops, expression of pigment genes should decrease.",
-      purpose:"Show the expected mechanism-based consequence.",
-      labels:["Reduced MITF activity","↓ TYR","↓ TYRP1","↓ DCT"],
-      pins:[["Reduced MITF activity",.26,.26],["↓ TYR",.34,.52,1],["↓ TYRP1",.34,.62,1],["↓ DCT",.34,.72,1]],
-      layers:["nucleusBig","dna","mitfBound","genes","candidateDocked"], down:1
+      id: 9, start: 40, end: 45, phase: "molecular", certainty: "hyp", visualType: "hero",
+      title: "Proposed binding at the MITF kink pocket", subtitle: "PDB 9H7Q · deposited coordinates",
+      footer: "Pose observed in 9H7Q; predicted to alter leucine-zipper dynamics.",
+      motion: "Slow orbit; the ligand slides into the pocket and settles with thermal jitter.",
+      vo: "A deposited structure shows this pocket is druggable; the functional consequence is what we predict.",
+      labels: [
+        { key: "dimer", text: "MITF dimer", color: "mitf-highlight", side: "l", slot: 500 },
+        { key: "pocket", text: "Kink pocket", color: "hypothesis-border", side: "r", slot: 780 },
+        { key: "binder", text: "Proposed binder", color: "candidate-molecule", side: "r", slot: 1320 }
+      ]
     },
     {
-      n:10, title:"Less melanin is produced", caption:"Pigment decreases",
-      scene:"Back to the melanosomes. Fewer, lighter granules form than before; the cell visibly generates less pigment than in shot six.",
-      camera:"Matched orbit to shot six so the two frames read as a before/after pair.",
-      vo:"That should translate into reduced melanin production.",
-      purpose:"Connect molecular binding to phenotype.",
-      labels:["Reduced melanin","Lighter melanosomes"],
-      pins:[["Reduced melanin",.36,.22],["Lighter melanosomes",.92,.64,1]],
-      layers:["melanosomes"], melanin:.3
+      id: 10, start: 45, end: 50, phase: "hypothesis", certainty: "hyp", visualType: "prediction",
+      title: "The testable prediction", subtitle: "Partial modulation, cell predicted viable",
+      footer: "Prediction: less pigment gene output without killing the cell.",
+      motion: "Transcription amplitude falls to roughly half and desaturates; the cell stays intact.",
+      vo: "If MITF activity falls, pigment gene expression should decrease.",
+      labels: [
+        { key: "mod", text: "Predicted MITF modulation", color: "mitf-highlight", side: "l", slot: 560 },
+        { key: "genes", text: "↓ TYR / TYRP1 / DCT", color: "downregulation-arrow", side: "r", slot: 1000 },
+        { key: "viable", text: "Predicted: cell stays viable", color: "hypothesis-border", side: "r", slot: 1410 }
+      ]
     },
     {
-      n:11, title:"Comparison: MITF strategy vs Thiamidol", caption:"Mechanism comparison",
-      scene:"Split screen. Left: the white candidate bound to brown MITF, upstream transcriptional suppression. Right: a pale silver-blue Thiamidol molecule blocking tyrosinase directly inside a melanosome. Both sides animate at once.",
-      camera:"Locked split composition, each half breathing with a slow internal drift.",
-      vo:"This differs from Thiamidol, which works downstream by directly inhibiting tyrosinase.",
-      purpose:"Distinguish the proposed route from an existing depigmenting mechanism.",
-      labels:["MITF-targeting strategy","Thiamidol strategy","MITF inhibition","Tyrosinase inhibition"],
-      pins:[["MITF-targeting strategy",.05,.09],["Thiamidol strategy",.95,.16,1],["MITF inhibition",.05,.72],["Tyrosinase inhibition",.95,.79,1]],
-      layers:["split"]
+      id: 11, start: 50, end: 55, phase: "comparison", certainty: "cmp", visualType: "split",
+      title: "Two different intervention levels", subtitle: "Upstream MITF vs downstream Thiamidol",
+      footer: "Different intervention levels; the same intended endpoint.",
+      motion: "Left: transcription dims in the nucleus. Right: the enzyme reaction stops in the melanosome.",
+      vo: "This differs from Thiamidol, which works downstream by inhibiting tyrosinase.",
+      labels: []
     },
     {
-      n:12, title:"The hypothesis", caption:"Validation hypothesis",
-      scene:"Hero shot. Brown MITF with the white molecule bound, floating in a dramatic molecular environment; background resolves to a clean branded scientific scene with a minimal end card.",
-      camera:"Slow orbit around the bound complex, elegant end hold.",
-      vo:"This is the hypothesis: directly modulating MITF to reduce pigmentation upstream — now ready for experimental validation.",
-      purpose:"Close with clarity, authority, and next-step framing.",
-      labels:["Hypothesis: Direct MITF modulation may reduce pigmentation upstream","Computational concept → Wet-lab validation","Hamiltonian Labs"],
-      pins:[],
-      layers:["hero","endcard"]
+      id: 12, start: 55, end: 60, phase: "conclusion", certainty: "question", visualType: "question",
+      title: "The experimental question", subtitle: "Computational prioritisation → wet-lab validation",
+      footer: "Hypothesis, not proof of efficacy.",
+      motion: "Slow orbit on the bound complex; the validation sequence resolves beneath.",
+      vo: "Can a proposed MITF kink-pocket binder reduce melanin without harming melanocytes?",
+      labels: []
     }
   ];
 
-  const NEG = "Exclude: garbled or misspelled text, duplicated labels, watermarks, logos other than the end card, warped anatomy, jittery camera, harsh strobing.";
-  const promptFor = (s) =>
-    `SHOT ${String(s.n).padStart(2,"0")} — ${s.title} (${fmt((s.n-1)*5)}–${fmt(s.n*5)})\n\n${s.scene}\n\nCamera: ${s.camera}\nOn-screen labels: ${s.labels.join(" · ")}\nLower-third caption: ${s.caption}\n\nStyle: ${STYLE}\nColour code: MITF brown, candidate molecule bright pearl white, MC1R blue-violet, α-MSH glowing cyan, cAMP turquoise, CREB gold, TYR/TYRP1/DCT orange, melanin dark brown, Thiamidol pale silver-blue, membrane translucent blue, nucleus soft glowing blue, DNA violet.\n\n${NEG}`;
+  const CERT = {
+    fact:     { label: "Established biology",    color: "established-border", dash: null },
+    hyp:      { label: "Computational hypothesis", color: "hypothesis-border", dash: "18 14" },
+    cmp:      { label: "Two intervention levels", color: "mitf-highlight",    dash: "26 10" },
+    question: { label: "Wet-lab question",        color: "warning",           dash: "4 11" }
+  };
 
-  const fmt = (s) => `00:${String(Math.floor(s)).padStart(2,"0")}`;
-  const mmss = (s) => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+  /* ═══════════════════════════════════════════════════════
+     SCENES — each returns { update(t), anchors }
+     `anchors` is mutated every frame so labels track moving objects.
+     ═══════════════════════════════════════════════════════ */
+  const SCENES = {
 
-  /* ── state ─────────────────────────────────────────── */
-  const S = { i:0, t:0, last:0, playing:!reduced, loop:true, busy:false, rate:12, dur:5, model:"gen45", credits:2480, creditsMax:3000, ar:"9/16" };
+    /* ── 01 · epidermis ───────────────────────────────── */
+    epidermis(g) {
+      const anchors = {};
+      const cam = E("g", {}, g);
 
-  /* ── noise helpers ─────────────────────────────────── */
-  const rng = (s) => () => { s|=0; s=(s+0x6D2B79F5)|0; let t=Math.imul(s^(s>>>15),1|s); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; };
-  const grainTile = (() => {
-    const c=document.createElement("canvas"); c.width=c.height=256;
-    const g=c.getContext("2d"), img=g.createImageData(256,256);
-    for(let i=0;i<img.data.length;i+=4){const v=112+Math.floor(Math.random()*80);img.data[i]=img.data[i+1]=img.data[i+2]=v;img.data[i+3]=255;}
-    g.putImageData(img,0,0); return c;
-  })();
-  const rgba = (hex,a) => { const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; };
-
-  /* ── drawing primitives ────────────────────────────── */
-  function glow(ctx, x, y, r, color, a){
-    const g=ctx.createRadialGradient(x,y,0,x,y,r);
-    g.addColorStop(0,rgba(color,a)); g.addColorStop(.5,rgba(color,a*.3)); g.addColorStop(1,rgba(color,0));
-    ctx.fillStyle=g; ctx.fillRect(x-r,y-r,r*2,r*2);
-  }
-
-  function blob(ctx, x, y, r, color, hi, seed, notch){
-    const rd=rng(seed); const pts=[];
-    for(let i=0;i<14;i++){
-      const a=(i/14)*6.283;
-      let rr=r*(.82+rd()*.3);
-      if(notch && a>notch-.5 && a<notch+.5) rr*=.6;
-      pts.push([x+Math.cos(a)*rr, y+Math.sin(a)*rr]);
-    }
-    ctx.beginPath(); ctx.moveTo((pts[0][0]+pts[13][0])/2,(pts[0][1]+pts[13][1])/2);
-    for(let i=0;i<14;i++){ const p=pts[i],q=pts[(i+1)%14]; ctx.quadraticCurveTo(p[0],p[1],(p[0]+q[0])/2,(p[1]+q[1])/2); }
-    ctx.closePath();
-    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.05,x,y,r*1.15);
-    g.addColorStop(0,hi); g.addColorStop(.55,color); g.addColorStop(1,rgba(color,.35));
-    ctx.fillStyle=g; ctx.fill();
-    ctx.strokeStyle=rgba(hi,.4); ctx.lineWidth=Math.max(1,r*.02); ctx.stroke();
-  }
-
-  function sphere(ctx,x,y,r,color,hi,alpha){
-    const g=ctx.createRadialGradient(x-r*.3,y-r*.35,r*.04,x,y,r);
-    g.addColorStop(0,rgba(hi,alpha)); g.addColorStop(.6,rgba(color,alpha*.85)); g.addColorStop(1,rgba(color,alpha*.15));
-    ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fillStyle=g; ctx.fill();
-  }
-
-  function membraneBand(ctx,W,H,y,t,amp){
-    const th=H*.022;
-    for(const off of [-th/2, th/2]){
-      ctx.beginPath();
-      for(let x=-4;x<=W+4;x+=6){
-        const yy=y+off+Math.sin(x/W*7+t*1.2)*amp;
-        x===-4?ctx.moveTo(x,yy):ctx.lineTo(x,yy);
-      }
-      ctx.strokeStyle=rgba(C.memb,.55); ctx.lineWidth=Math.max(1.2,W*.004); ctx.stroke();
-    }
-    ctx.fillStyle=rgba(C.memb,.1);
-    ctx.fillRect(0,y-th/2,W,th);
-    for(let x=W*.03;x<W;x+=W*.045){
-      const yy=y+Math.sin(x/W*7+t*1.2)*amp;
-      ctx.beginPath(); ctx.arc(x,yy-th/2,W*.007,0,6.283); ctx.fillStyle=rgba(C.memb,.5); ctx.fill();
-      ctx.beginPath(); ctx.arc(x,yy+th/2,W*.007,0,6.283); ctx.fill();
-    }
-  }
-
-  /* ── layer painters ────────────────────────────────── */
-  const LAYERS = {
-    skin(ctx,W,H,t){
-      const dive=t*H*.16;
-      // stratified epidermis → dermis, each layer a distinct tissue tone
-      const bands=[
-        ["#3E5F7E",.02],  // stratum corneum, lightest
-        ["#2A4763",.15],
-        ["#1C3550",.30],
-        ["#12283F",.47],
-        ["#0A1C2E",.66],
-        ["#05121F",.86]   // dermis
-      ];
-      // deepest first: each band fills from the top down to its own boundary,
-      // so the shallower, lighter strata must land last to stay visible.
-      bands.slice().reverse().forEach(([col,at],ri)=>{
-        const i=bands.length-1-ri;
-        ctx.beginPath(); ctx.moveTo(-4,-60);
-        for(let x=-4;x<=W+4;x+=8){
-          const u=x/W;
-          const y=(at*H)-dive+Math.sin(u*5+i*1.7)*H*.016+Math.sin(u*11+i)*H*.006+H*.08;
-          ctx.lineTo(x,y);
+      // stratified epidermis: distinct bands, lightest at the surface
+      const bands = [["#16405C", 0], ["#113650", .17], ["#0D2C43", .35], ["#0A2337", .54], ["#071D2C", .74]];
+      bands.forEach(([col, at], i) => {
+        let p = `M ${SAFE - 20} ${SC_BOT + 40} L ${SAFE - 20} ${SC_TOP + at * (SC_BOT - SC_TOP)}`;
+        for (let x = SAFE - 20; x <= W - SAFE + 20; x += 24) {
+          const y = SC_TOP + at * (SC_BOT - SC_TOP) + Math.sin(x / 150 + i * 1.6) * 16;
+          p += ` L ${x} ${y.toFixed(1)}`;
         }
-        ctx.lineTo(W+4,-60); ctx.closePath();
-        ctx.fillStyle=col; ctx.fill();
-        // hairline between strata reads as a tissue boundary
-        ctx.strokeStyle=rgba("#7FB4CE",.14); ctx.lineWidth=1; ctx.stroke();
+        p += ` L ${W - SAFE + 20} ${SC_BOT + 40} Z`;
+        E("path", { d: p, fill: col }, cam);
+        E("path", { d: p.replace(/ L .* Z$/, ""), fill: "none", stroke: hexA("#7FB4CE", .16), "stroke-width": 2 }, cam);
       });
-      // keratinocytes packed in the upper strata
-      const rd=rng(7);
-      for(let i=0;i<34;i++){
-        const x=rd()*W, y=(rd()*.62+.06)*H-dive*.4+H*.08;
-        if(y<-30||y>H*.72) continue;
-        const r=W*(.05+rd()*.045);
-        ctx.beginPath();
-        for(let k=0;k<6;k++){const a=k/6*6.283+rd()*.12;k?ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r*.8):ctx.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r*.8);}
-        ctx.closePath();
-        ctx.fillStyle=rgba("#9FD2E8",.10); ctx.fill();
-        ctx.strokeStyle=rgba("#9FD2E8",.30); ctx.lineWidth=1.1; ctx.stroke();
-        ctx.beginPath(); ctx.arc(x,y,r*.24,0,6.283);
-        ctx.fillStyle=rgba("#BFE0FF",.30); ctx.fill();
-      }
-      // melanocyte
-      const mx=W*.5, my=H*.62;
-      glow(ctx,mx,my,W*.42,C.memb,.28);
-      blob(ctx,mx,my,W*.17,rgba(C.teal,.9),"#8FD8EC",21);
-      // dendrites
-      ctx.strokeStyle=rgba(C.memb,.5); ctx.lineWidth=W*.008; ctx.lineCap="round";
-      for(let k=0;k<6;k++){
-        const a=k/6*6.283+.4;
-        ctx.beginPath(); ctx.moveTo(mx+Math.cos(a)*W*.15,my+Math.sin(a)*W*.15);
-        ctx.quadraticCurveTo(mx+Math.cos(a+.3)*W*.28,my+Math.sin(a+.3)*W*.28,mx+Math.cos(a)*W*.4,my+Math.sin(a)*W*.4);
-        ctx.stroke();
-      }
-      sphere(ctx,mx,my,W*.07,C.nuc,"#BFE0FF",.8);
-    },
+      // basal lamina
+      E("line", { x1: SAFE - 20, y1: SC_BOT - 96, x2: W - SAFE + 20, y2: SC_BOT - 96, stroke: hexA("#7FB4CE", .3), "stroke-width": 4, "stroke-dasharray": "22 14" }, cam);
 
-    membrane(ctx,W,H,t){ membraneBand(ctx,W,H,H*.46,t,H*.008); },
+      const kers = [];
+      const layout = [[210, 470, 96], [420, 420, 86], [640, 460, 92], [860, 430, 84],
+                      [300, 660, 100], [560, 690, 96], [800, 665, 92],
+                      [200, 880, 92], [880, 880, 88]];
+      layout.forEach(([x, y, r], i) => kers.push({ k: Keratinocyte(cam, { x, y, r, seed: i + 2 }), x, y }));
 
-    mc1r(ctx,W,H,t){
-      const x=W*.5,y=H*.46, on=t>.45;
-      if(on) glow(ctx,x,y,W*.3,C.mc1r,.36*Math.min(1,(t-.45)*4));
-      for(let i=0;i<5;i++){
-        const dx=(i-2)*W*.036;
-        ctx.save(); ctx.translate(x+dx,y); ctx.rotate((i-2)*.12);
-        const g=ctx.createLinearGradient(0,-H*.05,0,H*.05);
-        g.addColorStop(0,rgba(C.mc1r,.95)); g.addColorStop(1,rgba(C.mc1r,.5));
-        ctx.fillStyle=g;
-        ctx.beginPath(); ctx.roundRect(-W*.016,-H*.05,W*.032,H*.1,W*.016); ctx.fill();
-        ctx.restore();
-      }
-    },
+      const mel = Melanocyte(cam, { x: CX, y: SC_BOT - 210, r: 132, dendrites: 6, spread: Math.PI * 1.35, rot: -Math.PI / 2, seed: 9 });
 
-    amsh(ctx,W,H,t){
-      const p=Math.min(1,t*1.9);
-      const x=W*(.74-.24*p), y=H*(.18+.24*p);
-      glow(ctx,x,y,W*.26,C.amsh,.5);
-      blob(ctx,x,y,W*.055,rgba(C.amsh,.95),"#DFFFFF",5);
-      ctx.strokeStyle=rgba("#DFFFFF",.8); ctx.lineWidth=W*.006; ctx.lineCap="round";
-      ctx.beginPath();
-      for(let k=0;k<=20;k++){const u=k/20; ctx.lineTo(x-W*.03+u*W*.06, y+Math.sin(u*9+t*3)*H*.011);}
-      ctx.stroke();
-    },
+      anchors.mel = [CX + 96, SC_BOT - 240];
+      anchors.ker = [420 - 60, 420];
+      anchors.epi = [W - SAFE - 200, SC_TOP + 60];
 
-    stream(ctx,W,H,t){
-      const n=46, rd=rng(99);
-      for(let i=0;i<n;i++){
-        const off=rd(), u=((t*.85+off)%1);
-        const x=W*.5+Math.sin(u*5+off*6.283)*W*.2*(1-u*.5);
-        const y=H*(.47+u*.33);
-        const a=Math.sin(u*Math.PI)*.9;
-        glow(ctx,x,y,W*.05,C.camp,a*.5);
-        ctx.beginPath(); ctx.arc(x,y,W*.009*(0.5+rd()*.8),0,6.283);
-        ctx.fillStyle=rgba("#BFFFF6",a); ctx.fill();
-      }
-    },
-
-    nucleus(ctx,W,H,t){
-      const x=W*.5,y=H*.86,r=W*.36;
-      glow(ctx,x,y,r*1.6,C.nuc,.22);
-      sphere(ctx,x,y,r,C.nuc,"#9FCBFF",.55);
-      ctx.strokeStyle=rgba("#BFE0FF",.35); ctx.lineWidth=W*.005;
-      ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.stroke();
-    },
-
-    nucleusBig(ctx,W,H,t){
-      const x=W*.5,y=H*.52,r=W*.62;
-      glow(ctx,x,y,r*1.3,C.nuc,.2);
-      sphere(ctx,x,y,r,C.nuc,"#79ADEE",.34);
-      ctx.strokeStyle=rgba("#BFE0FF",.25); ctx.lineWidth=W*.006;
-      ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.stroke();
-      const rd=rng(3);
-      for(let i=0;i<16;i++){const a=rd()*6.283;
-        ctx.beginPath(); ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,W*.011,0,6.283);
-        ctx.fillStyle=rgba("#CFE6FF",.5); ctx.fill();}
-    },
-
-    dna(ctx,W,H,t){
-      const cx=W*.30, top=H*.20, len=H*.62, amp=W*.10;
-      const strand=(ph,col)=>{
-        ctx.beginPath();
-        for(let k=0;k<=60;k++){const u=k/60; const y=top+u*len; const x=cx+Math.sin(u*9+ph+t*.7)*amp;
-          k?ctx.lineTo(x,y):ctx.moveTo(x,y);}
-        ctx.strokeStyle=col; ctx.lineWidth=W*.014; ctx.lineCap="round"; ctx.stroke();
+      return {
+        anchors,
+        update(t) {
+          const push = 1 + t * .07;
+          cam.setAttribute("transform", `translate(${CX} ${SC_MID}) scale(${push}) translate(${-CX} ${-SC_MID})`);
+          mel.halo.setAttribute("opacity", .10 + Math.abs(Math.sin(t * 3.4)) * .14);
+          kers.forEach((o, i) => {
+            const dx = Math.sin(t * 1.6 + i) * 5, dy = Math.cos(t * 1.3 + i * .7) * 4;
+            o.k.g.setAttribute("transform", `translate(${o.x + dx} ${o.y + dy})`);
+          });
+          const s = push;
+          anchors.mel = [CX + (96) * s, SC_MID + (SC_BOT - 210 - 60 - SC_MID) * s];
+          anchors.ker = [CX + (420 - 60 - CX) * s, SC_MID + (420 - SC_MID) * s];
+          anchors.epi = [CX + (W - SAFE - 210 - CX) * s, SC_MID + (SC_TOP + 54 - SC_MID) * s];
+        }
       };
-      strand(0,rgba(C.dna,.9)); strand(Math.PI,rgba("#6E4BB8",.8));
-      ctx.lineWidth=W*.006;
-      for(let k=0;k<=26;k++){
-        const u=k/26, y=top+u*len;
-        const x1=cx+Math.sin(u*9+t*.7)*amp, x2=cx+Math.sin(u*9+Math.PI+t*.7)*amp;
-        ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y);
-        ctx.strokeStyle=rgba("#C9A8FF",.32); ctx.stroke();
-      }
     },
 
-    creb(ctx,W,H,t){
-      const x=W*.68,y=H*.34, pulse=.6+Math.sin(t*6)*.4;
-      glow(ctx,x,y,W*.24,C.creb,.42*pulse);
-      blob(ctx,x,y,W*.075,rgba(C.creb,.95),"#FFE9B0",11);
-      ctx.fillStyle=rgba("#FFF3D0",.9);
-      ctx.beginPath(); ctx.arc(x+W*.05,y-H*.02,W*.014,0,6.283); ctx.fill();
-    },
+    /* ── 02 · receptor ────────────────────────────────── */
+    receptor(g) {
+      const anchors = {};
+      const MY = 1010;                       // membrane centre line
+      // source keratinocyte, top
+      const src = Keratinocyte(g, { x: 250, y: 430, r: 128, seed: 4 });
+      T("Keratinocyte", 250, 590, { size: FS.tiny, fill: V("keratinocyte-highlight"), weight: 600, opacity: .8 }, g);
 
-    mitf(ctx,W,H,t){
-      const x=W*.52,y=H*.62+Math.sin(t*1.6)*H*.008;
-      glow(ctx,x,y,W*.3,C.mitfHi,.2);
-      blob(ctx,x,y,W*.15,rgba(C.mitf,.97),C.mitfHi,42,1.9);
-    },
+      // cytoplasm below the membrane
+      E("rect", { x: 0, y: MY, width: W, height: SC_BOT - MY + 60, fill: hexA(P["melanocyte"], .10) }, g);
+      const memb = CellMembrane(g, { x1: SAFE - 30, x2: W - SAFE + 30, y: MY, curve: -46, thickness: 50 });
 
-    mitfBound(ctx,W,H,t,shot){
-      const x=W*.56,y=H*.44;
-      const lum=shot.down ? Math.max(.25,1-t*.8) : 1;   // shot 9: MITF dims as activity falls
-      glow(ctx,x,y,W*.3,C.mitfHi,.2*lum);
-      blob(ctx,x,y,W*.13,rgba(C.mitf,.55+.42*lum),shot.down?"#7A5230":C.mitfHi,42,1.9);
-    },
+      const rec = MC1R(g, { x: CX + 40, y: MY, h: 168, w: 128 });
+      const pep = AlphaMSH(g, { beads: 6, r: 13 });
+      const pulse = E("circle", { cx: CX + 40, cy: MY + 40, r: 10, fill: "none", stroke: V("camp-signal"), "stroke-width": 6, opacity: 0 }, g);
 
-    mitfClose(ctx,W,H,t){
-      const x=W*.48,y=H*.5;
-      glow(ctx,x,y,W*.62,C.mitfHi,.16);
-      blob(ctx,x,y,W*.36,rgba(C.mitf,.98),C.mitfHi,42,1.55);
-      // surface speckle for molecular-surface feel
-      const rd=rng(88);
-      for(let i=0;i<160;i++){
-        const a=rd()*6.283, rr=Math.sqrt(rd())*W*.34;
-        ctx.beginPath(); ctx.arc(x+Math.cos(a)*rr,y+Math.sin(a)*rr,W*.008,0,6.283);
-        ctx.fillStyle=rgba(rd()>.5?C.mitfHi:"#5E3A18",.28); ctx.fill();
-      }
-      // kink pocket groove
-      ctx.beginPath();
-      ctx.ellipse(x-W*.12,y+H*.02,W*.11,W*.075,-.4,0,6.283);
-      ctx.fillStyle="rgba(0,0,0,.42)"; ctx.fill();
-      ctx.strokeStyle=rgba(C.mitfHi,.45); ctx.lineWidth=W*.006; ctx.stroke();
-    },
+      anchors.amsh = [700, 520];
+      anchors.mc1r = [CX + 40 + 78, MY];
+      anchors.memb = [300, MY - 30];
 
-    genes(ctx,W,H,t,shot){
-      const dn=shot.down?1:0;
-      const names=["TYR","TYRP1","DCT"];
-      names.forEach((nm,i)=>{
-        const y=H*(.52+i*.10), x=W*.40;
-        const pulse=dn ? Math.max(0,.5-t*.5) : .55+Math.sin(t*5-i)*.45;
-        glow(ctx,x,y,W*.16,C.tyr,.34*pulse);
-        ctx.font=`600 ${Math.round(W*.052)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
-        ctx.textBaseline="middle";
-        ctx.fillStyle=rgba(dn?"#7A5230":C.tyr,dn?.5:.95);
-        ctx.fillText(nm,x-W*.02,y);
-        if(!dn){
-          ctx.beginPath(); ctx.arc(x-W*.09,y,W*.02+W*.03*pulse,0,6.283);
-          ctx.strokeStyle=rgba(C.tyr,.35*(1-pulse)); ctx.lineWidth=W*.006; ctx.stroke();
+      return {
+        anchors,
+        update(t) {
+          const u = ramp(t, .04, .52);
+          const x = lerp(360, CX + 40, u), y = lerp(560, MY - 118, u);
+          const rot = lerp(-18, 0, u);
+          pep.g.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(1)})`);
+          const bound = ramp(t, .48, .62);
+          rec.activate(bound);
+          const pr = ramp(t, .6, 1);
+          pulse.setAttribute("opacity", bound > .5 ? (1 - pr) * .85 : 0);
+          pulse.setAttribute("r", 12 + pr * 210);
+          src.g.setAttribute("transform", `translate(${250 + Math.sin(t * 2) * 4} ${430})`);
+          anchors.amsh = [x + 70, y - 24];
+          anchors.mc1r = [CX + 40 + 84, MY + 10];
+          anchors.memb = [300, memb.yAt(300) - 34];
         }
-      });
+      };
     },
 
-    candidate(ctx,W,H,t){
-      const p=Math.min(1,t*1.5);
-      const x=W*(.76-.20*p), y=H*(.22+.36*p);
-      glow(ctx,x,y,W*.22,C.cand,.5);
-      sphere(ctx,x,y,W*.045,"#DDE6F0","#FFFFFF",1);
-      ctx.strokeStyle=rgba("#FFFFFF",.7); ctx.lineWidth=W*.008; ctx.lineCap="round";
-      [[-1,-.6],[1,-.5],[.2,1]].forEach(([dx,dy])=>{
-        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx*W*.05,y+dy*W*.05); ctx.stroke();
-        ctx.beginPath(); ctx.arc(x+dx*W*.05,y+dy*W*.05,W*.016,0,6.283);
-        ctx.fillStyle="#F2F6FF"; ctx.fill();
-      });
-    },
+    /* ── 03 · cascade ─────────────────────────────────── */
+    cascade(g) {
+      const anchors = {};
+      const MY = SC_TOP + 130;
+      CellMembrane(g, { x1: SAFE - 30, x2: W - SAFE + 30, y: MY, curve: -26, thickness: 40, opacity: .8 });
+      const rec = MC1R(g, { x: CX, y: MY, h: 132, w: 104 });
+      rec.activate(1);
 
-    candidateDocked(ctx,W,H,t,shot){
-      const close=shot.layers.includes("mitfClose");
-      const x=close?W*.36:W*.46, y=close?H*.52:H*.47;
-      const settle=Math.min(1,t*2.4);
-      const px=x+(1-settle)*W*.18, py=y-(1-settle)*H*.10;
-      glow(ctx,px,py,W*(close?.26:.16),C.cand,.42+ .3*settle*Math.abs(Math.sin(t*4)));
-      sphere(ctx,px,py,W*(close?.075:.04),"#DDE6F0","#FFFFFF",1);
-      if(settle>=1 && close){
-        ctx.beginPath(); ctx.arc(x,y,W*.11+Math.sin(t*5)*W*.012,0,6.283);
-        ctx.strokeStyle=rgba("#FFFFFF",.2); ctx.lineWidth=W*.005; ctx.stroke();
+      // vertical cascade spine
+      const yCamp = 640, yPka = 930, yCreb = 1190, yNuc = 1420;
+      const dots = [];
+      const dotG = E("g", {}, g);
+      for (let i = 0; i < 26; i++) {
+        dots.push(E("circle", { r: 9, fill: V("camp-signal"), opacity: 0, filter: i % 4 === 0 ? "url(#glowS)" : null }, dotG));
       }
+      // (no in-scene "cAMP" caption — the slotted leader label already names it,
+      //  and a caption here would sit on top of the particle cloud)
+
+      const aCamp = PathwayArrow(g, { x1: CX, y1: yCamp + 40, x2: CX, y2: yPka - 62, color: V("activation-arrow") });
+      // PKA
+      const pkaG = E("g", { transform: `translate(${CX} ${yPka})` }, g);
+      const pkaHalo = E("circle", { r: 108, fill: V("pka"), opacity: 0, filter: "url(#blurOnly)" }, pkaG);
+      // a kinase silhouette: two lobes with a substrate cleft between them —
+      // structurally apt, and unmistakable against CREB's single oval below
+      E("path", { d: "M -72 -18 q 10 -44 46 -42 q 34 2 40 34 q -18 16 -42 16 q -30 0 -44 -8 Z", fill: V("pka"), stroke: "#FFE9AE", "stroke-width": 3, "stroke-opacity": .55 }, pkaG);
+      E("path", { d: "M -70 6 q 16 46 50 46 q 36 0 46 -40 q -20 -14 -48 -14 q -32 0 -48 8 Z", fill: V("pka"), stroke: "#FFE9AE", "stroke-width": 3, "stroke-opacity": .55 }, pkaG);
+      E("path", { d: "M -58 -4 L 44 -4", stroke: "#7A5410", "stroke-width": 7, opacity: .45, "stroke-linecap": "round" }, pkaG);
+      // set below the lobes — inside the cleft the caption would be struck through
+      T("PKA", -4, 92, { size: FS.small, fill: V("pka"), weight: 700, opacity: .9 }, pkaG);
+
+      const aPka = PathwayArrow(g, { x1: CX, y1: yPka + 66, x2: CX, y2: yCreb - 66, color: V("activation-arrow") });
+      // CREB + phosphate
+      const crebG = E("g", { transform: `translate(${CX} ${yCreb})` }, g);
+      const crebHalo = E("circle", { r: 100, fill: V("creb"), opacity: 0, filter: "url(#blurOnly)" }, crebG);
+      E("ellipse", { rx: 74, ry: 56, fill: V("creb"), stroke: "#FFE9AE", "stroke-width": 3, "stroke-opacity": .5 }, crebG);
+      T("CREB", 0, 10, { size: FS.small, fill: "#3A2607", weight: 800 }, crebG);
+      const phos = E("g", { opacity: 0 }, crebG);
+      E("circle", { cx: 58, cy: -44, r: 22, fill: "#FFF3CE", stroke: V("creb"), "stroke-width": 4, filter: "url(#glowS)" }, phos);
+      T("P", 58, -36, { size: FS.tiny, fill: "#7A5410", weight: 800 }, phos);
+
+      const aCreb = PathwayArrow(g, { x1: CX, y1: yCreb + 70, x2: CX, y2: 1288, color: V("creb"), marker: "ahAct" });
+      // nucleus fills the lower third but must clear the footer plate at y=1628
+      E("ellipse", { cx: CX, cy: 1450, rx: 372, ry: 156, fill: "url(#gNuc)", stroke: V("dna"), "stroke-width": 4, "stroke-opacity": .45 }, g);
+      T("Nucleus", CX, 1362, { size: FS.tiny, fill: V("dna-highlight"), weight: 600, opacity: .85 }, g);
+
+      anchors.camp = [CX + 60, yCamp];
+      anchors.pka = [CX - 78, yPka];
+      anchors.pcreb = [CX + 80, yCreb];
+
+      return {
+        anchors,
+        update(t) {
+          const spawn = ramp(t, 0, .5);
+          dots.forEach((d, i) => {
+            const on = i / dots.length < spawn;
+            if (!on) { d.setAttribute("opacity", 0); return; }
+            const u = ((t * .9 + i * .13) % 1);
+            const x = CX + Math.sin(u * 5 + i) * (46 + i * 3.4);
+            const y = lerp(MY + 80, yCamp + 40, u);
+            d.setAttribute("cx", x.toFixed(1)); d.setAttribute("cy", y.toFixed(1));
+            d.setAttribute("opacity", (Math.sin(u * Math.PI) * .95).toFixed(2));
+          });
+          const pk = ramp(t, .34, .5);
+          pkaHalo.setAttribute("opacity", pk * .40);
+          aCamp.setAttribute("opacity", .25 + pk * .75);
+          const cr = ramp(t, .56, .72);
+          crebHalo.setAttribute("opacity", cr * .40);
+          phos.setAttribute("opacity", cr);
+          aPka.setAttribute("opacity", .25 + cr * .75);
+          aCreb.setAttribute("opacity", .2 + ramp(t, .74, .92) * .8);
+        }
+      };
     },
 
-    melanosomes(ctx,W,H,t,shot){
-      const dark=shot.melanin ?? 1;
-      const count=Math.round(7+dark*9);
-      const rd=rng(55);
-      for(let i=0;i<count;i++){
-        const x=(.14+rd()*.72)*W, y=(.18+rd()*.64)*H;
-        const r=W*(.06+rd()*.05);
-        const fill=Math.min(1,dark*(.35+rd()*.75)*(.4+t*.9));
-        ctx.save(); ctx.translate(x,y); ctx.rotate(rd()*6.283+t*.15);
-        // shell
-        ctx.beginPath(); ctx.ellipse(0,0,r,r*.68,0,0,6.283);
-        ctx.fillStyle=rgba(C.blue,.3); ctx.fill();
-        ctx.strokeStyle=rgba(C.memb,.35); ctx.lineWidth=W*.004; ctx.stroke();
-        // pigment
-        ctx.save(); ctx.beginPath(); ctx.ellipse(0,0,r*.94,r*.62,0,0,6.283); ctx.clip();
-        const g=ctx.createLinearGradient(0,-r,0,r);
-        g.addColorStop(0,rgba("#5A3A1E",.55*fill)); g.addColorStop(1,rgba(C.mel,.95*fill));
-        ctx.fillStyle=g; ctx.fillRect(-r,-r,r*2,r*2);
-        for(let k=0;k<18*fill;k++){
-          ctx.beginPath(); ctx.arc((rd()-.5)*r*1.6,(rd()-.5)*r*1.1,r*.10,0,6.283);
-          ctx.fillStyle=rgba(C.mel,.7); ctx.fill();
+    /* ── 04 · transcription (CREB → MITF programme) ───── */
+    transcription(g) {
+      const anchors = {};
+      // nuclear envelope
+      E("rect", { x: SAFE - 10, y: SC_TOP + 40, width: W - (SAFE - 10) * 2, height: SC_BOT - SC_TOP - 60, rx: 190, fill: "url(#gNuc)", stroke: V("dna"), "stroke-width": 5, "stroke-opacity": .5 }, g);
+      E("rect", { x: SAFE + 8, y: SC_TOP + 58, width: W - (SAFE + 8) * 2, height: SC_BOT - SC_TOP - 96, rx: 175, fill: "none", stroke: V("dna-highlight"), "stroke-width": 2.4, "stroke-opacity": .3, "stroke-dasharray": "16 12" }, g);
+      T("Nucleus", CX, SC_TOP + 108, { size: FS.tiny, fill: V("dna-highlight"), weight: 600, opacity: .8 }, g);
+
+      const dna = DNAHelix(g, { x1: 130, x2: 950, y: 860, amp: 40, turns: 4 });
+      // MITF regulatory region highlighted on the helix
+      const geneBox = E("rect", { x: 300, y: 790, width: 210, height: 140, rx: 14, fill: hexA(P["dna-highlight"], .12), stroke: V("dna-highlight"), "stroke-width": 3, "stroke-dasharray": "12 8" }, g);
+      T("MITF gene", 405, 962, { size: FS.tiny, fill: V("dna-highlight"), weight: 600, opacity: .9 }, g);
+
+      // pCREB docking
+      const creb = E("g", {}, g);
+      E("circle", { r: 62, fill: V("creb"), stroke: "#FFE9AE", "stroke-width": 3, "stroke-opacity": .5 }, creb);
+      T("pCREB", 0, 9, { size: FS.tiny, fill: "#3A2607", weight: 800 }, creb);
+      E("circle", { cx: 48, cy: -40, r: 17, fill: "#FFF3CE", stroke: V("creb"), "stroke-width": 3 }, creb);
+      T("P", 48, -33, { size: 17, fill: "#7A5410", weight: 800 }, creb);
+      // CRTC3 — deliberately secondary
+      const crtc = E("g", { opacity: 0 }, g);
+      E("circle", { cx: 0, cy: 0, r: 34, fill: V("crtc3"), opacity: .9 }, crtc);
+      T("CRTC3", 0, 56, { size: 17, fill: V("crtc3"), weight: 600, opacity: .85 }, crtc);
+
+      // transcript
+      const tx = E("path", { d: "", stroke: V("dna-highlight"), "stroke-width": 6, fill: "none", "stroke-linecap": "round", opacity: 0, filter: "url(#glowS)" }, g);
+      T("MITF transcript", 700, 1070, { size: 17, fill: V("dna-highlight"), weight: 600, opacity: .0 }, g).setAttribute("id", "txLbl");
+
+      // two subunits converge into the dimer
+      const subA = E("g", { opacity: 0 }, g), subB = E("g", { opacity: 0 }, g);
+      [[subA, -1], [subB, 1]].forEach(([sg, dir]) => {
+        E("path", { d: `M 0 60 Q ${dir * 16} 0 ${dir * 4} -70`, stroke: V("mitf"), "stroke-width": 34, fill: "none", "stroke-linecap": "round" }, sg);
+        E("path", { d: `M 0 60 Q ${dir * 16} 0 ${dir * 4} -70`, stroke: V("mitf-highlight"), "stroke-width": 10, fill: "none", "stroke-linecap": "round", opacity: .5 }, sg);
+      });
+      const dimerG = E("g", { opacity: 0 }, g);
+      const dimer = MITFDimer(dimerG, { x: 700, y: 1310, s: .62 });
+
+      anchors.pcreb = [405 - 90, 700];
+      anchors.gene = [510, 880];
+      anchors.dimer = [700 + 120, 1300];
+
+      return {
+        anchors,
+        update(t) {
+          const dock = ramp(t, .05, .30);
+          const cx = lerp(300, 405, dock), cy = lerp(560, 726, dock);
+          creb.setAttribute("transform", `translate(${cx.toFixed(1)} ${cy.toFixed(1)})`);
+          crtc.setAttribute("transform", `translate(${(cx + 92).toFixed(1)} ${(cy - 16).toFixed(1)})`);
+          crtc.setAttribute("opacity", ramp(t, .26, .42) * .9);
+          geneBox.setAttribute("stroke-opacity", .35 + dock * .65);
+
+          const trans = ramp(t, .34, .70);
+          if (trans > 0) {
+            let p = "";
+            const n = Math.max(2, Math.round(trans * 46));
+            for (let i = 0; i <= n; i++) {
+              const u = i / 46;
+              p += (i ? "L" : "M") + (405 + u * 300).toFixed(1) + " " + (930 + Math.sin(u * 16 + t * 6) * 22 + u * 150).toFixed(1);
+            }
+            tx.setAttribute("d", p);
+          }
+          tx.setAttribute("opacity", trans);
+
+          const form = ramp(t, .60, .92);
+          subA.setAttribute("opacity", form > 0 && form < 1 ? 1 : 0);
+          subB.setAttribute("opacity", form > 0 && form < 1 ? 1 : 0);
+          subA.setAttribute("transform", `translate(${lerp(560, 676, form).toFixed(1)} ${1310}) scale(.62)`);
+          subB.setAttribute("transform", `translate(${lerp(840, 724, form).toFixed(1)} ${1310}) scale(.62)`);
+          dimerG.setAttribute("opacity", form >= 1 ? 1 : 0);
+          dimer.halo.setAttribute("opacity", .08 + Math.abs(Math.sin(t * 4)) * .10);
+
+          anchors.pcreb = [cx - 74, cy];
+          anchors.dimer = [700 + 118, 1300];
         }
-        ctx.restore();
-        ctx.restore();
-        if(dark>.6){
-          // tyrosinase machinery on the surface
-          for(let k=0;k<3;k++){
-            const a=(k/3)*6.283+t*.9;
-            const ex=x+Math.cos(a)*r*1.05, ey=y+Math.sin(a)*r*.75;
-            glow(ctx,ex,ey,W*.05,C.tyr,.4);
-            ctx.beginPath(); ctx.arc(ex,ey,W*.014,0,6.283); ctx.fillStyle=rgba("#FFC07A",.95); ctx.fill();
+      };
+    },
+
+    /* ── 05 · genes ───────────────────────────────────── */
+    genes(g) {
+      const anchors = {};
+      E("rect", { x: SAFE - 10, y: SC_TOP + 10, width: W - (SAFE - 10) * 2, height: SC_BOT - SC_TOP - 10, rx: 170, fill: "url(#gNuc)", stroke: V("dna"), "stroke-width": 4, "stroke-opacity": .35 }, g);
+      const dna = DNAHelix(g, { x1: 120, x2: 960, y: 620, amp: 38, turns: 4 });
+      // M-box / E-box binding site
+      const mbox = E("rect", { x: 372, y: 556, width: 130, height: 130, rx: 12, fill: hexA(P["dna-highlight"], .14), stroke: V("dna-highlight"), "stroke-width": 3, "stroke-dasharray": "10 8" }, g);
+      T("M-box", 437, 726, { size: 17, fill: V("dna-highlight"), weight: 600, opacity: .85 }, g);
+
+      const dimerG = E("g", {}, g);
+      const dimer = MITFDimer(dimerG, { x: 437, y: 470, s: .60 });
+
+      const tracks = [
+        GeneTrack(g, { x: 250, y: 1010, w: 470, name: "TYR", color: V("tyr") }),
+        GeneTrack(g, { x: 250, y: 1190, w: 470, name: "TYRP1", color: V("tyrp1") }),
+        GeneTrack(g, { x: 250, y: 1370, w: 470, name: "DCT", color: V("dct") })
+      ];
+      // connector from MITF down into the three tracks
+      const spine = E("path", { d: `M 437 640 L 437 900 L 190 900 L 190 1010 M 190 900 L 190 1370`, stroke: V("activation-arrow"), "stroke-width": 4, fill: "none", opacity: .5 }, g);
+      [1010, 1190, 1370].forEach(y => PathwayArrow(g, { x1: 190, y1: y, x2: 240, y2: y, color: V("activation-arrow"), width: 4, marker: "ahAct" }));
+
+      anchors.dimer = [437 - 110, 470];
+      anchors.genes = [740, 1190];
+
+      return {
+        anchors,
+        update(t) {
+          const bind = ramp(t, .02, .22);
+          dimerG.setAttribute("transform", `translate(0 ${lerp(-70, 92, bind).toFixed(1)})`);
+          dimer.halo.setAttribute("opacity", .08 + bind * .12);
+          mbox.setAttribute("stroke-opacity", .3 + bind * .7);
+          spine.setAttribute("opacity", .2 + ramp(t, .2, .4) * .6);
+          tracks.forEach((tr, i) => {
+            const on = ramp(t, .26 + i * .12, .46 + i * .12);
+            tr.set(on, t * 1.6 + i * .2);
+          });
+          anchors.dimer = [437 - 112, 470 + lerp(-70, 92, bind)];
+        }
+      };
+    },
+
+    /* ── 06 · melanin synthesis ───────────────────────── */
+    melanin(g) {
+      const anchors = {};
+      // organelle sits left; the reaction chain runs fully clear of its rim on the right
+      const mx = 386, my = 940, rx = 268, ry = 350;
+      const ms = Melanosome(g, { x: mx, y: my, rx, ry, seed: 11, granules: 30 });
+
+      // membrane-associated tyrosinase, straddling the bilayer at the left pole
+      const tyG = E("g", { transform: `translate(${mx - rx + 12} ${my - 40})` }, g);
+      const tyHalo = E("circle", { r: 120, fill: V("tyr"), opacity: 0, filter: "url(#blurOnly)" }, tyG);
+      E("path", { d: "M -52 -66 q 62 -30 104 4 q 34 28 20 74 q -14 46 -66 52 q -56 6 -78 -38 q -20 -44 20 -92 Z", fill: V("tyr"), stroke: "#FFD3A0", "stroke-width": 3, "stroke-opacity": .5 }, tyG);
+      // catalytic cleft + the two copper centres — reads as an enzyme, not a small cell
+      E("path", { d: "M -6 -22 q 30 18 26 46 q -4 26 -30 30", fill: "none", stroke: "#7A3E0C", "stroke-width": 14, "stroke-linecap": "round", opacity: .55 }, tyG);
+      E("circle", { cx: 6, cy: 2, r: 9, fill: "#2C3E4C", stroke: "#9FB6C6", "stroke-width": 2.4 }, tyG);
+      E("circle", { cx: 28, cy: 16, r: 9, fill: "#2C3E4C", stroke: "#9FB6C6", "stroke-width": 2.4 }, tyG);
+      // transmembrane anchor into the melanosome membrane
+      E("rect", { x: -14, y: 44, width: 28, height: 92, rx: 14, fill: V("tyr"), opacity: .85 }, tyG);
+      const cat = E("circle", { cx: 17, cy: 9, r: 26, fill: "none", stroke: "#FFE3BE", "stroke-width": 5, opacity: 0 }, tyG);
+
+      // reaction sequence inside the organelle
+      const steps = ["Tyrosine", "DOPA", "DOPAquinone", "Melanin"];
+      const sy = [700, 866, 1032, 1198];
+      // chemical steps use a chevron silhouette so they can never be mistaken
+      // for the rounded gene-track boxes of shot 5
+      const bx = 700, bw2 = 300;
+      const nodes = steps.map((s, i) => {
+        const gg = E("g", {}, g);
+        const y = sy[i], hh = 30, notch = 22;
+        const box = E("path", {
+          d: `M ${bx} ${y - hh} L ${bx + bw2 - notch} ${y - hh} L ${bx + bw2} ${y} L ${bx + bw2 - notch} ${y + hh} L ${bx} ${y + hh} L ${bx + notch} ${y} Z`,
+          fill: hexA("#000000", .46), stroke: i === 3 ? V("melanin-highlight") : V("tyr"), "stroke-width": 3, "stroke-opacity": .5
+        }, gg);
+        // substrate glyph so each step reads as a chemical species, not an empty box
+        const gx = bx + 52;
+        if (i < 3) {
+          E("circle", { cx: gx, cy: y, r: 13, fill: "none", stroke: V("tyr"), "stroke-width": 3, opacity: .8 }, gg);
+          E("circle", { cx: gx + 18, cy: y - 9, r: 6, fill: V("tyr"), opacity: i > 0 ? .9 : .35 }, gg);
+          if (i > 1) E("circle", { cx: gx + 18, cy: y + 10, r: 6, fill: V("tyr"), opacity: .9 }, gg);
+        } else {
+          for (let k = 0; k < 5; k++) E("circle", { cx: gx - 6 + (k % 3) * 15, cy: y - 8 + Math.floor(k / 3) * 16, r: 8, fill: V("melanin"), stroke: V("melanin-highlight"), "stroke-width": 1.6 }, gg);
+        }
+        const txt = T(s, bx + bw2 / 2 + 34, y + 8, { size: FS.small, fill: i === 3 ? "#E8B98F" : (i === 0 ? "#CBB79A" : V("dct")), weight: 650 }, gg);
+        if (i < 3) PathwayArrow(g, { x1: bx + bw2 / 2, y1: y + 34, x2: bx + bw2 / 2, y2: sy[i + 1] - 34, color: V("tyr"), width: 4, marker: "ahTyr" });
+        return { gg, box, txt };
+      });
+      T("Catalysed by tyrosinase", bx + bw2 / 2, 648, { size: 17, fill: V("tyr"), weight: 600, opacity: .75 }, g);
+
+      anchors.tyro = [mx - rx + 70, my - 70];
+      anchors.msome = [mx - rx * .62, my - ry * .74];
+      anchors.melanin = [mx + 40, my + ry * .58];
+
+      return {
+        anchors,
+        update(t) {
+          ms.setFill(ramp(t, .12, .95));
+          tyHalo.setAttribute("opacity", .18 + Math.abs(Math.sin(t * 7)) * .3);
+          cat.setAttribute("opacity", Math.abs(Math.sin(t * 7)) * .9);
+          cat.setAttribute("r", 22 + Math.abs(Math.sin(t * 7)) * 20);
+          nodes.forEach((n, i) => {
+            const on = ramp(t, .1 + i * .18, .3 + i * .18);
+            n.box.setAttribute("stroke-opacity", .3 + on * .7);
+            n.txt.setAttribute("opacity", .4 + on * .6);
+          });
+        }
+      };
+    },
+
+    /* ── 07 · melanosome transfer ─────────────────────── */
+    transfer(g) {
+      const anchors = {};
+      const mel = Melanocyte(g, { x: 250, y: 1240, r: 118, dendrites: 3, spread: Math.PI * .62, rot: -Math.PI * .34, seed: 13 });
+
+      const kers = [
+        { k: Keratinocyte(g, { x: 700, y: 560, r: 138, seed: 21 }), x: 700, y: 560 },
+        { k: Keratinocyte(g, { x: 880, y: 880, r: 128, seed: 22 }), x: 880, y: 880 },
+        { k: Keratinocyte(g, { x: 660, y: 1140, r: 132, seed: 23 }), x: 660, y: 1140 }
+      ];
+
+      // three transport routes: melanocyte body → dendrite tip → keratinocyte
+      const routes = kers.map((kk, i) => {
+        const arm = mel.arms[i] || mel.arms[0];
+        const p0 = [250, 1240];
+        const p1 = [250 + arm.mx, 1240 + arm.my];
+        const p2 = [250 + arm.ex, 1240 + arm.ey];
+        const p3 = [kk.x - 40, kk.y + 40];
+        return { p0, p1, p2, p3 };
+      });
+      const carriers = [];
+      for (let i = 0; i < 9; i++) {
+        carriers.push(E("ellipse", { rx: 17, ry: 12, fill: V("melanin"), stroke: V("melanin-highlight"), "stroke-width": 2.4, opacity: 0 }, g));
+      }
+      // visible dendrite → keratinocyte hand-off paths
+      routes.forEach(r => E("path", {
+        d: `M ${r.p2[0]} ${r.p2[1]} Q ${(r.p2[0] + r.p3[0]) / 2} ${(r.p2[1] + r.p3[1]) / 2 - 60} ${r.p3[0]} ${r.p3[1]}`,
+        stroke: V("melanocyte"), "stroke-width": 12, fill: "none", opacity: .35, "stroke-linecap": "round"
+      }, g));
+
+      const bez = (r, u) => {
+        // body → tip (quadratic), then tip → keratinocyte (quadratic)
+        if (u < .55) {
+          const v = u / .55, iv = 1 - v;
+          return [iv * iv * r.p0[0] + 2 * iv * v * r.p1[0] + v * v * r.p2[0],
+                  iv * iv * r.p0[1] + 2 * iv * v * r.p1[1] + v * v * r.p2[1]];
+        }
+        const v = (u - .55) / .45, iv = 1 - v;
+        const mxp = (r.p2[0] + r.p3[0]) / 2, myp = (r.p2[1] + r.p3[1]) / 2 - 60;
+        return [iv * iv * r.p2[0] + 2 * iv * v * mxp + v * v * r.p3[0],
+                iv * iv * r.p2[1] + 2 * iv * v * myp + v * v * r.p3[1]];
+      };
+
+      anchors.dend = [250 + (mel.arms[0]?.ex || 120) * .6 - 90, 1240 + (mel.arms[0]?.ey || -120) * .6];
+      anchors.transfer = [520, 900];
+      anchors.ker = [880 + 90, 880];
+
+      return {
+        anchors,
+        update(t) {
+          carriers.forEach((c, i) => {
+            const r = routes[i % 3];
+            const u = ((t * .85 + i * .11) % 1);
+            const [x, y] = bez(r, u);
+            c.setAttribute("cx", x.toFixed(1)); c.setAttribute("cy", y.toFixed(1));
+            c.setAttribute("opacity", u > .96 ? 0 : .95);
+            const mid = bez(r, Math.min(1, u + .02));
+            c.setAttribute("transform", `rotate(${(Math.atan2(mid[1] - y, mid[0] - x) * 180 / Math.PI).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`);
+            if (i === 4) anchors.transfer = [x + 60, y - 30];
+          });
+          const load = ramp(t, .25, 1);
+          kers.forEach(kk => kk.k.setPigment(load));
+        }
+      };
+    },
+
+    /* ── 08 · candidate entry ─────────────────────────── */
+    entry(g) {
+      const anchors = {};
+      // intact melanocyte silhouette with its nucleus
+      E("ellipse", { cx: CX, cy: 1080, rx: 400, ry: 440, fill: hexA(P["melanocyte"], .13), stroke: V("melanocyte"), "stroke-width": 5, "stroke-opacity": .55 }, g);
+      E("ellipse", { cx: CX, cy: 1080, rx: 382, ry: 422, fill: "none", stroke: V("melanocyte-highlight"), "stroke-width": 2, "stroke-opacity": .3 }, g);
+      T("Melanocyte", CX, 1560, { size: 17, fill: V("melanocyte-highlight"), weight: 600, opacity: .75 }, g);
+      E("ellipse", { cx: CX, cy: 1230, rx: 208, ry: 190, fill: "url(#gNuc)", stroke: V("dna"), "stroke-width": 4, "stroke-opacity": .55 }, g);
+      T("Nucleus", CX, 1240, { size: FS.tiny, fill: V("dna-highlight"), weight: 600, opacity: .8 }, g);
+      const mitfG = E("g", { opacity: .9 }, g);
+      MITFDimer(mitfG, { x: CX, y: 1210, s: .34 });
+
+      // proposed — hence dashed and amber — entry route
+      // the route must terminate ON the MITF dimer, not stop short of it
+      const path = `M 830 400 C 800 620, 700 720, 640 830 S 570 1010, ${CX} 1188`;
+      const route = E("path", { d: path, stroke: V("hypothesis-border"), "stroke-width": 5, fill: "none", "stroke-dasharray": "18 16", opacity: .8, "marker-end": "url(#ahHyp)" }, g);
+      const pathEl = E("path", { d: path, stroke: "none", fill: "none" }, g);
+      const L = pathEl.getTotalLength ? pathEl.getTotalLength() : 900;
+
+      const molG = E("g", {}, g);
+      const mol = Molecule(molG, { x: 0, y: 0, s: 1.35, kind: "candidate" });
+      const halo = E("circle", { r: 190, fill: V("hypothesis-border"), opacity: .22, filter: "url(#blurOnly)" }, molG);
+      molG.insertBefore(halo, mol.g);
+
+      // membrane-crossing marker
+      const crossPt = pathEl.getPointAtLength ? pathEl.getPointAtLength(L * .58) : { x: 640, y: 900 };
+      E("circle", { cx: crossPt.x, cy: crossPt.y, r: 34, fill: "none", stroke: V("hypothesis-border"), "stroke-width": 3, "stroke-dasharray": "8 7", opacity: .85 }, g);
+
+      anchors.cand = [830 + 60, 400];
+      anchors.entry = [crossPt.x - 70, crossPt.y];
+      anchors.target = [CX + 150, 1210];
+
+      return {
+        anchors,
+        update(t) {
+          const u = ramp(t, .05, .88);
+          const pt = pathEl.getPointAtLength ? pathEl.getPointAtLength(L * u) : { x: 830, y: 400 };
+          molG.setAttribute("transform", `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)}) rotate(${(u * 90).toFixed(1)})`);
+          halo.setAttribute("opacity", .16 + Math.abs(Math.sin(t * 5)) * .16);
+          route.setAttribute("stroke-dashoffset", (-t * 60).toFixed(1));
+          anchors.cand = [pt.x + 74, pt.y - 40];
+        }
+      };
+    },
+
+    /* ── 09 · hero — real 9H7Q ────────────────────────── */
+    hero(g) {
+      const anchors = { dimer: [300, 700], pocket: [700, 900], binder: [640, 1160] };
+      // residue callouts are positioned from the live 3D projection each frame
+      const resLabels = ["E260", "Q261", "K265"].map((r, i) => {
+        const gg = E("g", { opacity: 0 }, g);
+        E("circle", { r: 5, fill: V("hypothesis-border") }, gg);
+        const t = T(r, 0, -14, { size: 17, fill: V("hypothesis-border"), weight: 650, anchor: "start" }, gg);
+        t.setAttribute("x", 12);
+        return gg;
+      });
+      const note = T("Chains A + B · 157 Cα · pose from X-ray, not docking", CX, SC_BOT - 6, { size: 17, fill: hexA("#FFFFFF", .5), weight: 500 }, g);
+      return {
+        anchors, usesCanvas: true,
+        update(t, ctx) {
+          if (!ctx || !Mol3D) return;
+          const { w, h, out } = ctx;
+          if (!out) return;
+          // project pocket + ligand into SVG viewBox coordinates
+          const sx = W / w, sy = H / h;
+          anchors.pocket = [out.pocket[0] * sx + 130, out.pocket[1] * sy - 60];
+          anchors.binder = [out.ligand[0] * sx + 90, out.ligand[1] * sy + 70];
+          anchors.dimer = [out.pocket[0] * sx - 250, out.pocket[1] * sy - 260];
+          // pinned to the actual Cα of each deposited contact residue
+          const names = ["E260", "Q261", "K265"];
+          resLabels.forEach((gg, i) => {
+            const r = out.residues && out.residues[names[i]];
+            if (!r) { gg.setAttribute("opacity", 0); return; }
+            gg.setAttribute("transform", `translate(${(r[0] * sx).toFixed(1)} ${(r[1] * sy).toFixed(1)})`);
+            gg.setAttribute("opacity", ramp(t, .45, .70) * .9);
+          });
+        }
+      };
+    },
+
+    /* ── 10 · testable prediction ─────────────────────── */
+    prediction(g) {
+      const anchors = {};
+      E("rect", { x: SAFE - 10, y: SC_TOP + 10, width: W - (SAFE - 10) * 2, height: 900, rx: 160, fill: "url(#gNuc)", stroke: V("dna"), "stroke-width": 4, "stroke-opacity": .35 }, g);
+      T("Nucleus intact", CX, SC_TOP + 76, { size: FS.tiny, fill: V("dna-highlight"), weight: 600, opacity: .75 }, g);
+      DNAHelix(g, { x1: 150, x2: 930, y: 700, amp: 34, turns: 4 });
+
+      const dimerG = E("g", {}, g);
+      const dimer = MITFDimer(dimerG, { x: 470, y: 560, s: .58, ligand: true });
+
+      const tracks = [
+        GeneTrack(g, { x: 240, y: 1020, w: 440, name: "TYR", color: V("tyr") }),
+        GeneTrack(g, { x: 240, y: 1180, w: 440, name: "TYRP1", color: V("tyrp1") }),
+        GeneTrack(g, { x: 240, y: 1340, w: 440, name: "DCT", color: V("dct") })
+      ];
+      [1020, 1180, 1340].forEach(y => PathwayArrow(g, { x1: 180, y1: y - 34, x2: 180, y2: y + 20, color: V("downregulation-arrow"), width: 4, marker: "ahDown" }));
+
+      // side-by-side melanosomes: pigment output falls but never reaches zero
+      const msA = Melanosome(g, { x: 830, y: 1150, rx: 96, ry: 120, seed: 31, granules: 16 });
+      const msB = Melanosome(g, { x: 950, y: 1370, rx: 76, ry: 96, seed: 32, granules: 12 });
+
+      // viability indicator — the cell survives
+      const via = E("g", { transform: `translate(${CX} 1490)` }, g);
+      E("rect", { x: -210, y: -30, width: 420, height: 60, rx: 30, fill: hexA(P["hypothesis-border"], .12), stroke: V("hypothesis-border"), "stroke-width": 3 }, via);
+      E("path", { d: "M -166 0 l 16 18 l 30 -36", stroke: V("hypothesis-border"), "stroke-width": 6, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, via);
+      T("Predicted: cell stays viable", 10, 9, { size: FS.small, fill: V("hypothesis-border"), weight: 650 }, via);
+
+      anchors.mod = [470 - 130, 560];
+      anchors.genes = [700, 1180];
+      anchors.viable = [CX + 196, 1490];
+
+      return {
+        anchors,
+        update(t) {
+          // 1.0 → ~0.45: partial modulation, explicitly not a shutdown
+          const lvl = lerp(1, .45, ramp(t, .10, .80));
+          tracks.forEach((tr, i) => {
+            tr.showBaseline(t > .28, t * 1.1 + i * .18);   // dashed = previous full output
+            tr.set(lvl, t * 1.1 + i * .18);
+          });
+          msA.setFill(lerp(.85, .38, ramp(t, .2, .9)));
+          msB.setFill(lerp(.75, .30, ramp(t, .25, .95)));
+          dimer.setPocketGlow(.4 + Math.abs(Math.sin(t * 4)) * .3);
+          dimer.halo.setAttribute("opacity", lerp(.16, .07, ramp(t, .1, .8)));
+          via.setAttribute("opacity", ramp(t, .45, .70));
+        }
+      };
+    },
+
+    /* ── 11 · upstream vs downstream ──────────────────── */
+    split(g) {
+      const anchors = {};
+      const LX = SAFE - 12, RX = CX + 8, PW = CX - SAFE - 4;
+      // panel grounds carry the meaning: warm = MITF route, cool = Thiamidol route
+      E("rect", { x: LX, y: SC_TOP, width: PW, height: SC_BOT - SC_TOP, rx: 16, fill: hexA(P["melanocyte"], .13), stroke: V("mitf-highlight"), "stroke-width": 2.5, "stroke-opacity": .45 }, g);
+      E("rect", { x: RX, y: SC_TOP, width: PW, height: SC_BOT - SC_TOP, rx: 16, fill: hexA(P["thiamidol"], .10), stroke: V("thiamidol"), "stroke-width": 2.5, "stroke-opacity": .45 }, g);
+
+      T("Proposed MITF route", LX + PW / 2, SC_TOP + 54, { size: FS.small, fill: V("mitf-highlight"), weight: 700 }, g);
+      T("UPSTREAM", LX + PW / 2, SC_TOP + 86, { size: 17, fill: V("mitf-highlight"), weight: 600, ls: 2.4, opacity: .8 }, g);
+      T("Thiamidol route", RX + PW / 2, SC_TOP + 54, { size: FS.small, fill: V("thiamidol"), weight: 700 }, g);
+      T("DOWNSTREAM", RX + PW / 2, SC_TOP + 86, { size: 17, fill: V("thiamidol"), weight: 600, ls: 2.4, opacity: .8 }, g);
+
+      // shared level rails — the whole point of the shot: same axis, different level
+      const LEV = [{ y: 640, name: "NUCLEUS" }, { y: 1150, name: "MELANOSOME" }];
+      LEV.forEach(l => {
+        E("line", { x1: LX + 8, y1: l.y, x2: RX + PW - 8, y2: l.y, stroke: hexA("#FFFFFF", .16), "stroke-width": 2, "stroke-dasharray": "10 12" }, g);
+        T(l.name, CX, l.y - 14, { size: 17, fill: hexA("#FFFFFF", .45), weight: 700, ls: 2 }, g);
+      });
+
+      /* LEFT — intervention at the nucleus */
+      const lMitf = MITFDimer(g, { x: LX + PW / 2, y: 640, s: .56, ligand: true });
+      const lTracks = [
+        GeneTrack(g, { x: LX + 46, y: 830, w: 150, name: "TYR", color: V("tyr") }),
+        GeneTrack(g, { x: LX + 46, y: 940, w: 150, name: "TYRP1", color: V("tyrp1") }),
+        GeneTrack(g, { x: LX + 46, y: 1050, w: 150, name: "DCT", color: V("dct") })
+      ];
+      PathwayArrow(g, { x1: LX + PW / 2, y1: 730, x2: LX + PW / 2, y2: 790, color: V("downregulation-arrow"), width: 5, marker: "ahDown" });
+      const lMs = Melanosome(g, { x: LX + PW / 2, y: 1290, rx: 108, ry: 130, seed: 41, granules: 16 });
+      T("Predicted: fewer enzymes", LX + PW / 2, 1450, { size: 17, fill: V("downregulation-arrow"), weight: 600, opacity: .9 }, g);
+
+      /* RIGHT — intervention inside the melanosome; the nucleus is untouched */
+      const rNucG = E("g", { opacity: .45 }, g);
+      E("ellipse", { cx: RX + PW / 2, cy: 640, rx: 118, ry: 92, fill: "url(#gNuc)", stroke: V("dna"), "stroke-width": 3, "stroke-opacity": .4 }, rNucG);
+      T("Transcription unchanged", RX + PW / 2, 748, { size: 17, fill: hexA("#FFFFFF", .55), weight: 600 }, rNucG);
+
+      const rMs = Melanosome(g, { x: RX + PW / 2, y: 1150, rx: 168, ry: 200, seed: 42, granules: 20 });
+      // orange tyrosinase inside the organelle
+      const tyG = E("g", { transform: `translate(${RX + PW / 2 - 46} 1120)` }, g);
+      E("path", { d: "M -44 -50 q 50 -24 84 4 q 28 22 16 60 q -12 38 -54 42 q -46 4 -64 -30 q -16 -36 18 -76 Z", fill: V("tyr"), stroke: "#FFD3A0", "stroke-width": 2.6, "stroke-opacity": .5 }, tyG);
+      // same enzyme, same silhouette as shot 6: catalytic cleft + copper centres
+      E("path", { d: "M -4 -18 q 24 15 21 37 q -3 21 -24 24", fill: "none", stroke: "#7A3E0C", "stroke-width": 11, "stroke-linecap": "round", opacity: .55 }, tyG);
+      E("circle", { cx: 5, cy: 2, r: 7, fill: "#2C3E4C", stroke: "#9FB6C6", "stroke-width": 2 }, tyG);
+      E("circle", { cx: 23, cy: 13, r: 7, fill: "#2C3E4C", stroke: "#9FB6C6", "stroke-width": 2 }, tyG);
+      const stop = E("g", { opacity: 0 }, tyG);
+      E("circle", { cx: 14, cy: 8, r: 30, fill: "none", stroke: V("warning"), "stroke-width": 6 }, stop);
+      E("path", { d: "M -6 -12 l 40 40 M 34 -12 l -40 40", stroke: V("warning"), "stroke-width": 6, "stroke-linecap": "round" }, stop);
+      const thia = Molecule(g, { x: RX + PW / 2 + 96, y: 1050, s: .62, kind: "thiamidol" });
+      T("Thiamidol", RX + PW / 2 + 96, 990, { size: 17, fill: V("thiamidol"), weight: 650 }, g);
+      T("Tyrosinase", RX + PW / 2 - 46, 1230, { size: 17, fill: V("tyr"), weight: 650, opacity: .9 }, g);
+      T("Enzyme blocked directly", RX + PW / 2, 1450, { size: 17, fill: V("thiamidol"), weight: 600, opacity: .9 }, g);
+
+      return {
+        anchors,
+        update(t) {
+          const dim = ramp(t, .12, .8);
+          lTracks.forEach((tr, i) => tr.set(lerp(1, .38, dim), t * 1.1 + i * .2));
+          lMitf.setPocketGlow(.35 + Math.abs(Math.sin(t * 4)) * .3);
+          lMs.setFill(lerp(.8, .34, dim));
+          // right: ligand docks onto the enzyme, catalysis halts
+          const dock = ramp(t, .18, .55);
+          thia.g.setAttribute("transform", `translate(${(RX + PW / 2 + 96 - dock * 86).toFixed(1)} ${(1050 + dock * 58).toFixed(1)}) scale(.62)`);
+          stop.setAttribute("opacity", ramp(t, .5, .68));
+          // must land as low as the left panel, or the right side reads as "no effect"
+          rMs.setFill(lerp(.85, .22, ramp(t, .48, .95)));
+        }
+      };
+    },
+
+    /* ── 12 · the experimental question ───────────────── */
+    question(g) {
+      const anchors = {};
+      const dimerG = E("g", {}, g);
+      const dimer = MITFDimer(dimerG, { x: CX, y: 560, s: .58, ligand: true });
+
+      // the causal chain the experiment must actually test
+      const chain = [
+        { y: 810, txt: "MITF", col: V("mitf-highlight") },
+        { y: 990, txt: "TYR / TYRP1 / DCT", col: V("tyr") },
+        { y: 1170, txt: "Melanin", col: V("melanin-highlight"), ink: "#E8B98F" }
+      ];
+      chain.forEach((c, i) => {
+        E("rect", { x: CX - 230, y: c.y - 34, width: 460, height: 68, rx: 12, fill: hexA("#000000", .40), stroke: c.col, "stroke-width": 2.6, "stroke-opacity": .55 }, g);
+        // each rung carries the glyph of the thing it names, so the chain
+        // still reads with every label switched off
+        const gx = CX - 168;
+        if (i === 0) {                                    // MITF: two-lobed dimer
+          E("path", { d: `M ${gx - 20} ${c.y + 20} Q ${gx - 8} ${c.y} ${gx - 12} ${c.y - 20}`, stroke: V("mitf"), "stroke-width": 11, fill: "none", "stroke-linecap": "round" }, g);
+          E("path", { d: `M ${gx + 20} ${c.y + 20} Q ${gx + 8} ${c.y} ${gx + 12} ${c.y - 20}`, stroke: V("mitf"), "stroke-width": 11, fill: "none", "stroke-linecap": "round" }, g);
+          E("path", { d: `M ${gx - 12} ${c.y - 20} Q ${gx} ${c.y - 30} ${gx + 12} ${c.y - 20}`, stroke: V("mitf-highlight"), "stroke-width": 7, fill: "none", "stroke-linecap": "round" }, g);
+        } else if (i === 1) {                             // three transcript waves
+          [-16, 0, 16].forEach((dy, k) => {
+            let p = "";
+            for (let s = 0; s <= 16; s++) p += (s ? "L" : "M") + (gx - 26 + s * 3.4).toFixed(1) + " " + (c.y + dy + Math.sin(s * .8) * 5).toFixed(1);
+            E("path", { d: p, stroke: [V("tyr"), V("tyrp1"), V("dct")][k], "stroke-width": 4, fill: "none", "stroke-linecap": "round" }, g);
+          });
+        } else {                                          // melanin granules
+          for (let k = 0; k < 6; k++) {
+            E("circle", { cx: gx - 24 + (k % 3) * 24, cy: c.y - 11 + Math.floor(k / 3) * 22, r: 9,
+              fill: V("melanin"), stroke: V("melanin-highlight"), "stroke-width": 1.8 }, g);
           }
         }
-      }
-    },
+        T(c.txt, CX + 52, c.y + 9, { size: FS.small, fill: c.ink || c.col, weight: 650 }, g);
+        if (i < 2) PathwayArrow(g, { x1: CX, y1: c.y + 36, x2: CX, y2: chain[i + 1].y - 38, color: V("downregulation-arrow"), width: 4, marker: "ahDown" });
+      });
 
-    split(ctx,W,H,t){
-      ctx.fillStyle=rgba("#000000",.14); ctx.fillRect(W*.5,0,W*.5,H);
-      // left: MITF + candidate
-      const lx=W*.25, ly=H*.46;
-      glow(ctx,lx,ly,W*.24,C.mitfHi,.24);
-      blob(ctx,lx,ly,W*.12,rgba(C.mitf,.97),C.mitfHi,42,1.9);
-      const cx=lx-W*.09, cy=ly+H*.012;
-      glow(ctx,cx,cy,W*.12,C.cand,.5);
-      sphere(ctx,cx,cy,W*.036,"#DDE6F0","#FFFFFF",1);
-      ctx.strokeStyle=rgba(C.tyr,.28); ctx.lineWidth=W*.006;
-      for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(lx-W*.09,ly+H*.10+i*H*.045); ctx.lineTo(lx+W*.09,ly+H*.10+i*H*.045); ctx.stroke(); }
-      // right: thiamidol + tyrosinase in melanosome
-      const rx=W*.75, ry=H*.46;
-      ctx.beginPath(); ctx.ellipse(rx,ry,W*.16,W*.11,0,0,6.283);
-      ctx.fillStyle=rgba(C.blue,.35); ctx.fill();
-      ctx.strokeStyle=rgba(C.memb,.4); ctx.lineWidth=W*.005; ctx.stroke();
-      glow(ctx,rx+W*.03,ry,W*.16,C.tyr,.3);
-      blob(ctx,rx+W*.03,ry,W*.07,rgba(C.tyr,.9),"#FFD9A8",17);
-      const tx=rx-W*.07+Math.sin(t*2)*W*.006;
-      glow(ctx,tx,ry,W*.1,C.thia,.4);
-      sphere(ctx,tx,ry,W*.032,C.thia,"#EAF2FF",1);
-      // divider
-      ctx.strokeStyle="rgba(255,255,255,.22)"; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.moveTo(W*.5,H*.06); ctx.lineTo(W*.5,H*.94); ctx.stroke();
-    },
+      // the unresolved step
+      const qG = E("g", { transform: `translate(${CX + 262} 900)` }, g);
+      E("circle", { r: 56, fill: hexA(P["warning"], .14), stroke: V("warning"), "stroke-width": 4, "stroke-dasharray": "14 10" }, qG);
+      // drawn, not typed — the unresolved step must survive the silent-viewer test
+      E("path", { d: "M -17 -16 a 17 17 0 1 1 17 17 v 11", stroke: V("warning"), "stroke-width": 8, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }, qG);
+      E("circle", { cx: 0, cy: 27, r: 5.5, fill: V("warning") }, qG);
+      E("path", { d: `M ${CX + 230} 700 Q ${CX + 300} 780 ${CX + 288} 848`, stroke: V("warning"), "stroke-width": 3, fill: "none", "stroke-dasharray": "10 9", opacity: .7 }, g);
 
-    hero(ctx,W,H,t){
-      const x=W*.5,y=H*.44, a=t*.9;
-      glow(ctx,x,y,W*.75,C.nuc,.16);
-      glow(ctx,x,y,W*.5,C.mitfHi,.2);
-      ctx.save(); ctx.translate(x,y); ctx.rotate(Math.sin(a)*.12); ctx.translate(-x,-y);
-      blob(ctx,x,y,W*.23,rgba(C.mitf,.98),C.mitfHi,42,1.7);
-      const cx=x-W*.16+Math.cos(a)*W*.01, cy=y+H*.012;
-      glow(ctx,cx,cy,W*.2,C.cand,.55);
-      sphere(ctx,cx,cy,W*.055,"#DDE6F0","#FFFFFF",1);
-      ctx.restore();
-      ctx.beginPath(); ctx.arc(x,y,W*.3+Math.sin(t*3)*W*.01,0,6.283);
-      ctx.strokeStyle=rgba("#FFFFFF",.09); ctx.lineWidth=W*.004; ctx.stroke();
-    },
+      // validation sequence
+      const steps = ["Docking", "Cell assay", "Viability", "Mechanism"];
+      const bw = 216, gap = 14, tot = steps.length * bw + (steps.length - 1) * gap;
+      const chips = steps.map((s, i) => {
+        const x = CX - tot / 2 + i * (bw + gap);
+        const gg = E("g", { opacity: 0 }, g);
+        E("rect", { x, y: 1288, width: bw, height: 62, rx: 31, fill: hexA(P["downregulation-arrow"], .10), stroke: V("downregulation-arrow"), "stroke-width": 2.4, "stroke-opacity": .6 }, gg);
+        T(s, x + bw / 2, 1327, { size: 17, fill: V("downregulation-arrow"), weight: 620 }, gg);
+        if (i < steps.length - 1) T("→", x + bw + gap / 2, 1327, { size: 20, fill: hexA("#FFFFFF", .4), weight: 600 }, gg);
+        return gg;
+      });
 
-    endcard(ctx,W,H,t){
-      const fade=Math.min(1,Math.max(0,(t-.22)/.3));
-      if(fade<=0) return;
-      ctx.fillStyle=rgba("#02070E",fade*.55); ctx.fillRect(0,0,W,H);
-      ctx.textAlign="center";
+      // the question itself, wrapped
+      const qLines = ["Can a proposed MITF kink-pocket binder", "reduce melanin without harming melanocytes?"];
+      const qTexts = qLines.map((l, i) => T(l, CX, 1432 + i * 46, { size: 30, fill: "#FFFFFF", weight: 700, opacity: 0 }, g));
 
-      // hypothesis line, wrapped to the safe area
-      ctx.font=`600 ${Math.round(W*.045)}px -apple-system, "Segoe UI", Roboto, sans-serif`;
-      ctx.fillStyle=rgba("#FFFFFF",fade*.96);
-      const words="Hypothesis: Direct MITF modulation may reduce pigmentation upstream".split(" ");
-      const maxW=W*.8, lines=[]; let line="";
-      for(const w of words){
-        const test=line?line+" "+w:w;
-        if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; }
-        else line=test;
-      }
-      lines.push(line);
-      const lh=W*.062, top=H*.615-(lines.length-1)*lh;
-      lines.forEach((l,i)=>ctx.fillText(l,W*.5,top+i*lh));
+      // brand
+      const brand = E("g", { opacity: 0 }, g);
+      E("line", { x1: CX - 150, y1: SC_BOT - 46, x2: CX + 150, y2: SC_BOT - 46, stroke: hexA("#FFFFFF", .18), "stroke-width": 1.5 }, brand);
+      T("Hamiltonian Labs", CX, SC_BOT + 4, { size: 22, fill: hexA("#FFFFFF", .8), weight: 650, ls: 1.4 }, brand);
 
-      ctx.font=`500 ${Math.round(W*.030)}px -apple-system, "Segoe UI", Roboto, sans-serif`;
-      ctx.fillStyle=rgba("#9FB6CC",fade*.9);
-      ctx.fillText("Computational concept → Wet-lab validation",W*.5,H*.685);
-
-      ctx.strokeStyle=rgba("#FFFFFF",fade*.16); ctx.lineWidth=1;
-      ctx.beginPath(); ctx.moveTo(W*.34,H*.735); ctx.lineTo(W*.66,H*.735); ctx.stroke();
-
-      ctx.font=`600 ${Math.round(W*.040)}px -apple-system, "Segoe UI", Roboto, sans-serif`;
-      ctx.fillStyle=rgba("#FFFFFF",fade*.9);
-      ctx.fillText("Hamiltonian Labs",W*.5,H*.785);
-      ctx.textAlign="left";
+      return {
+        anchors,
+        update(t) {
+          dimerG.setAttribute("transform", `rotate(${(Math.sin(t * 1.4) * 4).toFixed(2)} ${CX} 560)`);
+          dimer.setPocketGlow(.4 + Math.abs(Math.sin(t * 3.4)) * .3);
+          qG.setAttribute("opacity", ramp(t, .15, .35));
+          chips.forEach((c, i) => c.setAttribute("opacity", ramp(t, .30 + i * .07, .46 + i * .07)));
+          qTexts.forEach((q, i) => q.setAttribute("opacity", ramp(t, .5 + i * .07, .68 + i * .07)));
+          brand.setAttribute("opacity", ramp(t, .74, .92));
+        }
+      };
     }
   };
 
-  /* ── frame compositor ──────────────────────────────── */
-  function paint(ctx,W,H,shot,t){
-    ctx.clearRect(0,0,W,H);
-    // volumetric ground
-    const bg=ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,"#04101C"); bg.addColorStop(.5,"#030C16"); bg.addColorStop(1,C.deep);
-    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-    ctx.globalCompositeOperation="lighter";
-    glow(ctx,W*(.3+Math.sin(t*.8)*.06),H*.24,W*.9,C.teal,.30);
-    glow(ctx,W*(.72-Math.sin(t*.6)*.05),H*.72,W*.8,C.blue,.28);
-    ctx.globalCompositeOperation="source-over";
+  /* ═══════════════════════════════════════════════════════
+     FRAME CHROME — title, badge, labels, footer
+     ═══════════════════════════════════════════════════════ */
+  function buildChrome(svg, shot) {
+    const chrome = E("g", { "data-chrome": "1" }, svg);
+    const c = CERT[shot.certainty];
 
-    // cytoplasm motes
-    ctx.globalCompositeOperation="lighter";
-    const rd=rng(2024);
-    for(let i=0;i<64;i++){
-      const z=.3+rd()*.7;
-      const x=(((rd()+t*.05*z)%1)+1)%1*W;
-      const y=(((rd()-t*.09*z)%1)+1)%1*H;
-      ctx.beginPath(); ctx.arc(x,y,W*.004*z*2,0,6.283);
-      ctx.fillStyle=rgba("#8FD8EC",.05+z*.16); ctx.fill();
-    }
-    ctx.globalCompositeOperation="source-over";
+    // certainty border — solid cyan for fact, dashed amber for hypothesis
+    E("rect", {
+      x: 14, y: 14, width: W - 28, height: H - 28, rx: 8,
+      fill: "none", stroke: V(c.color), "stroke-width": 5,
+      "stroke-dasharray": c.dash, opacity: .78
+    }, chrome);
 
-    if(shot.dim){ ctx.fillStyle=rgba("#000000",shot.dim); ctx.fillRect(0,0,W,H); }
+    // top-left: shot + timecode
+    const tl = E("g", {}, chrome);
+    const num = T(`SHOT ${String(shot.id).padStart(2, "0")}`, SAFE, TOPBAR_Y, { size: FS.badge, fill: "#FFFFFF", weight: 700, anchor: "start", ls: 1.6 }, tl);
+    T(`${fmt(shot.start)}–${fmt(shot.end)}`, SAFE + 122, TOPBAR_Y, { size: FS.badge, fill: hexA("#FFFFFF", .55), weight: 500, anchor: "start" }, tl);
 
-    for(const key of shot.layers){ const fn=LAYERS[key]; if(fn) fn(ctx,W,H,t,shot); }
-
-    // grain
-    ctx.globalCompositeOperation="overlay"; ctx.globalAlpha=.085;
-    const ox=-Math.floor(((t*37)%1)*256), oy=-Math.floor(((t*61)%1)*256);
-    for(let x=ox;x<W;x+=256) for(let y=oy;y<H;y+=256) ctx.drawImage(grainTile,x,y);
-    ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over";
-
-    // vignette
-    const vg=ctx.createRadialGradient(W*.5,H*.5,Math.min(W,H)*.32,W*.5,H*.5,Math.max(W,H)*.75);
-    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,.66)");
-    ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
-  }
-
-  function fit(cv){
-    const dpr=Math.min(devicePixelRatio||1,1.75);
-    const r=cv.getBoundingClientRect();
-    const w=Math.max(2,Math.round(r.width*dpr)), h=Math.max(2,Math.round(r.height*dpr));
-    if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
-    return [cv.getContext("2d"),w,h];
-  }
-
-  /* ── stage ─────────────────────────────────────────── */
-  const canvas=$("canvas"), gate=$("gate");
-  function drawStage(){ const [c,w,h]=fit(canvas); paint(c,w,h,SHOTS[S.i],S.t); }
-
-  function renderLabels(){
-    const shot=SHOTS[S.i], host=$("labels");
-    host.innerHTML="";
-    shot.pins.forEach(([text,x,y,rtl],k)=>{
-      const el=document.createElement("div");
-      el.className="lab"+(rtl?" rtl":"")+(k===0?" main":"");
-      el.style.left=(x*100)+"%"; el.style.top=(y*100)+"%";
-      el.style.animationDelay=(.15+k*.12)+"s";
-      el.innerHTML=`<span class="dot"></span><span class="lead" style="width:${rtl?18:18}px"></span><span class="txt"></span>`;
-      el.querySelector(".txt").textContent=text;
-      host.appendChild(el);
+    // top-right: certainty badge
+    const bg = E("g", {}, chrome);
+    const label = c.label.toUpperCase();
+    const badgeRect = E("rect", { y: TOPBAR_Y - 27, height: 38, rx: 19, fill: hexA("#000000", .45), stroke: V(c.color), "stroke-width": 2.4, "stroke-dasharray": c.dash ? "10 7" : null }, bg);
+    const badgeDot = E("circle", { cy: TOPBAR_Y - 8, r: 6, fill: V(c.color) }, bg);
+    const badgeTxt = T(label, 0, TOPBAR_Y - 1, { size: 17, fill: V(c.color), weight: 700, anchor: "start", ls: 1.5 }, bg);
+    // size the pill from the measured text so the label can never overflow it
+    requestAnimationFrame(() => {
+      let tw = 0;
+      try { tw = badgeTxt.getComputedTextLength(); } catch { tw = label.length * 11.5; }
+      const bw = tw + 62;
+      badgeRect.setAttribute("x", W - SAFE - bw); badgeRect.setAttribute("width", bw);
+      badgeDot.setAttribute("cx", W - SAFE - bw + 24);
+      badgeTxt.setAttribute("x", W - SAFE - bw + 40);
     });
-    // Shot 12 carries its titles inside the frame (endcard layer), so it pins nothing here.
-  }
 
-  function selectShot(i,{keepT=false}={}){
-    S.i=Math.max(0,Math.min(SHOTS.length-1,i));
-    if(!keepT) S.t=0;
-    const s=SHOTS[S.i];
-    $("tagNum").textContent="SHOT "+String(s.n).padStart(2,"0");
-    $("tagTime").textContent=`${fmt((s.n-1)*5)}–${fmt(s.n*5)}`;
-    $("caption").textContent=s.caption;
-    $("tlTitle").textContent=s.title;
-    $("prompt").value=promptFor(s);
-    renderLabels(); drawStage(); syncTimeline(); syncInspector(); markShot();
-  }
+    // title block
+    T(shot.title, CX, TITLE_Y, { size: FS.title, fill: "#FFFFFF", weight: 700 }, chrome);
+    T(shot.subtitle, CX, SUB_Y, { size: FS.sub, fill: hexA("#FFFFFF", .58), weight: 500 }, chrome);
 
-  function markShot(){
-    document.querySelectorAll(".shot").forEach((el,k)=>el.setAttribute("aria-current",String(k===S.i)));
-    document.querySelectorAll(".tl-seg").forEach((el,k)=>el.setAttribute("aria-current",String(k===S.i)));
-  }
+    // footer caption
+    E("rect", { x: SAFE, y: FOOT_Y - 40, width: W - SAFE * 2, height: 62, rx: 12, fill: hexA("#000000", .38) }, chrome);
+    T(shot.footer, CX, FOOT_Y, { size: FS.foot, fill: hexA("#FFFFFF", .90), weight: 550 }, chrome);
 
-  function syncTimeline(){
-    const total=SHOTS.length*5, elapsed=S.i*5+S.t*5;
-    $("timecode").textContent=`${mmss(elapsed)} / ${mmss(total)}`;
-    document.querySelectorAll(".tl-seg i").forEach((el,k)=>{
-      el.style.width=(k<S.i?100:k===S.i?S.t*100:0)+"%";
+    // object labels — slotted so they can never cross, leader lines track the object
+    const labelParts = shot.labels.map(l => {
+      const gg = E("g", {}, chrome);
+      const left = l.side === "l";
+      const tx = left ? SAFE + 8 : W - SAFE - 8;
+      // z-order matters: leader first, then the readability plate, then the text.
+      // Otherwise the leader line reads as a strike-through across its own label.
+      const lead = E("path", { d: "", stroke: hexA("#FFFFFF", .62), "stroke-width": 2.2, fill: "none" }, gg);
+      const dot = E("circle", { r: 6.5, fill: V(l.color), stroke: "#0A1018", "stroke-width": 1.6 }, gg);
+      const plate = E("rect", { y: l.slot - 26, height: 36, rx: 18, fill: hexA("#04101A", .78) }, gg);
+      const chip = E("circle", { cx: left ? tx + 9 : tx - 9, cy: l.slot - 7, r: 7, fill: V(l.color) }, gg);
+      const txt = T(l.text, left ? tx + 26 : tx - 26, l.slot, { size: FS.label, fill: "#FFFFFF", weight: 600, anchor: left ? "start" : "end" }, gg);
+      const part = { l, lead, dot, left, tx, start: left ? tx + 150 : tx - 150 };
+      // measure the real text so the plate fits and the leader starts clear of it
+      requestAnimationFrame(() => {
+        let tw = 0;
+        try { tw = txt.getComputedTextLength(); } catch { tw = l.text.length * FS.label * .55; }
+        const wdt = tw + 46;
+        plate.setAttribute("x", left ? tx - 4 : tx + 4 - wdt);
+        plate.setAttribute("width", wdt);
+        part.start = left ? tx - 4 + wdt : tx + 4 - wdt;
+      });
+      return part;
     });
-  }
 
-  /* ── playback ──────────────────────────────────────── */
-  function tick(now){
-    if(S.playing && !reduced && !S.busy){
-      const dt=S.last?(now-S.last)/1000:0;
-      S.t+=dt/5;
-      if(S.t>=1){
-        S.t=0;
-        if(S.i<SHOTS.length-1) selectShot(S.i+1);
-        else if(S.loop) selectShot(0);
-        else { S.t=1; setPlaying(false); }
+    return {
+      chrome,
+      /** re-point leader lines at the (possibly moving) anchors */
+      track(anchors) {
+        labelParts.forEach(part => {
+          const { l, lead, dot, left } = part;
+          const a = anchors[l.key];
+          if (!a) { lead.setAttribute("opacity", 0); dot.setAttribute("opacity", 0); return; }
+          lead.setAttribute("opacity", 1); dot.setAttribute("opacity", 1);
+          const ax = clamp(a[0], 30, W - 30), ay = clamp(a[1], 30, H - 30);
+          const sx = part.start, sy = l.slot - 7;
+          const elbow = left ? sx + 26 : sx - 26;
+          lead.setAttribute("d", `M ${sx.toFixed(1)} ${sy} L ${elbow.toFixed(1)} ${sy} L ${ax.toFixed(1)} ${ay.toFixed(1)}`);
+          dot.setAttribute("cx", ax.toFixed(1)); dot.setAttribute("cy", ay.toFixed(1));
+        });
       }
-      drawStage(); syncTimeline();
+    };
+  }
+
+  const fmt = (s) => `00:${String(Math.round(s)).padStart(2, "0")}`;
+  const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+  /* ═══════════════════════════════════════════════════════
+     PLAYER
+     ═══════════════════════════════════════════════════════ */
+  const svg = $("scene"), depth = $("depth"), gate = $("gate");
+  buildDefs(svg);
+  let sceneLayer = E("g", {}, svg);
+  let cur = null, curScene = null, curChrome = null;
+  const S = { i: 0, t: 0, last: 0, playing: !reduced, loop: true, silent: false, guides: false, render: false };
+
+  function mount(i) {
+    S.i = clamp(i, 0, SHOTS.length - 1);
+    S.t = 0;
+    while (svg.childNodes.length > 1) svg.removeChild(svg.lastChild);
+    sceneLayer = E("g", {}, svg);
+    const shot = SHOTS[S.i];
+    cur = shot;
+    curScene = SCENES[shot.visualType](sceneLayer);
+    curChrome = buildChrome(svg, shot);
+    if (S.guides) drawGuides();
+    applySilent();
+    $("tlTitle").textContent = shot.title;
+    document.querySelectorAll(".shot").forEach((el, k) => el.setAttribute("aria-current", String(k === S.i)));
+    document.querySelectorAll(".tl-seg").forEach((el, k) => el.setAttribute("aria-current", String(k === S.i)));
+    frame();
+  }
+
+  function drawGuides() {
+    const g = E("g", { "data-guides": "1" }, svg);
+    E("rect", { x: SAFE, y: SAFE, width: W - SAFE * 2, height: H - SAFE * 2, fill: "none", stroke: hexA("#39D6E8", .28), "stroke-width": 2, "stroke-dasharray": "14 10" }, g);
+    E("line", { x1: CX, y1: 0, x2: CX, y2: H, stroke: hexA("#FFFFFF", .10), "stroke-width": 1.5 }, g);
+    [SC_TOP, SC_BOT].forEach(y => E("line", { x1: 0, y1: y, x2: W, y2: y, stroke: hexA("#FFFFFF", .10), "stroke-width": 1.5 }, g));
+  }
+  function applySilent() {
+    svg.querySelectorAll("text").forEach(t => t.style.display = S.silent ? "none" : "");
+    const ch = svg.querySelector('[data-chrome]');
+    if (ch) ch.querySelectorAll("rect,circle,path").forEach(n => {
+      if (n.parentNode !== ch) n.style.opacity = S.silent ? "0" : "";
+    });
+  }
+
+  /* ambient cytoplasm depth field on canvas */
+  function paintDepth(t) {
+    const dpr = Math.min(devicePixelRatio || 1, 1.6);
+    const r = depth.getBoundingClientRect();
+    const w = Math.max(2, r.width * dpr | 0), h = Math.max(2, r.height * dpr | 0);
+    if (depth.width !== w || depth.height !== h) { depth.width = w; depth.height = h; }
+    const ctx = depth.getContext("2d");
+    ctx.clearRect(0, 0, w, h);
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, P["background-cellular"]);
+    bg.addColorStop(.55, "#04121D");
+    bg.addColorStop(1, P["background-deep"]);
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "lighter";
+    const rd = rng(4242);
+    for (let i = 0; i < 42; i++) {
+      const z = .3 + rd() * .7;
+      const x = ((rd() + t * .04 * z) % 1) * w;
+      const y = ((rd() - t * .07 * z + 1) % 1) * h;
+      ctx.beginPath(); ctx.arc(x, y, w * .0035 * z * 2, 0, 6.283);
+      ctx.fillStyle = hexA("#8FD8EC", .05 + z * .13); ctx.fill();
     }
-    S.last=now;
+    ctx.globalCompositeOperation = "source-over";
+    let out = null;
+    if (cur && cur.visualType === "hero" && Mol3D) {
+      out = Mol3D.draw(ctx, w, h, S.t, { zoom: 1.15, cy: .49 });
+    }
+    // vignette
+    const vg = ctx.createRadialGradient(w * .5, h * .5, Math.min(w, h) * .34, w * .5, h * .5, Math.max(w, h) * .7);
+    vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)");
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, w, h);
+    return { w, h, out };
+  }
+
+  function frame() {
+    const ctx = paintDepth(S.t);
+    if (curScene) {
+      curScene.update(S.t, ctx);
+      curChrome.track(curScene.anchors || {});
+    }
+    const elapsed = S.i * 5 + S.t * 5;
+    $("timecode").textContent = `${mmss(elapsed)} / 01:00`;
+    document.querySelectorAll(".tl-seg i").forEach((el, k) => {
+      el.style.width = (k < S.i ? 100 : k === S.i ? S.t * 100 : 0) + "%";
+    });
+  }
+
+  function tick(now) {
+    if (S.playing && !reduced) {
+      const dt = S.last ? (now - S.last) / 1000 : 0;
+      S.t += dt / 5;
+      if (S.t >= 1) {
+        if (S.i < SHOTS.length - 1) mount(S.i + 1);
+        else if (S.loop) mount(0);
+        else { S.t = 1; setPlaying(false); }
+      } else frame();
+    }
+    S.last = now;
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 
-  function setPlaying(on){
-    S.playing=on;
-    const b=$("playBtn");
-    b.setAttribute("aria-label",on?"Pause":"Play");
-    b.setAttribute("aria-pressed",String(on));
-    b.innerHTML=on
+  function setPlaying(on) {
+    S.playing = on;
+    const b = $("playBtn");
+    b.setAttribute("aria-label", on ? "Pause" : "Play");
+    b.innerHTML = on
       ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="1.5" width="2.6" height="9" rx=".6"/><rect x="6.9" y="1.5" width="2.6" height="9" rx=".6"/></svg>'
       : '<svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M3 1.8v8.4a.5.5 0 0 0 .77.42l6.3-4.2a.5.5 0 0 0 0-.84l-6.3-4.2A.5.5 0 0 0 3 1.8Z"/></svg>';
   }
 
-  /* ── shot list + timeline build ────────────────────── */
-  const list=$("shotsList"), track=$("tlTrack");
-  SHOTS.forEach((s,k)=>{
-    const btn=document.createElement("button");
-    btn.type="button"; btn.className="shot";
-    btn.innerHTML=`<span class="shot-thumb"><canvas></canvas></span>
-      <span class="shot-body">
-        <span class="shot-idx"><span class="num">${String(s.n).padStart(2,"0")}</span><span class="num">${fmt((s.n-1)*5)}</span></span>
-        <span class="shot-title"></span>
-      </span>`;
-    btn.querySelector(".shot-title").textContent=s.title;
-    btn.addEventListener("click",()=>selectShot(k));
-    list.appendChild(btn);
-    const cv=btn.querySelector("canvas");
-    requestAnimationFrame(()=>{const [c,w,h]=fit(cv); paint(c,w,h,s,.55);});
+  /* ═══ shot list + timeline ═══ */
+  const list = $("shotsList"), track = $("tlTrack");
+  SHOTS.forEach((s, k) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "shot";
+    b.innerHTML = `<span class="shot-n num">${String(s.id).padStart(2, "0")}</span>
+      <span class="shot-b"><span class="shot-t"></span><span class="shot-c ${s.certainty}"></span></span>`;
+    b.querySelector(".shot-t").textContent = s.title;
+    b.querySelector(".shot-c").textContent = CERT[s.certainty].label;
+    b.addEventListener("click", () => mount(k));
+    list.appendChild(b);
 
-    const seg=document.createElement("button");
-    seg.type="button"; seg.className="tl-seg";
-    seg.title=`Shot ${s.n} — ${s.title}`;
-    seg.setAttribute("aria-label",`Shot ${s.n}: ${s.title}`);
-    seg.innerHTML="<i></i>";
-    seg.addEventListener("click",()=>selectShot(k));
+    const seg = document.createElement("button");
+    seg.type = "button"; seg.className = "tl-seg";
+    seg.dataset.c = s.certainty;
+    seg.title = `Shot ${s.id} — ${s.title}`;
+    seg.setAttribute("aria-label", `Shot ${s.id}: ${s.title}`);
+    seg.innerHTML = "<i></i><b></b>";
+    seg.addEventListener("click", () => mount(k));
     track.appendChild(seg);
   });
 
-  /* ── inspector ─────────────────────────────────────── */
-  function syncInspector(){
-    const s=SHOTS[S.i];
-    $("drawerTitle").textContent=`Shot ${String(s.n).padStart(2,"0")} · ${fmt((s.n-1)*5)}–${fmt(s.n*5)}`;
-    $("iScene").textContent=s.scene;
-    $("iCamera").textContent=s.camera;
-    $("iVO").textContent=`“${s.vo}”`;
-    $("iPurpose").textContent=s.purpose;
-    $("iPrompt").textContent=promptFor(s);
-    const host=$("iLabels"); host.innerHTML="";
-    s.labels.forEach((l)=>{const c=document.createElement("span");c.className="tagchip";c.textContent=l;host.appendChild(c);});
-  }
-  const drawer=$("drawer");
-  const toggleDrawer=(on)=>{drawer.classList.toggle("open",on);drawer.setAttribute("aria-hidden",String(!on));$("railInspect").setAttribute("aria-expanded",String(on));};
-  $("railInspect").addEventListener("click",()=>toggleDrawer(!drawer.classList.contains("open")));
-  $("drawerClose").addEventListener("click",()=>toggleDrawer(false));
-  $("railStoryboard").addEventListener("click",()=>toggleDrawer(true));
+  /* ═══ controls ═══ */
+  const toast = (msg) => {
+    const el = $("toast"); el.textContent = msg; el.classList.add("show");
+    clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2400);
+  };
+  $("playBtn").addEventListener("click", () => setPlaying(!S.playing));
+  $("prevBtn").addEventListener("click", () => mount(S.i - 1));
+  $("nextBtn").addEventListener("click", () => mount(S.i + 1));
+  $("loopBtn").addEventListener("click", e => { S.loop = !S.loop; e.currentTarget.setAttribute("aria-pressed", String(S.loop)); });
+  $("muteBtn").addEventListener("click", e => {
+    const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
+    e.currentTarget.setAttribute("aria-pressed", String(on));
+    toast(on ? "Voiceover track armed — no audio bundled in this build." : "Voiceover muted.");
+  });
+  $("btnSilent").addEventListener("click", e => {
+    S.silent = !S.silent;
+    e.currentTarget.setAttribute("aria-pressed", String(S.silent));
+    applySilent();
+    toast(S.silent ? "Silent-viewer test: all text hidden." : "Text restored.");
+  });
+  $("btnGrid").addEventListener("click", e => {
+    S.guides = !S.guides;
+    e.currentTarget.setAttribute("aria-pressed", String(S.guides));
+    svg.querySelectorAll('[data-guides]').forEach(n => n.remove());
+    if (S.guides) drawGuides();
+  });
+  $("btnRender").addEventListener("click", e => {
+    S.render = !S.render;
+    e.currentTarget.setAttribute("aria-pressed", String(S.render));
+    $("stage").classList.toggle("render-mode", S.render);
+    toast(S.render ? "Render mode — stage is exactly 1080 × 1920." : "Fit preview.");
+    requestAnimationFrame(frame);
+  });
+  $("btnFull").addEventListener("click", () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else gate.requestFullscreen?.();
+  });
 
-  /* ── clipboard + export ────────────────────────────── */
-  function notify(msg,ok){
-    const n=$("notice"); n.textContent=msg;
-    n.classList.toggle("ok",!!ok); n.classList.toggle("show",!!msg);
-    if(msg) setTimeout(()=>n.classList.remove("show"),2600);
-  }
-  async function copy(text,what){
-    try{ await navigator.clipboard.writeText(text); notify(`${what} copied to clipboard.`,true); }
-    catch{
-      const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta);
-      ta.select(); document.execCommand("copy"); ta.remove();
-      notify(`${what} copied to clipboard.`,true);
-    }
-  }
-  $("copyShot").addEventListener("click",()=>copy($("prompt").value,`Shot ${SHOTS[S.i].n} prompt`));
-  $("iCopy").addEventListener("click",()=>copy(promptFor(SHOTS[S.i]),`Shot ${SHOTS[S.i].n} prompt`));
-  $("exportAll").addEventListener("click",()=>{
-    const doc=[
-      "TARGETING MITF TO REDUCE PIGMENTATION",
-      "60 seconds · 12 shots × 5s · 9:16 vertical",
-      "Framing: the MITF-binding route is a computational hypothesis awaiting wet-lab validation.",
-      "",
-      "MASTER STYLE PROMPT",
-      STYLE,
-      "",
-      "VOICEOVER SCRIPT",
-      ...SHOTS.map(s=>`${fmt((s.n-1)*5)}  ${s.vo}`),
-      "",
-      "SHOT PROMPTS",
-      ...SHOTS.map(s=>promptFor(s)+"\n"+"—".repeat(40))
+  /* PNG export — canvas underlay composited with the serialised SVG */
+  $("btnPng").addEventListener("click", async () => {
+    const out = document.createElement("canvas");
+    out.width = W; out.height = H;
+    const c = out.getContext("2d");
+    // 1. depth/molecular layer at export resolution
+    const tmp = document.createElement("canvas");
+    tmp.width = W; tmp.height = H;
+    const tctx = tmp.getContext("2d");
+    const bg = tctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, P["background-cellular"]); bg.addColorStop(.55, "#04121D"); bg.addColorStop(1, P["background-deep"]);
+    tctx.fillStyle = bg; tctx.fillRect(0, 0, W, H);
+    if (cur.visualType === "hero" && Mol3D) Mol3D.draw(tctx, W, H, S.t, { zoom: 1.15, cy: .49 });
+    const vg = tctx.createRadialGradient(W * .5, H * .5, Math.min(W, H) * .34, W * .5, H * .5, Math.max(W, H) * .7);
+    vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)");
+    tctx.fillStyle = vg; tctx.fillRect(0, 0, W, H);
+    c.drawImage(tmp, 0, 0);
+    // 2. SVG on top, with CSS variables resolved to literals
+    try {
+      const clone = svg.cloneNode(true);
+      clone.setAttribute("xmlns", NS);
+      clone.setAttribute("width", W); clone.setAttribute("height", H);
+      const cs = getComputedStyle(document.documentElement);
+      clone.querySelectorAll("*").forEach(n => {
+        ["fill", "stroke"].forEach(a => {
+          const v = n.getAttribute(a);
+          if (v && v.startsWith("var(")) {
+            const k = v.slice(6, -1);
+            n.setAttribute(a, cs.getPropertyValue("--" + k).trim());
+          }
+        });
+        if (n.getAttribute("font-family")) n.setAttribute("font-family", "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif");
+      });
+      const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      await new Promise((res, rej) => {
+        const img = new Image();
+        img.onload = () => { c.drawImage(img, 0, 0, W, H); URL.revokeObjectURL(url); res(); };
+        img.onerror = rej; img.src = url;
+      });
+    } catch (err) { toast("SVG layer could not be rasterised — saved background only."); }
+    const a = document.createElement("a");
+    a.download = `mitf-shot-${String(cur.id).padStart(2, "0")}.png`;
+    a.href = out.toDataURL("image/png"); a.click();
+    toast(`Shot ${cur.id} exported at 1080 × 1920.`);
+  });
+
+  $("btnExport").addEventListener("click", async () => {
+    const doc = [
+      "TARGETING MITF — 60s EXPLAINER",
+      "12 shots × 5s · 9:16 · semantic colour system",
+      "Shots 1–7 established biology · 8–10 computational hypothesis · 11 comparison · 12 wet-lab question",
+      "", "VOICEOVER SCRIPT", ...SHOTS.map(s => `${fmt(s.start)}  ${s.vo}`),
+      "", "SHOT LIST",
+      ...SHOTS.map(s => [
+        `SHOT ${String(s.id).padStart(2, "0")} — ${s.title} (${fmt(s.start)}–${fmt(s.end)})`,
+        `  Certainty : ${CERT[s.certainty].label}`,
+        `  Subtitle  : ${s.subtitle}`,
+        `  Motion    : ${s.motion}`,
+        `  Labels    : ${s.labels.map(l => l.text).join(" · ") || "(in-frame only)"}`,
+        `  Footer    : ${s.footer}`
+      ].join("\n"))
     ].join("\n");
-    copy(doc,"Full storyboard (style prompt, VO script, 12 shot prompts)");
+    try { await navigator.clipboard.writeText(doc); toast("Shot list + VO script copied."); }
+    catch { toast("Clipboard blocked by the browser."); }
   });
 
-  function saveFrame(){
-    const s=SHOTS[S.i];
-    const out=document.createElement("canvas");
-    out.width=1080; out.height=1920;
-    paint(out.getContext("2d"),1080,1920,s,S.t);
-    const a=document.createElement("a");
-    a.download=`mitf-shot-${String(s.n).padStart(2,"0")}.png`;
-    a.href=out.toDataURL("image/png"); a.click();
-    notify(`Shot ${s.n} frame saved as PNG.`,true);
-  }
-  $("iSave").addEventListener("click",saveFrame);
-
-  /* ── controls ──────────────────────────────────────── */
-  function segment(id,apply){
-    $(id).addEventListener("click",(e)=>{
-      const b=e.target.closest("button"); if(!b) return;
-      $(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
-      apply(b);
-    });
-  }
-  const syncCost=()=>{ $("costVal").textContent=S.dur*S.rate; $("go").disabled=S.busy; };
-  segment("modelSeg",b=>{S.model=b.dataset.model;S.rate=+b.dataset.rate;syncCost();});
-  segment("ratioSeg",b=>{S.ar=b.dataset.ar;gate.style.setProperty("--ar",S.ar);requestAnimationFrame(drawStage);});
-  segment("durSeg",b=>{S.dur=+b.dataset.dur;syncCost();});
-
-  $("playBtn").addEventListener("click",()=>setPlaying(!S.playing));
-  $("loopBtn").addEventListener("click",e=>{S.loop=!S.loop;e.currentTarget.setAttribute("aria-pressed",String(S.loop));});
-
-  $("refBtn").addEventListener("click",()=>{
-    const btn=$("refBtn");
-    if(btn.classList.contains("filled")){ btn.classList.remove("filled"); btn.querySelector("canvas")?.remove(); return; }
-    if(S.i===0){ notify("Shot 1 opens the reel — there is no previous frame to carry in."); return; }
-    btn.classList.add("filled");
-    const cv=document.createElement("canvas"); btn.prepend(cv);
-    requestAnimationFrame(()=>{const [c,w,h]=fit(cv); paint(c,w,h,SHOTS[S.i-1],.9);});
-    notify(`Shot ${S.i} last frame attached as continuity reference.`,true);
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (e.key === " ") { e.preventDefault(); setPlaying(!S.playing); }
+    if (e.key === "ArrowRight") { e.preventDefault(); mount(S.i + 1); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); mount(S.i - 1); }
   });
 
-  /* regenerate (simulated queue) */
-  const PHASES=[[0,"Queued"],[10,"Interpreting prompt"],[28,"Diffusing latents"],[62,"Temporal upsampling"],[86,"Encoding"]];
-  $("dock").addEventListener("submit",(e)=>{
-    e.preventDefault();
-    const cost=S.dur*S.rate;
-    if(S.busy) return;
-    if(S.credits<cost){ notify(`Not enough credits — ${cost-S.credits} short. Drop to 5s or switch to Turbo.`); return; }
-    S.busy=true; S.credits-=cost; syncCredits(); syncCost();
-    gate.classList.add("busy"); $("labels").style.opacity="0";
-    const started=performance.now(), span=reduced?500:2600;
-    const step=(now)=>{
-      const p=Math.min(1,(now-started)/span), pct=Math.round(p*100);
-      $("statusFill").style.width=pct+"%"; $("statusPct").textContent=pct+"%";
-      let label=PHASES[0][1]; for(const [at,l] of PHASES) if(pct>=at) label=l;
-      $("statusLabel").textContent=label;
-      if(p<1) requestAnimationFrame(step);
-      else{
-        S.busy=false; gate.classList.remove("busy"); $("statusFill").style.width="0%";
-        $("labels").style.opacity=""; S.t=0; renderLabels(); drawStage(); syncCost();
-        notify(`Shot ${SHOTS[S.i].n} re-rendered.`,true);
-      }
-    };
-    requestAnimationFrame(step);
-  });
+  let rz = 0;
+  addEventListener("resize", () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(frame); });
 
-  function syncCredits(){
-    $("creditVal").textContent=S.credits.toLocaleString();
-    $("creditFill").style.width=Math.max(0,Math.min(100,(S.credits/S.creditsMax)*100))+"%";
-    $("credits").classList.toggle("low",S.credits<240);
-  }
+  if (Mol3D) $("tagStruct").textContent = `PDB 9H7Q · ${Mol3D.nRes} Cα · ${Mol3D.nAtoms}-atom ligand`;
+  setPlaying(!reduced);
+  mount(0);
 
-  /* keyboard */
-  document.addEventListener("keydown",(e)=>{
-    if(e.key==="Escape") toggleDrawer(false);
-    if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT") return;
-    if(e.key===" "){ e.preventDefault(); setPlaying(!S.playing); }
-    if(e.key==="ArrowRight"){ e.preventDefault(); selectShot(Math.min(SHOTS.length-1,S.i+1)); }
-    if(e.key==="ArrowLeft"){ e.preventDefault(); selectShot(Math.max(0,S.i-1)); }
-  });
-
-  let rz=0;
-  addEventListener("resize",()=>{
-    cancelAnimationFrame(rz);
-    rz=requestAnimationFrame(()=>{
-      drawStage();
-      document.querySelectorAll(".shot canvas").forEach((cv,k)=>{const [c,w,h]=fit(cv); paint(c,w,h,SHOTS[k],.55);});
-    });
-  });
-
-  syncCost(); syncCredits(); setPlaying(!reduced); selectShot(0);
+  // expose for the screenshot harness
+  window.__reel = { mount: (i) => mount(i), seek: (t) => { S.t = t; frame(); }, pause: () => setPlaying(false), SHOTS };
 })();
 </script>
