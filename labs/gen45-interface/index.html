@@ -1,0 +1,1307 @@
+<title>Targeting MITF — Gen-4.5 Storyboard Session</title>
+<style>
+  :root{
+    --void:#000000;
+    --panel:#0B0B0C;
+    --raise:#16161A;
+    --raise-hi:#212127;
+    --hairline:rgba(255,255,255,.10);
+    --hairline-soft:rgba(255,255,255,.055);
+    --type:#EDEDEA;
+    --type-mid:#A2A2A9;
+    --type-dim:#74747C;
+    --type-faint:#4A4A52;
+    --amber:#D99B3C;
+    --live:#6EE7B7;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --rail:56px;
+    --shots:246px;
+    --r-sm:7px;
+    --r-md:11px;
+    --r-lg:16px;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;background:var(--void);color:var(--type);
+    font-family:var(--sans);font-size:13px;line-height:1.45;letter-spacing:-.005em;
+    -webkit-font-smoothing:antialiased;overflow:hidden;
+  }
+  button,input,textarea{font:inherit;color:inherit;letter-spacing:inherit;}
+  button{background:none;border:0;padding:0;cursor:pointer;}
+  :focus-visible{outline:1.5px solid var(--type);outline-offset:2px;border-radius:4px;}
+  ::selection{background:var(--type);color:var(--void);}
+
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0;}
+  .eyebrow{font-size:9.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--type-faint);font-weight:600;}
+
+  .app{display:flex;height:100vh;height:100dvh;overflow:hidden;}
+
+  /* ─── rail ──────────────────────────────────────────── */
+  .rail{
+    width:var(--rail);flex:none;border-right:1px solid var(--hairline-soft);
+    background:var(--panel);display:flex;flex-direction:column;align-items:center;
+    padding:12px 0;gap:3px;
+  }
+  .mark{
+    width:30px;height:30px;margin-bottom:14px;display:grid;place-items:center;
+    border-radius:8px;background:var(--type);color:var(--void);
+  }
+  .rail-btn{
+    width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
+    color:var(--type-dim);transition:background .15s var(--ease),color .15s var(--ease);
+  }
+  .rail-btn:hover{background:var(--raise);color:var(--type);}
+  .rail-btn[aria-current="true"]{background:var(--raise-hi);color:var(--type);}
+  .rail-spacer{flex:1;}
+  .avatar{
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(150deg,#3A3A44,#1A1A20);border:1px solid var(--hairline);
+    display:grid;place-items:center;font-size:10px;font-weight:650;color:var(--type-mid);
+  }
+
+  .shell{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  /* ─── topbar ────────────────────────────────────────── */
+  .topbar{
+    height:46px;flex:none;border-bottom:1px solid var(--hairline-soft);
+    display:flex;align-items:center;gap:9px;padding:0 14px;background:var(--panel);
+  }
+  .crumb{display:flex;align-items:center;gap:7px;min-width:0;}
+  .crumb-org{color:var(--type-dim);}
+  .crumb-sep{color:var(--type-faint);}
+  .crumb-name{font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;height:21px;padding:0 8px;
+    border-radius:5px;border:1px solid var(--hairline);color:var(--type-mid);
+    font-size:10.5px;font-weight:550;white-space:nowrap;
+  }
+  .badge.replica{border-style:dashed;color:var(--type-faint);}
+  .badge.claim{border-color:rgba(217,155,60,.4);color:var(--amber);}
+  .top-spacer{flex:1;}
+  .credits{display:flex;align-items:center;gap:8px;}
+  .credit-bar{width:52px;height:3px;border-radius:2px;background:var(--raise-hi);overflow:hidden;}
+  .credit-bar i{display:block;height:100%;background:var(--type-mid);transition:width .5s var(--ease),background .3s;}
+  .credits.low .credit-bar i{background:var(--amber);}
+  .credits.low .credit-val{color:var(--amber);}
+  .credit-val{font-size:11.5px;color:var(--type-mid);}
+
+  .workarea{flex:1;min-height:0;display:flex;}
+
+  /* ─── stage ─────────────────────────────────────────── */
+  .stage{
+    flex:1;min-width:0;position:relative;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:18px 26px 176px;
+    background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.028),transparent 62%),var(--void);
+  }
+  .gate{
+    position:relative;aspect-ratio:var(--ar,9/16);
+    max-width:min(100%,520px);max-height:100%;
+    background:#02070E;border:1px solid var(--hairline);border-radius:var(--r-md);
+    overflow:hidden;transition:aspect-ratio .35s var(--ease),border-color .3s var(--ease);
+  }
+  .gate canvas{display:block;width:100%;height:100%;}
+
+  /* label overlay */
+  .labels{position:absolute;inset:0;pointer-events:none;}
+  .lab{
+    position:absolute;display:flex;align-items:center;gap:0;
+    transform:translateY(-50%);white-space:nowrap;
+    opacity:0;animation:labIn .5s var(--ease) forwards;
+  }
+  .lab .dot{width:4px;height:4px;border-radius:50%;background:#fff;flex:none;box-shadow:0 0 6px rgba(255,255,255,.8);}
+  .lab .lead{height:1px;background:rgba(255,255,255,.55);flex:none;}
+  .lab .txt{
+    font-size:10.5px;font-weight:550;color:#fff;letter-spacing:.005em;
+    text-shadow:0 0 10px rgba(0,0,0,.95),0 1px 3px rgba(0,0,0,.9);padding:0 5px;
+  }
+  .lab.main .txt{font-size:12.5px;font-weight:600;}
+  .lab.rtl{flex-direction:row-reverse;transform:translate(-100%,-50%);}
+  @keyframes labIn{from{opacity:0;transform:translateY(-50%) translateX(-4px)}to{opacity:1}}
+  .lab.rtl{animation-name:labInR;}
+  @keyframes labInR{from{opacity:0}to{opacity:1}}
+
+  .caption{
+    position:absolute;left:0;right:0;bottom:52px;text-align:center;
+    font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;
+    color:rgba(255,255,255,.82);text-shadow:0 1px 8px rgba(0,0,0,.9);
+  }
+  .shot-tag{
+    position:absolute;top:10px;left:11px;display:flex;align-items:center;gap:7px;
+    font-size:10px;color:rgba(255,255,255,.6);
+    text-shadow:0 1px 6px rgba(0,0,0,.9);
+  }
+  .shot-tag b{color:#fff;font-weight:600;}
+  .safe{position:absolute;inset:6.5%;border:1px solid rgba(255,255,255,.09);border-radius:4px;pointer-events:none;}
+
+  .render-status{
+    position:absolute;inset:0;display:none;flex-direction:column;align-items:center;
+    justify-content:center;gap:14px;background:rgba(2,5,9,.86);backdrop-filter:blur(2px);
+  }
+  .gate.busy .render-status{display:flex;}
+  .gate.busy{border-color:rgba(255,255,255,.22);}
+  .status-label{font-size:12px;color:var(--type-mid);}
+  .status-track{width:min(200px,60%);height:2px;background:var(--raise-hi);border-radius:2px;overflow:hidden;}
+  .status-track i{display:block;height:100%;width:0;background:var(--type);transition:width .25s linear;}
+  .status-pct{font-size:11px;color:var(--type-dim);}
+  .scanline{
+    position:absolute;left:0;right:0;height:120px;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(255,255,255,.05),transparent);
+    animation:sweep 2.1s var(--ease) infinite;
+  }
+  @keyframes sweep{from{top:-120px}to{top:100%}}
+
+  /* ─── composer / timeline dock ──────────────────────── */
+  .dock{
+    position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
+    width:min(820px,calc(100% - 52px));
+    background:rgba(14,14,16,.9);backdrop-filter:blur(18px) saturate(1.2);
+    border:1px solid var(--hairline);border-radius:var(--r-lg);
+    box-shadow:0 18px 44px -14px rgba(0,0,0,.9);
+    padding:10px 11px 9px;display:flex;flex-direction:column;gap:9px;z-index:5;
+  }
+
+  .timeline{display:flex;flex-direction:column;gap:5px;}
+  .tl-track{display:flex;gap:2px;height:16px;}
+  .tl-seg{
+    flex:1;border-radius:3px;background:var(--raise);position:relative;overflow:hidden;
+    transition:background .15s var(--ease);
+  }
+  .tl-seg:hover{background:var(--raise-hi);}
+  .tl-seg[aria-current="true"]{background:rgba(255,255,255,.82);}
+  .tl-seg i{
+    position:absolute;inset:0 auto 0 0;width:0;background:rgba(255,255,255,.22);
+  }
+  .tl-seg[aria-current="true"] i{background:rgba(0,0,0,.22);}
+  .tl-meta{display:flex;align-items:center;gap:10px;}
+  .tl-meta .tc{font-size:10.5px;color:var(--type-mid);}
+  .tp-btn{width:22px;height:22px;display:grid;place-items:center;color:var(--type);border-radius:5px;}
+  .tp-btn:hover{background:rgba(255,255,255,.12);}
+  .tp-btn[aria-pressed="false"]{color:var(--type-dim);}
+  .tl-title{flex:1;min-width:0;font-size:11.5px;color:var(--type-mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .prompt-row{display:flex;gap:9px;align-items:flex-start;}
+  .ref{
+    width:42px;height:42px;flex:none;border-radius:var(--r-sm);
+    border:1px dashed rgba(255,255,255,.2);color:var(--type-faint);
+    display:grid;place-items:center;position:relative;overflow:hidden;
+    transition:border-color .15s var(--ease),color .15s var(--ease);
+  }
+  .ref:hover{border-color:rgba(255,255,255,.4);color:var(--type-mid);}
+  .ref.filled{border-style:solid;border-color:var(--hairline);}
+  .ref canvas{position:absolute;inset:0;width:100%;height:100%;}
+  #prompt{
+    flex:1;min-width:0;background:none;border:0;resize:none;
+    padding:6px 2px 0;min-height:40px;max-height:104px;
+    font-size:12.5px;line-height:1.45;color:var(--type-mid);overflow-y:auto;
+  }
+  #prompt:focus{outline:none;color:var(--type);}
+
+  .controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .seg{display:inline-flex;align-items:center;background:var(--raise);border-radius:var(--r-sm);padding:2px;gap:2px;}
+  .seg button{
+    height:23px;padding:0 9px;border-radius:5px;font-size:11px;font-weight:500;
+    color:var(--type-dim);transition:background .13s var(--ease),color .13s var(--ease);
+  }
+  .seg button:hover{color:var(--type-mid);}
+  .seg button[aria-pressed="true"]{background:var(--raise-hi);color:var(--type);box-shadow:0 1px 2px rgba(0,0,0,.4);}
+  .ctl-label{padding-left:3px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;height:27px;padding:0 10px;
+    border-radius:var(--r-sm);background:var(--raise);font-size:11.5px;color:var(--type-mid);
+    transition:background .13s var(--ease),color .13s var(--ease);
+  }
+  .chip:hover{background:var(--raise-hi);color:var(--type);}
+  .ctl-spacer{flex:1;}
+  .cost{font-size:11px;color:var(--type-dim);white-space:nowrap;}
+  .go{
+    width:30px;height:30px;flex:none;border-radius:50%;background:var(--type);color:var(--void);
+    display:grid;place-items:center;transition:transform .13s var(--ease),opacity .13s var(--ease);
+  }
+  .go:hover{transform:scale(1.06);}
+  .go:disabled{opacity:.28;cursor:not-allowed;transform:none;}
+  .notice{
+    display:none;margin:0;padding:7px 9px;border-radius:var(--r-sm);
+    background:rgba(217,155,60,.1);border:1px solid rgba(217,155,60,.25);
+    color:var(--amber);font-size:11.5px;
+  }
+  .notice.show{display:block;}
+  .notice.ok{background:rgba(110,231,183,.08);border-color:rgba(110,231,183,.24);color:var(--live);}
+
+  /* ─── shots column ──────────────────────────────────── */
+  .shots{
+    width:var(--shots);flex:none;border-left:1px solid var(--hairline-soft);
+    background:var(--panel);display:flex;flex-direction:column;min-height:0;
+  }
+  .shots-head{
+    height:38px;flex:none;display:flex;align-items:center;justify-content:space-between;
+    padding:0 13px;border-bottom:1px solid var(--hairline-soft);
+  }
+  .link-btn{font-size:10.5px;color:var(--type-dim);}
+  .link-btn:hover{color:var(--type);}
+  .shots-list{
+    flex:1;min-height:0;overflow-y:auto;padding:9px;display:flex;flex-direction:column;gap:7px;
+    scrollbar-width:thin;scrollbar-color:var(--raise-hi) transparent;
+  }
+  .shots-list::-webkit-scrollbar{width:8px;}
+  .shots-list::-webkit-scrollbar-thumb{background:var(--raise-hi);border-radius:8px;border:2px solid var(--panel);}
+  .shot{
+    display:flex;gap:8px;width:100%;text-align:left;padding:6px;
+    border-radius:var(--r-sm);border:1px solid transparent;background:var(--raise);
+    transition:border-color .15s var(--ease);
+  }
+  .shot:hover{border-color:var(--hairline);}
+  .shot[aria-current="true"]{border-color:rgba(255,255,255,.34);}
+  .shot-thumb{
+    width:38px;flex:none;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#02070E;
+  }
+  .shot-thumb canvas{display:block;width:100%;height:100%;}
+  .shot-body{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px;}
+  .shot-idx{font-size:9.5px;color:var(--type-faint);display:flex;justify-content:space-between;}
+  .shot-title{
+    font-size:11.5px;color:var(--type-mid);line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .shot[aria-current="true"] .shot-title{color:var(--type);}
+
+  /* ─── inspector drawer ──────────────────────────────── */
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:330px;z-index:20;
+    background:var(--panel);border-left:1px solid var(--hairline);
+    transform:translateX(100%);transition:transform .28s var(--ease);
+    display:flex;flex-direction:column;box-shadow:-24px 0 60px -30px rgba(0,0,0,.9);
+  }
+  .drawer.open{transform:none;}
+  .drawer-head{
+    height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;
+    padding:0 13px;border-bottom:1px solid var(--hairline-soft);
+  }
+  .drawer-body{padding:15px 13px 20px;display:flex;flex-direction:column;gap:15px;overflow-y:auto;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field p{margin:0;font-size:12px;color:var(--type-mid);line-height:1.5;}
+  .field p.vo{color:var(--type);font-style:italic;}
+  .chips{display:flex;flex-wrap:wrap;gap:4px;}
+  .tagchip{
+    padding:2px 7px;border-radius:4px;background:var(--raise);
+    font-size:10.5px;color:var(--type-mid);
+  }
+  .promptbox{
+    background:var(--raise);border-radius:var(--r-sm);padding:9px;
+    font-family:var(--mono);font-size:10.5px;line-height:1.55;color:var(--type-mid);
+    max-height:190px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;
+  }
+  .drawer-foot{
+    margin-top:auto;padding:11px 13px;border-top:1px solid var(--hairline-soft);
+    font-size:10.5px;color:var(--type-faint);line-height:1.5;
+  }
+  .act{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    height:29px;padding:0 11px;border-radius:var(--r-sm);
+    border:1px solid var(--hairline);color:var(--type-mid);font-size:11.5px;font-weight:500;
+    transition:border-color .15s var(--ease),color .15s var(--ease),background .15s var(--ease);
+  }
+  .act:hover{border-color:rgba(255,255,255,.3);color:var(--type);background:rgba(255,255,255,.04);}
+  .act.solid{background:var(--type);color:var(--void);border-color:var(--type);}
+  .act.solid:hover{background:#fff;color:var(--void);}
+  .act-row{display:flex;gap:6px;}
+  .act-row .act{flex:1;}
+
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+  @media (max-width:1040px){ .shots{display:none;} }
+  @media (max-width:640px){
+    .rail{display:none;}
+    .dock{width:calc(100% - 20px);bottom:12px;}
+    .ctl-label{display:none;}
+    .stage{padding:12px 12px 190px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+    .scanline{display:none;}
+    .lab{opacity:1;}
+  }
+</style>
+
+<div class="app">
+  <nav class="rail" aria-label="Workspace">
+    <div class="mark" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2.6 14 8 2l5.4 12" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.4 10.2h5.2" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>
+    <button class="rail-btn" aria-current="true" title="Generate" aria-label="Generate">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M10 2.6 11.8 8 17 9.8 11.8 11.6 10 17 8.2 11.6 3 9.8 8.2 8 10 2.6Z" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="rail-btn" id="railStoryboard" title="Storyboard" aria-label="Storyboard">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.8" y="4" width="14.4" height="12" rx="2"/><path d="M7.4 4v12M12.6 4v12"/></svg>
+    </button>
+    <button class="rail-btn" title="Assets" aria-label="Assets">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.8" y="3.6" width="14.4" height="12.8" rx="2"/><path d="M2.8 12.6 7 9l4 3.4 2.6-2.2 3.6 3"/><circle cx="7.2" cy="7.4" r="1.2"/></svg>
+    </button>
+    <div class="rail-spacer"></div>
+    <button class="rail-btn" id="railInspect" title="Shot inspector" aria-label="Shot inspector" aria-expanded="false">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="9" cy="9" r="5.2"/><path d="m13 13 4 4" stroke-linecap="round"/></svg>
+    </button>
+    <div class="avatar" title="Signed in">MK</div>
+  </nav>
+
+  <div class="shell">
+    <header class="topbar">
+      <div class="crumb">
+        <span class="crumb-org">Hamiltonian Labs</span>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-name">Targeting MITF to Reduce Pigmentation</span>
+      </div>
+      <span class="badge"><svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="currentColor"/></svg>Gen-4.5</span>
+      <span class="badge claim" title="Every downstream claim in this reel is framed as proposed and awaiting wet-lab validation.">Proposed mechanism</span>
+      <span class="badge replica" title="Independent interface study. Not affiliated with Runway. Frames are drawn locally in your browser.">Interface replica</span>
+      <div class="top-spacer"></div>
+      <div class="credits" id="credits">
+        <span class="credit-val num" id="creditVal">2,480</span>
+        <span class="credit-bar"><i id="creditFill" style="width:82%"></i></span>
+      </div>
+    </header>
+
+    <div class="workarea">
+      <section class="stage" id="stage">
+        <div class="gate" id="gate" style="--ar:9/16">
+          <canvas id="canvas" aria-label="Storyboard frame"></canvas>
+          <div class="safe" aria-hidden="true"></div>
+          <div class="labels" id="labels"></div>
+          <div class="shot-tag"><b id="tagNum">SHOT 01</b><span id="tagTime" class="num">00:00–00:05</span></div>
+          <div class="caption" id="caption">Melanocyte signaling</div>
+          <div class="render-status" id="renderStatus">
+            <span class="scanline" aria-hidden="true"></span>
+            <span class="status-label" id="statusLabel">Queued</span>
+            <span class="status-track"><i id="statusFill"></i></span>
+            <span class="status-pct num" id="statusPct">0%</span>
+          </div>
+        </div>
+
+        <form class="dock" id="dock" autocomplete="off">
+          <p class="notice" id="notice" role="status"></p>
+
+          <div class="timeline">
+            <div class="tl-track" id="tlTrack" role="group" aria-label="Timeline, 12 shots"></div>
+            <div class="tl-meta">
+              <button type="button" class="tp-btn" id="playBtn" aria-label="Pause">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="1.5" width="2.6" height="9" rx=".6"/><rect x="6.9" y="1.5" width="2.6" height="9" rx=".6"/></svg>
+              </button>
+              <span class="tc num" id="timecode">00:00 / 01:00</span>
+              <span class="tl-title" id="tlTitle">Pigmentation starts with signaling</span>
+              <button type="button" class="tp-btn" id="loopBtn" aria-pressed="true" aria-label="Loop reel">
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2.4 6.2V5.4A2.4 2.4 0 0 1 4.8 3h6.8M11.6 7.8v.8A2.4 2.4 0 0 1 9.2 11H2.4" stroke-linecap="round"/><path d="M9.8 1.4 11.8 3 9.8 4.6M4.2 9.4 2.2 11l2 1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="prompt-row">
+            <button type="button" class="ref" id="refBtn" title="Use previous shot as reference frame" aria-label="Use previous shot as reference frame">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 3v8M3 7h8" stroke-linecap="round"/></svg>
+            </button>
+            <textarea id="prompt" rows="2" aria-label="Shot prompt"></textarea>
+          </div>
+
+          <div class="controls">
+            <div class="seg" id="modelSeg" role="group" aria-label="Model">
+              <button type="button" data-model="gen45" data-rate="12" aria-pressed="true">Gen-4.5</button>
+              <button type="button" data-model="turbo" data-rate="5" aria-pressed="false">Turbo</button>
+            </div>
+            <div class="seg" id="ratioSeg" role="group" aria-label="Aspect ratio">
+              <span class="eyebrow ctl-label">Ratio</span>
+              <button type="button" data-ar="9/16" aria-pressed="true">9:16</button>
+              <button type="button" data-ar="1/1" aria-pressed="false">1:1</button>
+              <button type="button" data-ar="16/9" aria-pressed="false">16:9</button>
+            </div>
+            <div class="seg" id="durSeg" role="group" aria-label="Duration">
+              <button type="button" data-dur="5" aria-pressed="true">5s</button>
+              <button type="button" data-dur="10" aria-pressed="false">10s</button>
+            </div>
+            <button type="button" class="chip" id="copyShot">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4.4" y="4.4" width="7.2" height="7.2" rx="1.4"/><path d="M9.6 4.4V3.2A1.2 1.2 0 0 0 8.4 2H3.6a1.2 1.2 0 0 0-1.2 1.2V8a1.2 1.2 0 0 0 1.2 1.2h1.2"/></svg>
+              Copy prompt
+            </button>
+            <span class="ctl-spacer"></span>
+            <span class="cost"><span class="num" id="costVal">60</span> cr</span>
+            <button type="submit" class="go" id="go" aria-label="Regenerate this shot">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 11.5V2.5M3.4 6 7 2.5 10.6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="shots" aria-label="Shots">
+        <div class="shots-head">
+          <span class="eyebrow">Shots · <span class="num">12</span> × 5s</span>
+          <button class="link-btn" id="exportAll" type="button">Export all →</button>
+        </div>
+        <div class="shots-list" id="shotsList"></div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="drawer" id="drawer" role="dialog" aria-label="Shot inspector" aria-hidden="true">
+    <div class="drawer-head">
+      <span class="eyebrow" id="drawerTitle">Shot 01</span>
+      <button class="rail-btn" id="drawerClose" aria-label="Close inspector" style="width:28px;height:28px">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 4l6 6M10 4l-6 6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div class="field"><span class="eyebrow">Scene</span><p id="iScene">—</p></div>
+      <div class="field"><span class="eyebrow">Camera</span><p id="iCamera">—</p></div>
+      <div class="field"><span class="eyebrow">Voiceover</span><p class="vo" id="iVO">—</p></div>
+      <div class="field"><span class="eyebrow">Purpose</span><p id="iPurpose">—</p></div>
+      <div class="field"><span class="eyebrow">On-screen labels</span><div class="chips" id="iLabels"></div></div>
+      <div class="field">
+        <span class="eyebrow">Generation prompt</span>
+        <div class="promptbox" id="iPrompt">—</div>
+        <div class="act-row">
+          <button class="act solid" id="iCopy" type="button">Copy this shot</button>
+          <button class="act" id="iSave" type="button">Save frame</button>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      Independent interface study — not affiliated with Runway. Frames are drawn locally from shot parameters; no model is called and nothing leaves this page. The MITF-binding route is shown as a computational hypothesis awaiting wet-lab validation.
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── palette (shot world) ──────────────────────────── */
+  const C = {
+    deep:   "#02070E",
+    teal:   "#0E4C5E",
+    blue:   "#123A6B",
+    memb:   "#4FA8C8",
+    nuc:    "#3E7FD0",
+    dna:    "#9B6BE8",
+    mitf:   "#8A5A2E",
+    mitfHi: "#C08A4E",
+    cand:   "#FFFFFF",
+    mc1r:   "#7C6BD8",
+    amsh:   "#3FE2E8",
+    camp:   "#38D6C4",
+    creb:   "#F0B942",
+    tyr:    "#F08A2E",
+    mel:    "#1A0E06",
+    thia:   "#AFC4DC"
+  };
+
+  /* ── storyboard data ───────────────────────────────── */
+  const STYLE = "Cinematic scientific 3D animation, vertical 9:16, immersive deep blue and teal cellular environment, translucent membranes, soft volumetric lighting, floating particles, glossy premium biology-education render, high contrast, slow fluid camera, stable clean sans-serif white labels with subtle glow and fine leader lines, correctly spelled scientific terms, no watermark, no garbled text.";
+
+  const SHOTS = [
+    {
+      n:1, title:"Pigmentation starts with signaling", caption:"Melanocyte signaling",
+      scene:"Microscopic cross-section of skin. Camera pushes inward through the epidermis toward a single melanocyte surrounded by keratinocytes; the melanocyte carries a soft glow.",
+      camera:"Slow vertical dive into the skin, easing to a pause on the melanocyte.",
+      vo:"Skin pigmentation begins inside melanocytes.",
+      purpose:"Establish location and biological context.",
+      labels:["Skin","Melanocyte","Keratinocytes"],
+      pins:[["Skin",.66,.14],["Keratinocytes",.46,.34,1],["Melanocyte",.60,.62]],
+      layers:["skin"]
+    },
+    {
+      n:2, title:"MC1R receives the pigmentation signal", caption:"MC1R activation",
+      scene:"Zoom to the melanocyte membrane. MC1R sits embedded in the translucent lipid bilayer; a glowing cyan α-MSH peptide drifts in and docks into the receptor, which blooms with light.",
+      camera:"Slow push to the membrane, slight lateral drift as α-MSH docks.",
+      vo:"When α-MSH binds MC1R, the pigmentation pathway switches on.",
+      purpose:"Introduce the upstream trigger.",
+      labels:["MC1R receptor","α-MSH","Melanocyte membrane"],
+      pins:[["α-MSH",.62,.20],["MC1R receptor",.50,.45],["Melanocyte membrane",.90,.58,1]],
+      layers:["membrane","mc1r","amsh"]
+    },
+    {
+      n:3, title:"Signal transduction", caption:"cAMP pathway",
+      scene:"Inside the melanocyte, turquoise cAMP particles stream from the activated receptor down toward the nucleus in an elegant kinase cascade.",
+      camera:"Camera follows the particle flow inward, gentle acceleration.",
+      vo:"This activates intracellular cAMP signaling.",
+      purpose:"Show the pathway travelling inward.",
+      labels:["cAMP","Signal transduction","Activated pathway"],
+      pins:[["Activated pathway",.34,.22],["cAMP",.36,.46,1],["Signal transduction",.30,.68]],
+      layers:["membrane","mc1r","stream","nucleus"]
+    },
+    {
+      n:4, title:"CREB activates MITF", caption:"MITF activation",
+      scene:"Camera moves into the nucleus. CREB glows gold as it is phosphorylated near violet DNA, then brown MITF resolves into view beside the helix.",
+      camera:"Continuous push through the nuclear envelope, settling on MITF.",
+      vo:"The signal reaches the nucleus and drives MITF, a master regulator of melanogenesis.",
+      purpose:"Introduce MITF as the central target.",
+      labels:["Nucleus","CREB","MITF","DNA"],
+      pins:[["Nucleus",.60,.14],["CREB",.86,.34,1],["MITF",.64,.62],["DNA",.30,.74,1]],
+      layers:["nucleusBig","dna","creb","mitf"]
+    },
+    {
+      n:5, title:"MITF turns on pigment genes", caption:"Pigment gene transcription",
+      scene:"Brown MITF binds the violet DNA. The binding region lights up and transcription pulses travel outward; the gene names TYR, TYRP1 and DCT ignite in orange along the helix.",
+      camera:"Slow lateral track along the DNA as pulses move outward.",
+      vo:"MITF activates genes like TYR, TYRP1, and DCT.",
+      purpose:"Show exactly what MITF controls.",
+      labels:["MITF bound to DNA","TYR","TYRP1","DCT"],
+      pins:[["MITF bound to DNA",.32,.28],["TYR",.34,.52,1],["TYRP1",.34,.62,1],["DCT",.34,.72,1]],
+      layers:["nucleusBig","dna","mitfBound","genes"]
+    },
+    {
+      n:6, title:"Melanin production increases", caption:"Melanin synthesis",
+      scene:"Melanosomes form in the cytoplasm. Orange tyrosinase machinery works across their surfaces as dark brown pigment granules accumulate and deepen.",
+      camera:"Slow orbit around a cluster of melanosomes as they darken.",
+      vo:"These genes drive melanin production inside melanosomes.",
+      purpose:"Show the biological output: pigmentation.",
+      labels:["Melanosome","Tyrosinase","Melanin synthesis"],
+      pins:[["Melanin synthesis",.30,.20],["Tyrosinase",.56,.44],["Melanosome",.44,.66,1]],
+      layers:["melanosomes"], melanin:1
+    },
+    {
+      n:7, title:"Introducing the candidate molecule", caption:"Candidate entry",
+      scene:"The environment darkens for emphasis. A small, bright pearl-white candidate molecule enters frame with a soft glow and moves through the nuclear space toward brown MITF.",
+      camera:"Slow, elegant tracking follow behind the white molecule.",
+      vo:"Our strategy is to introduce a small molecule designed to bind MITF directly.",
+      purpose:"Introduce the intervention.",
+      labels:["Candidate molecule","Proposed MITF binder"],
+      pins:[["Candidate molecule",.34,.24],["Proposed MITF binder",.92,.70,1]],
+      layers:["nucleusBig","dna","mitf","candidate"], dim:.45
+    },
+    {
+      n:8, title:"Binding to the MITF kink pocket", caption:"MITF binding",
+      scene:"Close-up molecular shot. Brown MITF rendered in a premium molecular-surface style; the white candidate settles into a defined groove — the kink pocket — with a subtle glow at the contact interface.",
+      camera:"Tight close-up, micro-dolly in, tiny stabilisation ripple on contact.",
+      vo:"The molecule binds the MITF kink pocket, aiming to disrupt its function.",
+      purpose:"Show the exact molecular hypothesis visually.",
+      labels:["MITF","Kink pocket","Small-molecule binding"],
+      pins:[["MITF",.64,.24],["Kink pocket",.40,.52,1],["Small-molecule binding",.26,.76]],
+      layers:["mitfClose","candidateDocked"]
+    },
+    {
+      n:9, title:"MITF activity falls", caption:"Transcription decreases",
+      scene:"MITF dims with the candidate bound. The DNA glow fades, transcription pulses slow and stop, and the TYR, TYRP1 and DCT labels shrink and darken.",
+      camera:"Hold steady, very slow pull back as the light drains.",
+      vo:"If MITF activity drops, expression of pigment genes should decrease.",
+      purpose:"Show the expected mechanism-based consequence.",
+      labels:["Reduced MITF activity","↓ TYR","↓ TYRP1","↓ DCT"],
+      pins:[["Reduced MITF activity",.26,.26],["↓ TYR",.34,.52,1],["↓ TYRP1",.34,.62,1],["↓ DCT",.34,.72,1]],
+      layers:["nucleusBig","dna","mitfBound","genes","candidateDocked"], down:1
+    },
+    {
+      n:10, title:"Less melanin is produced", caption:"Pigment decreases",
+      scene:"Back to the melanosomes. Fewer, lighter granules form than before; the cell visibly generates less pigment than in shot six.",
+      camera:"Matched orbit to shot six so the two frames read as a before/after pair.",
+      vo:"That should translate into reduced melanin production.",
+      purpose:"Connect molecular binding to phenotype.",
+      labels:["Reduced melanin","Lighter melanosomes"],
+      pins:[["Reduced melanin",.36,.22],["Lighter melanosomes",.92,.64,1]],
+      layers:["melanosomes"], melanin:.3
+    },
+    {
+      n:11, title:"Comparison: MITF strategy vs Thiamidol", caption:"Mechanism comparison",
+      scene:"Split screen. Left: the white candidate bound to brown MITF, upstream transcriptional suppression. Right: a pale silver-blue Thiamidol molecule blocking tyrosinase directly inside a melanosome. Both sides animate at once.",
+      camera:"Locked split composition, each half breathing with a slow internal drift.",
+      vo:"This differs from Thiamidol, which works downstream by directly inhibiting tyrosinase.",
+      purpose:"Distinguish the proposed route from an existing depigmenting mechanism.",
+      labels:["MITF-targeting strategy","Thiamidol strategy","MITF inhibition","Tyrosinase inhibition"],
+      pins:[["MITF-targeting strategy",.05,.09],["Thiamidol strategy",.95,.16,1],["MITF inhibition",.05,.72],["Tyrosinase inhibition",.95,.79,1]],
+      layers:["split"]
+    },
+    {
+      n:12, title:"The hypothesis", caption:"Validation hypothesis",
+      scene:"Hero shot. Brown MITF with the white molecule bound, floating in a dramatic molecular environment; background resolves to a clean branded scientific scene with a minimal end card.",
+      camera:"Slow orbit around the bound complex, elegant end hold.",
+      vo:"This is the hypothesis: directly modulating MITF to reduce pigmentation upstream — now ready for experimental validation.",
+      purpose:"Close with clarity, authority, and next-step framing.",
+      labels:["Hypothesis: Direct MITF modulation may reduce pigmentation upstream","Computational concept → Wet-lab validation","Hamiltonian Labs"],
+      pins:[],
+      layers:["hero","endcard"]
+    }
+  ];
+
+  const NEG = "Exclude: garbled or misspelled text, duplicated labels, watermarks, logos other than the end card, warped anatomy, jittery camera, harsh strobing.";
+  const promptFor = (s) =>
+    `SHOT ${String(s.n).padStart(2,"0")} — ${s.title} (${fmt((s.n-1)*5)}–${fmt(s.n*5)})\n\n${s.scene}\n\nCamera: ${s.camera}\nOn-screen labels: ${s.labels.join(" · ")}\nLower-third caption: ${s.caption}\n\nStyle: ${STYLE}\nColour code: MITF brown, candidate molecule bright pearl white, MC1R blue-violet, α-MSH glowing cyan, cAMP turquoise, CREB gold, TYR/TYRP1/DCT orange, melanin dark brown, Thiamidol pale silver-blue, membrane translucent blue, nucleus soft glowing blue, DNA violet.\n\n${NEG}`;
+
+  const fmt = (s) => `00:${String(Math.floor(s)).padStart(2,"0")}`;
+  const mmss = (s) => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+
+  /* ── state ─────────────────────────────────────────── */
+  const S = { i:0, t:0, last:0, playing:!reduced, loop:true, busy:false, rate:12, dur:5, model:"gen45", credits:2480, creditsMax:3000, ar:"9/16" };
+
+  /* ── noise helpers ─────────────────────────────────── */
+  const rng = (s) => () => { s|=0; s=(s+0x6D2B79F5)|0; let t=Math.imul(s^(s>>>15),1|s); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; };
+  const grainTile = (() => {
+    const c=document.createElement("canvas"); c.width=c.height=256;
+    const g=c.getContext("2d"), img=g.createImageData(256,256);
+    for(let i=0;i<img.data.length;i+=4){const v=112+Math.floor(Math.random()*80);img.data[i]=img.data[i+1]=img.data[i+2]=v;img.data[i+3]=255;}
+    g.putImageData(img,0,0); return c;
+  })();
+  const rgba = (hex,a) => { const n=parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; };
+
+  /* ── drawing primitives ────────────────────────────── */
+  function glow(ctx, x, y, r, color, a){
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0,rgba(color,a)); g.addColorStop(.5,rgba(color,a*.3)); g.addColorStop(1,rgba(color,0));
+    ctx.fillStyle=g; ctx.fillRect(x-r,y-r,r*2,r*2);
+  }
+
+  function blob(ctx, x, y, r, color, hi, seed, notch){
+    const rd=rng(seed); const pts=[];
+    for(let i=0;i<14;i++){
+      const a=(i/14)*6.283;
+      let rr=r*(.82+rd()*.3);
+      if(notch && a>notch-.5 && a<notch+.5) rr*=.6;
+      pts.push([x+Math.cos(a)*rr, y+Math.sin(a)*rr]);
+    }
+    ctx.beginPath(); ctx.moveTo((pts[0][0]+pts[13][0])/2,(pts[0][1]+pts[13][1])/2);
+    for(let i=0;i<14;i++){ const p=pts[i],q=pts[(i+1)%14]; ctx.quadraticCurveTo(p[0],p[1],(p[0]+q[0])/2,(p[1]+q[1])/2); }
+    ctx.closePath();
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.05,x,y,r*1.15);
+    g.addColorStop(0,hi); g.addColorStop(.55,color); g.addColorStop(1,rgba(color,.35));
+    ctx.fillStyle=g; ctx.fill();
+    ctx.strokeStyle=rgba(hi,.4); ctx.lineWidth=Math.max(1,r*.02); ctx.stroke();
+  }
+
+  function sphere(ctx,x,y,r,color,hi,alpha){
+    const g=ctx.createRadialGradient(x-r*.3,y-r*.35,r*.04,x,y,r);
+    g.addColorStop(0,rgba(hi,alpha)); g.addColorStop(.6,rgba(color,alpha*.85)); g.addColorStop(1,rgba(color,alpha*.15));
+    ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fillStyle=g; ctx.fill();
+  }
+
+  function membraneBand(ctx,W,H,y,t,amp){
+    const th=H*.022;
+    for(const off of [-th/2, th/2]){
+      ctx.beginPath();
+      for(let x=-4;x<=W+4;x+=6){
+        const yy=y+off+Math.sin(x/W*7+t*1.2)*amp;
+        x===-4?ctx.moveTo(x,yy):ctx.lineTo(x,yy);
+      }
+      ctx.strokeStyle=rgba(C.memb,.55); ctx.lineWidth=Math.max(1.2,W*.004); ctx.stroke();
+    }
+    ctx.fillStyle=rgba(C.memb,.1);
+    ctx.fillRect(0,y-th/2,W,th);
+    for(let x=W*.03;x<W;x+=W*.045){
+      const yy=y+Math.sin(x/W*7+t*1.2)*amp;
+      ctx.beginPath(); ctx.arc(x,yy-th/2,W*.007,0,6.283); ctx.fillStyle=rgba(C.memb,.5); ctx.fill();
+      ctx.beginPath(); ctx.arc(x,yy+th/2,W*.007,0,6.283); ctx.fill();
+    }
+  }
+
+  /* ── layer painters ────────────────────────────────── */
+  const LAYERS = {
+    skin(ctx,W,H,t){
+      const dive=t*H*.16;
+      // stratified epidermis → dermis, each layer a distinct tissue tone
+      const bands=[
+        ["#3E5F7E",.02],  // stratum corneum, lightest
+        ["#2A4763",.15],
+        ["#1C3550",.30],
+        ["#12283F",.47],
+        ["#0A1C2E",.66],
+        ["#05121F",.86]   // dermis
+      ];
+      // deepest first: each band fills from the top down to its own boundary,
+      // so the shallower, lighter strata must land last to stay visible.
+      bands.slice().reverse().forEach(([col,at],ri)=>{
+        const i=bands.length-1-ri;
+        ctx.beginPath(); ctx.moveTo(-4,-60);
+        for(let x=-4;x<=W+4;x+=8){
+          const u=x/W;
+          const y=(at*H)-dive+Math.sin(u*5+i*1.7)*H*.016+Math.sin(u*11+i)*H*.006+H*.08;
+          ctx.lineTo(x,y);
+        }
+        ctx.lineTo(W+4,-60); ctx.closePath();
+        ctx.fillStyle=col; ctx.fill();
+        // hairline between strata reads as a tissue boundary
+        ctx.strokeStyle=rgba("#7FB4CE",.14); ctx.lineWidth=1; ctx.stroke();
+      });
+      // keratinocytes packed in the upper strata
+      const rd=rng(7);
+      for(let i=0;i<34;i++){
+        const x=rd()*W, y=(rd()*.62+.06)*H-dive*.4+H*.08;
+        if(y<-30||y>H*.72) continue;
+        const r=W*(.05+rd()*.045);
+        ctx.beginPath();
+        for(let k=0;k<6;k++){const a=k/6*6.283+rd()*.12;k?ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r*.8):ctx.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r*.8);}
+        ctx.closePath();
+        ctx.fillStyle=rgba("#9FD2E8",.10); ctx.fill();
+        ctx.strokeStyle=rgba("#9FD2E8",.30); ctx.lineWidth=1.1; ctx.stroke();
+        ctx.beginPath(); ctx.arc(x,y,r*.24,0,6.283);
+        ctx.fillStyle=rgba("#BFE0FF",.30); ctx.fill();
+      }
+      // melanocyte
+      const mx=W*.5, my=H*.62;
+      glow(ctx,mx,my,W*.42,C.memb,.28);
+      blob(ctx,mx,my,W*.17,rgba(C.teal,.9),"#8FD8EC",21);
+      // dendrites
+      ctx.strokeStyle=rgba(C.memb,.5); ctx.lineWidth=W*.008; ctx.lineCap="round";
+      for(let k=0;k<6;k++){
+        const a=k/6*6.283+.4;
+        ctx.beginPath(); ctx.moveTo(mx+Math.cos(a)*W*.15,my+Math.sin(a)*W*.15);
+        ctx.quadraticCurveTo(mx+Math.cos(a+.3)*W*.28,my+Math.sin(a+.3)*W*.28,mx+Math.cos(a)*W*.4,my+Math.sin(a)*W*.4);
+        ctx.stroke();
+      }
+      sphere(ctx,mx,my,W*.07,C.nuc,"#BFE0FF",.8);
+    },
+
+    membrane(ctx,W,H,t){ membraneBand(ctx,W,H,H*.46,t,H*.008); },
+
+    mc1r(ctx,W,H,t){
+      const x=W*.5,y=H*.46, on=t>.45;
+      if(on) glow(ctx,x,y,W*.3,C.mc1r,.36*Math.min(1,(t-.45)*4));
+      for(let i=0;i<5;i++){
+        const dx=(i-2)*W*.036;
+        ctx.save(); ctx.translate(x+dx,y); ctx.rotate((i-2)*.12);
+        const g=ctx.createLinearGradient(0,-H*.05,0,H*.05);
+        g.addColorStop(0,rgba(C.mc1r,.95)); g.addColorStop(1,rgba(C.mc1r,.5));
+        ctx.fillStyle=g;
+        ctx.beginPath(); ctx.roundRect(-W*.016,-H*.05,W*.032,H*.1,W*.016); ctx.fill();
+        ctx.restore();
+      }
+    },
+
+    amsh(ctx,W,H,t){
+      const p=Math.min(1,t*1.9);
+      const x=W*(.74-.24*p), y=H*(.18+.24*p);
+      glow(ctx,x,y,W*.26,C.amsh,.5);
+      blob(ctx,x,y,W*.055,rgba(C.amsh,.95),"#DFFFFF",5);
+      ctx.strokeStyle=rgba("#DFFFFF",.8); ctx.lineWidth=W*.006; ctx.lineCap="round";
+      ctx.beginPath();
+      for(let k=0;k<=20;k++){const u=k/20; ctx.lineTo(x-W*.03+u*W*.06, y+Math.sin(u*9+t*3)*H*.011);}
+      ctx.stroke();
+    },
+
+    stream(ctx,W,H,t){
+      const n=46, rd=rng(99);
+      for(let i=0;i<n;i++){
+        const off=rd(), u=((t*.85+off)%1);
+        const x=W*.5+Math.sin(u*5+off*6.283)*W*.2*(1-u*.5);
+        const y=H*(.47+u*.33);
+        const a=Math.sin(u*Math.PI)*.9;
+        glow(ctx,x,y,W*.05,C.camp,a*.5);
+        ctx.beginPath(); ctx.arc(x,y,W*.009*(0.5+rd()*.8),0,6.283);
+        ctx.fillStyle=rgba("#BFFFF6",a); ctx.fill();
+      }
+    },
+
+    nucleus(ctx,W,H,t){
+      const x=W*.5,y=H*.86,r=W*.36;
+      glow(ctx,x,y,r*1.6,C.nuc,.22);
+      sphere(ctx,x,y,r,C.nuc,"#9FCBFF",.55);
+      ctx.strokeStyle=rgba("#BFE0FF",.35); ctx.lineWidth=W*.005;
+      ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.stroke();
+    },
+
+    nucleusBig(ctx,W,H,t){
+      const x=W*.5,y=H*.52,r=W*.62;
+      glow(ctx,x,y,r*1.3,C.nuc,.2);
+      sphere(ctx,x,y,r,C.nuc,"#79ADEE",.34);
+      ctx.strokeStyle=rgba("#BFE0FF",.25); ctx.lineWidth=W*.006;
+      ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.stroke();
+      const rd=rng(3);
+      for(let i=0;i<16;i++){const a=rd()*6.283;
+        ctx.beginPath(); ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,W*.011,0,6.283);
+        ctx.fillStyle=rgba("#CFE6FF",.5); ctx.fill();}
+    },
+
+    dna(ctx,W,H,t){
+      const cx=W*.30, top=H*.20, len=H*.62, amp=W*.10;
+      const strand=(ph,col)=>{
+        ctx.beginPath();
+        for(let k=0;k<=60;k++){const u=k/60; const y=top+u*len; const x=cx+Math.sin(u*9+ph+t*.7)*amp;
+          k?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+        ctx.strokeStyle=col; ctx.lineWidth=W*.014; ctx.lineCap="round"; ctx.stroke();
+      };
+      strand(0,rgba(C.dna,.9)); strand(Math.PI,rgba("#6E4BB8",.8));
+      ctx.lineWidth=W*.006;
+      for(let k=0;k<=26;k++){
+        const u=k/26, y=top+u*len;
+        const x1=cx+Math.sin(u*9+t*.7)*amp, x2=cx+Math.sin(u*9+Math.PI+t*.7)*amp;
+        ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y);
+        ctx.strokeStyle=rgba("#C9A8FF",.32); ctx.stroke();
+      }
+    },
+
+    creb(ctx,W,H,t){
+      const x=W*.68,y=H*.34, pulse=.6+Math.sin(t*6)*.4;
+      glow(ctx,x,y,W*.24,C.creb,.42*pulse);
+      blob(ctx,x,y,W*.075,rgba(C.creb,.95),"#FFE9B0",11);
+      ctx.fillStyle=rgba("#FFF3D0",.9);
+      ctx.beginPath(); ctx.arc(x+W*.05,y-H*.02,W*.014,0,6.283); ctx.fill();
+    },
+
+    mitf(ctx,W,H,t){
+      const x=W*.52,y=H*.62+Math.sin(t*1.6)*H*.008;
+      glow(ctx,x,y,W*.3,C.mitfHi,.2);
+      blob(ctx,x,y,W*.15,rgba(C.mitf,.97),C.mitfHi,42,1.9);
+    },
+
+    mitfBound(ctx,W,H,t,shot){
+      const x=W*.56,y=H*.44;
+      const lum=shot.down ? Math.max(.25,1-t*.8) : 1;   // shot 9: MITF dims as activity falls
+      glow(ctx,x,y,W*.3,C.mitfHi,.2*lum);
+      blob(ctx,x,y,W*.13,rgba(C.mitf,.55+.42*lum),shot.down?"#7A5230":C.mitfHi,42,1.9);
+    },
+
+    mitfClose(ctx,W,H,t){
+      const x=W*.48,y=H*.5;
+      glow(ctx,x,y,W*.62,C.mitfHi,.16);
+      blob(ctx,x,y,W*.36,rgba(C.mitf,.98),C.mitfHi,42,1.55);
+      // surface speckle for molecular-surface feel
+      const rd=rng(88);
+      for(let i=0;i<160;i++){
+        const a=rd()*6.283, rr=Math.sqrt(rd())*W*.34;
+        ctx.beginPath(); ctx.arc(x+Math.cos(a)*rr,y+Math.sin(a)*rr,W*.008,0,6.283);
+        ctx.fillStyle=rgba(rd()>.5?C.mitfHi:"#5E3A18",.28); ctx.fill();
+      }
+      // kink pocket groove
+      ctx.beginPath();
+      ctx.ellipse(x-W*.12,y+H*.02,W*.11,W*.075,-.4,0,6.283);
+      ctx.fillStyle="rgba(0,0,0,.42)"; ctx.fill();
+      ctx.strokeStyle=rgba(C.mitfHi,.45); ctx.lineWidth=W*.006; ctx.stroke();
+    },
+
+    genes(ctx,W,H,t,shot){
+      const dn=shot.down?1:0;
+      const names=["TYR","TYRP1","DCT"];
+      names.forEach((nm,i)=>{
+        const y=H*(.52+i*.10), x=W*.40;
+        const pulse=dn ? Math.max(0,.5-t*.5) : .55+Math.sin(t*5-i)*.45;
+        glow(ctx,x,y,W*.16,C.tyr,.34*pulse);
+        ctx.font=`600 ${Math.round(W*.052)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+        ctx.textBaseline="middle";
+        ctx.fillStyle=rgba(dn?"#7A5230":C.tyr,dn?.5:.95);
+        ctx.fillText(nm,x-W*.02,y);
+        if(!dn){
+          ctx.beginPath(); ctx.arc(x-W*.09,y,W*.02+W*.03*pulse,0,6.283);
+          ctx.strokeStyle=rgba(C.tyr,.35*(1-pulse)); ctx.lineWidth=W*.006; ctx.stroke();
+        }
+      });
+    },
+
+    candidate(ctx,W,H,t){
+      const p=Math.min(1,t*1.5);
+      const x=W*(.76-.20*p), y=H*(.22+.36*p);
+      glow(ctx,x,y,W*.22,C.cand,.5);
+      sphere(ctx,x,y,W*.045,"#DDE6F0","#FFFFFF",1);
+      ctx.strokeStyle=rgba("#FFFFFF",.7); ctx.lineWidth=W*.008; ctx.lineCap="round";
+      [[-1,-.6],[1,-.5],[.2,1]].forEach(([dx,dy])=>{
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+dx*W*.05,y+dy*W*.05); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x+dx*W*.05,y+dy*W*.05,W*.016,0,6.283);
+        ctx.fillStyle="#F2F6FF"; ctx.fill();
+      });
+    },
+
+    candidateDocked(ctx,W,H,t,shot){
+      const close=shot.layers.includes("mitfClose");
+      const x=close?W*.36:W*.46, y=close?H*.52:H*.47;
+      const settle=Math.min(1,t*2.4);
+      const px=x+(1-settle)*W*.18, py=y-(1-settle)*H*.10;
+      glow(ctx,px,py,W*(close?.26:.16),C.cand,.42+ .3*settle*Math.abs(Math.sin(t*4)));
+      sphere(ctx,px,py,W*(close?.075:.04),"#DDE6F0","#FFFFFF",1);
+      if(settle>=1 && close){
+        ctx.beginPath(); ctx.arc(x,y,W*.11+Math.sin(t*5)*W*.012,0,6.283);
+        ctx.strokeStyle=rgba("#FFFFFF",.2); ctx.lineWidth=W*.005; ctx.stroke();
+      }
+    },
+
+    melanosomes(ctx,W,H,t,shot){
+      const dark=shot.melanin ?? 1;
+      const count=Math.round(7+dark*9);
+      const rd=rng(55);
+      for(let i=0;i<count;i++){
+        const x=(.14+rd()*.72)*W, y=(.18+rd()*.64)*H;
+        const r=W*(.06+rd()*.05);
+        const fill=Math.min(1,dark*(.35+rd()*.75)*(.4+t*.9));
+        ctx.save(); ctx.translate(x,y); ctx.rotate(rd()*6.283+t*.15);
+        // shell
+        ctx.beginPath(); ctx.ellipse(0,0,r,r*.68,0,0,6.283);
+        ctx.fillStyle=rgba(C.blue,.3); ctx.fill();
+        ctx.strokeStyle=rgba(C.memb,.35); ctx.lineWidth=W*.004; ctx.stroke();
+        // pigment
+        ctx.save(); ctx.beginPath(); ctx.ellipse(0,0,r*.94,r*.62,0,0,6.283); ctx.clip();
+        const g=ctx.createLinearGradient(0,-r,0,r);
+        g.addColorStop(0,rgba("#5A3A1E",.55*fill)); g.addColorStop(1,rgba(C.mel,.95*fill));
+        ctx.fillStyle=g; ctx.fillRect(-r,-r,r*2,r*2);
+        for(let k=0;k<18*fill;k++){
+          ctx.beginPath(); ctx.arc((rd()-.5)*r*1.6,(rd()-.5)*r*1.1,r*.10,0,6.283);
+          ctx.fillStyle=rgba(C.mel,.7); ctx.fill();
+        }
+        ctx.restore();
+        ctx.restore();
+        if(dark>.6){
+          // tyrosinase machinery on the surface
+          for(let k=0;k<3;k++){
+            const a=(k/3)*6.283+t*.9;
+            const ex=x+Math.cos(a)*r*1.05, ey=y+Math.sin(a)*r*.75;
+            glow(ctx,ex,ey,W*.05,C.tyr,.4);
+            ctx.beginPath(); ctx.arc(ex,ey,W*.014,0,6.283); ctx.fillStyle=rgba("#FFC07A",.95); ctx.fill();
+          }
+        }
+      }
+    },
+
+    split(ctx,W,H,t){
+      ctx.fillStyle=rgba("#000000",.14); ctx.fillRect(W*.5,0,W*.5,H);
+      // left: MITF + candidate
+      const lx=W*.25, ly=H*.46;
+      glow(ctx,lx,ly,W*.24,C.mitfHi,.24);
+      blob(ctx,lx,ly,W*.12,rgba(C.mitf,.97),C.mitfHi,42,1.9);
+      const cx=lx-W*.09, cy=ly+H*.012;
+      glow(ctx,cx,cy,W*.12,C.cand,.5);
+      sphere(ctx,cx,cy,W*.036,"#DDE6F0","#FFFFFF",1);
+      ctx.strokeStyle=rgba(C.tyr,.28); ctx.lineWidth=W*.006;
+      for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(lx-W*.09,ly+H*.10+i*H*.045); ctx.lineTo(lx+W*.09,ly+H*.10+i*H*.045); ctx.stroke(); }
+      // right: thiamidol + tyrosinase in melanosome
+      const rx=W*.75, ry=H*.46;
+      ctx.beginPath(); ctx.ellipse(rx,ry,W*.16,W*.11,0,0,6.283);
+      ctx.fillStyle=rgba(C.blue,.35); ctx.fill();
+      ctx.strokeStyle=rgba(C.memb,.4); ctx.lineWidth=W*.005; ctx.stroke();
+      glow(ctx,rx+W*.03,ry,W*.16,C.tyr,.3);
+      blob(ctx,rx+W*.03,ry,W*.07,rgba(C.tyr,.9),"#FFD9A8",17);
+      const tx=rx-W*.07+Math.sin(t*2)*W*.006;
+      glow(ctx,tx,ry,W*.1,C.thia,.4);
+      sphere(ctx,tx,ry,W*.032,C.thia,"#EAF2FF",1);
+      // divider
+      ctx.strokeStyle="rgba(255,255,255,.22)"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(W*.5,H*.06); ctx.lineTo(W*.5,H*.94); ctx.stroke();
+    },
+
+    hero(ctx,W,H,t){
+      const x=W*.5,y=H*.44, a=t*.9;
+      glow(ctx,x,y,W*.75,C.nuc,.16);
+      glow(ctx,x,y,W*.5,C.mitfHi,.2);
+      ctx.save(); ctx.translate(x,y); ctx.rotate(Math.sin(a)*.12); ctx.translate(-x,-y);
+      blob(ctx,x,y,W*.23,rgba(C.mitf,.98),C.mitfHi,42,1.7);
+      const cx=x-W*.16+Math.cos(a)*W*.01, cy=y+H*.012;
+      glow(ctx,cx,cy,W*.2,C.cand,.55);
+      sphere(ctx,cx,cy,W*.055,"#DDE6F0","#FFFFFF",1);
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(x,y,W*.3+Math.sin(t*3)*W*.01,0,6.283);
+      ctx.strokeStyle=rgba("#FFFFFF",.09); ctx.lineWidth=W*.004; ctx.stroke();
+    },
+
+    endcard(ctx,W,H,t){
+      const fade=Math.min(1,Math.max(0,(t-.22)/.3));
+      if(fade<=0) return;
+      ctx.fillStyle=rgba("#02070E",fade*.55); ctx.fillRect(0,0,W,H);
+      ctx.textAlign="center";
+
+      // hypothesis line, wrapped to the safe area
+      ctx.font=`600 ${Math.round(W*.045)}px -apple-system, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle=rgba("#FFFFFF",fade*.96);
+      const words="Hypothesis: Direct MITF modulation may reduce pigmentation upstream".split(" ");
+      const maxW=W*.8, lines=[]; let line="";
+      for(const w of words){
+        const test=line?line+" "+w:w;
+        if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; }
+        else line=test;
+      }
+      lines.push(line);
+      const lh=W*.062, top=H*.615-(lines.length-1)*lh;
+      lines.forEach((l,i)=>ctx.fillText(l,W*.5,top+i*lh));
+
+      ctx.font=`500 ${Math.round(W*.030)}px -apple-system, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle=rgba("#9FB6CC",fade*.9);
+      ctx.fillText("Computational concept → Wet-lab validation",W*.5,H*.685);
+
+      ctx.strokeStyle=rgba("#FFFFFF",fade*.16); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(W*.34,H*.735); ctx.lineTo(W*.66,H*.735); ctx.stroke();
+
+      ctx.font=`600 ${Math.round(W*.040)}px -apple-system, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle=rgba("#FFFFFF",fade*.9);
+      ctx.fillText("Hamiltonian Labs",W*.5,H*.785);
+      ctx.textAlign="left";
+    }
+  };
+
+  /* ── frame compositor ──────────────────────────────── */
+  function paint(ctx,W,H,shot,t){
+    ctx.clearRect(0,0,W,H);
+    // volumetric ground
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,"#04101C"); bg.addColorStop(.5,"#030C16"); bg.addColorStop(1,C.deep);
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    ctx.globalCompositeOperation="lighter";
+    glow(ctx,W*(.3+Math.sin(t*.8)*.06),H*.24,W*.9,C.teal,.30);
+    glow(ctx,W*(.72-Math.sin(t*.6)*.05),H*.72,W*.8,C.blue,.28);
+    ctx.globalCompositeOperation="source-over";
+
+    // cytoplasm motes
+    ctx.globalCompositeOperation="lighter";
+    const rd=rng(2024);
+    for(let i=0;i<64;i++){
+      const z=.3+rd()*.7;
+      const x=(((rd()+t*.05*z)%1)+1)%1*W;
+      const y=(((rd()-t*.09*z)%1)+1)%1*H;
+      ctx.beginPath(); ctx.arc(x,y,W*.004*z*2,0,6.283);
+      ctx.fillStyle=rgba("#8FD8EC",.05+z*.16); ctx.fill();
+    }
+    ctx.globalCompositeOperation="source-over";
+
+    if(shot.dim){ ctx.fillStyle=rgba("#000000",shot.dim); ctx.fillRect(0,0,W,H); }
+
+    for(const key of shot.layers){ const fn=LAYERS[key]; if(fn) fn(ctx,W,H,t,shot); }
+
+    // grain
+    ctx.globalCompositeOperation="overlay"; ctx.globalAlpha=.085;
+    const ox=-Math.floor(((t*37)%1)*256), oy=-Math.floor(((t*61)%1)*256);
+    for(let x=ox;x<W;x+=256) for(let y=oy;y<H;y+=256) ctx.drawImage(grainTile,x,y);
+    ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over";
+
+    // vignette
+    const vg=ctx.createRadialGradient(W*.5,H*.5,Math.min(W,H)*.32,W*.5,H*.5,Math.max(W,H)*.75);
+    vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,.66)");
+    ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+  }
+
+  function fit(cv){
+    const dpr=Math.min(devicePixelRatio||1,1.75);
+    const r=cv.getBoundingClientRect();
+    const w=Math.max(2,Math.round(r.width*dpr)), h=Math.max(2,Math.round(r.height*dpr));
+    if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
+    return [cv.getContext("2d"),w,h];
+  }
+
+  /* ── stage ─────────────────────────────────────────── */
+  const canvas=$("canvas"), gate=$("gate");
+  function drawStage(){ const [c,w,h]=fit(canvas); paint(c,w,h,SHOTS[S.i],S.t); }
+
+  function renderLabels(){
+    const shot=SHOTS[S.i], host=$("labels");
+    host.innerHTML="";
+    shot.pins.forEach(([text,x,y,rtl],k)=>{
+      const el=document.createElement("div");
+      el.className="lab"+(rtl?" rtl":"")+(k===0?" main":"");
+      el.style.left=(x*100)+"%"; el.style.top=(y*100)+"%";
+      el.style.animationDelay=(.15+k*.12)+"s";
+      el.innerHTML=`<span class="dot"></span><span class="lead" style="width:${rtl?18:18}px"></span><span class="txt"></span>`;
+      el.querySelector(".txt").textContent=text;
+      host.appendChild(el);
+    });
+    // Shot 12 carries its titles inside the frame (endcard layer), so it pins nothing here.
+  }
+
+  function selectShot(i,{keepT=false}={}){
+    S.i=Math.max(0,Math.min(SHOTS.length-1,i));
+    if(!keepT) S.t=0;
+    const s=SHOTS[S.i];
+    $("tagNum").textContent="SHOT "+String(s.n).padStart(2,"0");
+    $("tagTime").textContent=`${fmt((s.n-1)*5)}–${fmt(s.n*5)}`;
+    $("caption").textContent=s.caption;
+    $("tlTitle").textContent=s.title;
+    $("prompt").value=promptFor(s);
+    renderLabels(); drawStage(); syncTimeline(); syncInspector(); markShot();
+  }
+
+  function markShot(){
+    document.querySelectorAll(".shot").forEach((el,k)=>el.setAttribute("aria-current",String(k===S.i)));
+    document.querySelectorAll(".tl-seg").forEach((el,k)=>el.setAttribute("aria-current",String(k===S.i)));
+  }
+
+  function syncTimeline(){
+    const total=SHOTS.length*5, elapsed=S.i*5+S.t*5;
+    $("timecode").textContent=`${mmss(elapsed)} / ${mmss(total)}`;
+    document.querySelectorAll(".tl-seg i").forEach((el,k)=>{
+      el.style.width=(k<S.i?100:k===S.i?S.t*100:0)+"%";
+    });
+  }
+
+  /* ── playback ──────────────────────────────────────── */
+  function tick(now){
+    if(S.playing && !reduced && !S.busy){
+      const dt=S.last?(now-S.last)/1000:0;
+      S.t+=dt/5;
+      if(S.t>=1){
+        S.t=0;
+        if(S.i<SHOTS.length-1) selectShot(S.i+1);
+        else if(S.loop) selectShot(0);
+        else { S.t=1; setPlaying(false); }
+      }
+      drawStage(); syncTimeline();
+    }
+    S.last=now;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  function setPlaying(on){
+    S.playing=on;
+    const b=$("playBtn");
+    b.setAttribute("aria-label",on?"Pause":"Play");
+    b.setAttribute("aria-pressed",String(on));
+    b.innerHTML=on
+      ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="1.5" width="2.6" height="9" rx=".6"/><rect x="6.9" y="1.5" width="2.6" height="9" rx=".6"/></svg>'
+      : '<svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M3 1.8v8.4a.5.5 0 0 0 .77.42l6.3-4.2a.5.5 0 0 0 0-.84l-6.3-4.2A.5.5 0 0 0 3 1.8Z"/></svg>';
+  }
+
+  /* ── shot list + timeline build ────────────────────── */
+  const list=$("shotsList"), track=$("tlTrack");
+  SHOTS.forEach((s,k)=>{
+    const btn=document.createElement("button");
+    btn.type="button"; btn.className="shot";
+    btn.innerHTML=`<span class="shot-thumb"><canvas></canvas></span>
+      <span class="shot-body">
+        <span class="shot-idx"><span class="num">${String(s.n).padStart(2,"0")}</span><span class="num">${fmt((s.n-1)*5)}</span></span>
+        <span class="shot-title"></span>
+      </span>`;
+    btn.querySelector(".shot-title").textContent=s.title;
+    btn.addEventListener("click",()=>selectShot(k));
+    list.appendChild(btn);
+    const cv=btn.querySelector("canvas");
+    requestAnimationFrame(()=>{const [c,w,h]=fit(cv); paint(c,w,h,s,.55);});
+
+    const seg=document.createElement("button");
+    seg.type="button"; seg.className="tl-seg";
+    seg.title=`Shot ${s.n} — ${s.title}`;
+    seg.setAttribute("aria-label",`Shot ${s.n}: ${s.title}`);
+    seg.innerHTML="<i></i>";
+    seg.addEventListener("click",()=>selectShot(k));
+    track.appendChild(seg);
+  });
+
+  /* ── inspector ─────────────────────────────────────── */
+  function syncInspector(){
+    const s=SHOTS[S.i];
+    $("drawerTitle").textContent=`Shot ${String(s.n).padStart(2,"0")} · ${fmt((s.n-1)*5)}–${fmt(s.n*5)}`;
+    $("iScene").textContent=s.scene;
+    $("iCamera").textContent=s.camera;
+    $("iVO").textContent=`“${s.vo}”`;
+    $("iPurpose").textContent=s.purpose;
+    $("iPrompt").textContent=promptFor(s);
+    const host=$("iLabels"); host.innerHTML="";
+    s.labels.forEach((l)=>{const c=document.createElement("span");c.className="tagchip";c.textContent=l;host.appendChild(c);});
+  }
+  const drawer=$("drawer");
+  const toggleDrawer=(on)=>{drawer.classList.toggle("open",on);drawer.setAttribute("aria-hidden",String(!on));$("railInspect").setAttribute("aria-expanded",String(on));};
+  $("railInspect").addEventListener("click",()=>toggleDrawer(!drawer.classList.contains("open")));
+  $("drawerClose").addEventListener("click",()=>toggleDrawer(false));
+  $("railStoryboard").addEventListener("click",()=>toggleDrawer(true));
+
+  /* ── clipboard + export ────────────────────────────── */
+  function notify(msg,ok){
+    const n=$("notice"); n.textContent=msg;
+    n.classList.toggle("ok",!!ok); n.classList.toggle("show",!!msg);
+    if(msg) setTimeout(()=>n.classList.remove("show"),2600);
+  }
+  async function copy(text,what){
+    try{ await navigator.clipboard.writeText(text); notify(`${what} copied to clipboard.`,true); }
+    catch{
+      const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta);
+      ta.select(); document.execCommand("copy"); ta.remove();
+      notify(`${what} copied to clipboard.`,true);
+    }
+  }
+  $("copyShot").addEventListener("click",()=>copy($("prompt").value,`Shot ${SHOTS[S.i].n} prompt`));
+  $("iCopy").addEventListener("click",()=>copy(promptFor(SHOTS[S.i]),`Shot ${SHOTS[S.i].n} prompt`));
+  $("exportAll").addEventListener("click",()=>{
+    const doc=[
+      "TARGETING MITF TO REDUCE PIGMENTATION",
+      "60 seconds · 12 shots × 5s · 9:16 vertical",
+      "Framing: the MITF-binding route is a computational hypothesis awaiting wet-lab validation.",
+      "",
+      "MASTER STYLE PROMPT",
+      STYLE,
+      "",
+      "VOICEOVER SCRIPT",
+      ...SHOTS.map(s=>`${fmt((s.n-1)*5)}  ${s.vo}`),
+      "",
+      "SHOT PROMPTS",
+      ...SHOTS.map(s=>promptFor(s)+"\n"+"—".repeat(40))
+    ].join("\n");
+    copy(doc,"Full storyboard (style prompt, VO script, 12 shot prompts)");
+  });
+
+  function saveFrame(){
+    const s=SHOTS[S.i];
+    const out=document.createElement("canvas");
+    out.width=1080; out.height=1920;
+    paint(out.getContext("2d"),1080,1920,s,S.t);
+    const a=document.createElement("a");
+    a.download=`mitf-shot-${String(s.n).padStart(2,"0")}.png`;
+    a.href=out.toDataURL("image/png"); a.click();
+    notify(`Shot ${s.n} frame saved as PNG.`,true);
+  }
+  $("iSave").addEventListener("click",saveFrame);
+
+  /* ── controls ──────────────────────────────────────── */
+  function segment(id,apply){
+    $(id).addEventListener("click",(e)=>{
+      const b=e.target.closest("button"); if(!b) return;
+      $(id).querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+      apply(b);
+    });
+  }
+  const syncCost=()=>{ $("costVal").textContent=S.dur*S.rate; $("go").disabled=S.busy; };
+  segment("modelSeg",b=>{S.model=b.dataset.model;S.rate=+b.dataset.rate;syncCost();});
+  segment("ratioSeg",b=>{S.ar=b.dataset.ar;gate.style.setProperty("--ar",S.ar);requestAnimationFrame(drawStage);});
+  segment("durSeg",b=>{S.dur=+b.dataset.dur;syncCost();});
+
+  $("playBtn").addEventListener("click",()=>setPlaying(!S.playing));
+  $("loopBtn").addEventListener("click",e=>{S.loop=!S.loop;e.currentTarget.setAttribute("aria-pressed",String(S.loop));});
+
+  $("refBtn").addEventListener("click",()=>{
+    const btn=$("refBtn");
+    if(btn.classList.contains("filled")){ btn.classList.remove("filled"); btn.querySelector("canvas")?.remove(); return; }
+    if(S.i===0){ notify("Shot 1 opens the reel — there is no previous frame to carry in."); return; }
+    btn.classList.add("filled");
+    const cv=document.createElement("canvas"); btn.prepend(cv);
+    requestAnimationFrame(()=>{const [c,w,h]=fit(cv); paint(c,w,h,SHOTS[S.i-1],.9);});
+    notify(`Shot ${S.i} last frame attached as continuity reference.`,true);
+  });
+
+  /* regenerate (simulated queue) */
+  const PHASES=[[0,"Queued"],[10,"Interpreting prompt"],[28,"Diffusing latents"],[62,"Temporal upsampling"],[86,"Encoding"]];
+  $("dock").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const cost=S.dur*S.rate;
+    if(S.busy) return;
+    if(S.credits<cost){ notify(`Not enough credits — ${cost-S.credits} short. Drop to 5s or switch to Turbo.`); return; }
+    S.busy=true; S.credits-=cost; syncCredits(); syncCost();
+    gate.classList.add("busy"); $("labels").style.opacity="0";
+    const started=performance.now(), span=reduced?500:2600;
+    const step=(now)=>{
+      const p=Math.min(1,(now-started)/span), pct=Math.round(p*100);
+      $("statusFill").style.width=pct+"%"; $("statusPct").textContent=pct+"%";
+      let label=PHASES[0][1]; for(const [at,l] of PHASES) if(pct>=at) label=l;
+      $("statusLabel").textContent=label;
+      if(p<1) requestAnimationFrame(step);
+      else{
+        S.busy=false; gate.classList.remove("busy"); $("statusFill").style.width="0%";
+        $("labels").style.opacity=""; S.t=0; renderLabels(); drawStage(); syncCost();
+        notify(`Shot ${SHOTS[S.i].n} re-rendered.`,true);
+      }
+    };
+    requestAnimationFrame(step);
+  });
+
+  function syncCredits(){
+    $("creditVal").textContent=S.credits.toLocaleString();
+    $("creditFill").style.width=Math.max(0,Math.min(100,(S.credits/S.creditsMax)*100))+"%";
+    $("credits").classList.toggle("low",S.credits<240);
+  }
+
+  /* keyboard */
+  document.addEventListener("keydown",(e)=>{
+    if(e.key==="Escape") toggleDrawer(false);
+    if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT") return;
+    if(e.key===" "){ e.preventDefault(); setPlaying(!S.playing); }
+    if(e.key==="ArrowRight"){ e.preventDefault(); selectShot(Math.min(SHOTS.length-1,S.i+1)); }
+    if(e.key==="ArrowLeft"){ e.preventDefault(); selectShot(Math.max(0,S.i-1)); }
+  });
+
+  let rz=0;
+  addEventListener("resize",()=>{
+    cancelAnimationFrame(rz);
+    rz=requestAnimationFrame(()=>{
+      drawStage();
+      document.querySelectorAll(".shot canvas").forEach((cv,k)=>{const [c,w,h]=fit(cv); paint(c,w,h,SHOTS[k],.55);});
+    });
+  });
+
+  syncCost(); syncCredits(); setPlaying(!reduced); selectShot(0);
+})();
+</script>
