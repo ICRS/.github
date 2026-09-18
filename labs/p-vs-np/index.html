@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P vs NP — Inside the Computation</title>
+<style>
+  :root{
+    --bg:#000000;
+    --panel:#0B0B0C;
+    --raise:#16141A;
+    --raise2:#16161A;
+    --text:#EDEDEA;
+    --text2:#74747C;
+    --amber:#D99B3C;
+    --mint:#6EE7B7;
+    --red:#C4564B;
+    --line:rgba(255,255,255,.10);
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+    font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  button,input{font:inherit;color:inherit}
+  button{background:none;border:0;padding:0;cursor:pointer}
+  :focus-visible{outline:1.5px solid var(--amber);outline-offset:2px;border-radius:4px}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  .shell{width:min(100%,520px);padding:14px 14px 40px;display:flex;flex-direction:column;gap:12px}
+  header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
+  .sub{font-size:12px;color:var(--text2)}
+
+  .tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:3px}
+  .tabs button{flex:1;height:30px;border-radius:6px;font-size:12.5px;font-weight:500;color:var(--text2);transition:background .14s,color .14s}
+  .tabs button:hover{color:var(--text)}
+  .tabs button[aria-pressed="true"]{background:var(--raise2);color:var(--text)}
+
+  .stagewrap{position:relative;width:100%;aspect-ratio:9/16;background:#000;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  canvas{display:block;width:100%;height:100%}
+
+  .controls{display:flex;align-items:center;gap:9px}
+  .ctl{width:32px;height:32px;border-radius:7px;display:grid;place-items:center;background:var(--raise2);transition:background .14s}
+  .ctl:hover{background:#22222A}
+  .ctl.primary{background:var(--text);color:#000}
+  .scrub{flex:1;-webkit-appearance:none;appearance:none;height:18px;background:none;cursor:pointer;min-width:40px}
+  .scrub::-webkit-slider-runnable-track{height:3px;background:#26262E;border-radius:2px}
+  .scrub::-moz-range-track{height:3px;background:#26262E;border-radius:2px}
+  .scrub::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--text);margin-top:-4.5px}
+  .scrub::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--text)}
+  .tc{font-size:12px;color:var(--text2);white-space:nowrap}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:11px}
+  .panel h2{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--text2);margin:0;font-weight:600}
+  .panel p{margin:0;font-size:12.5px;color:var(--text2)}
+  .hidden{display:none !important}
+
+  .bits{display:flex;gap:8px}
+  .bit{flex:1;background:var(--raise2);border:1px solid var(--line);border-radius:8px;padding:8px 6px;text-align:center;transition:border-color .14s}
+  .bit:hover{border-color:rgba(255,255,255,.3)}
+  .bit .nm{font-size:11px;color:var(--text2)}
+  .bit .vl{font-family:var(--mono);font-size:22px;font-weight:600;margin-top:2px}
+  .rules{display:flex;flex-direction:column;gap:6px}
+  .rule{display:flex;align-items:center;gap:9px;background:var(--raise2);border-radius:7px;padding:7px 9px;font-family:var(--mono);font-size:12px}
+  .rule .txt{flex:1;color:var(--text2)}
+  .rule .res{font-weight:600}
+  .verdict{border-radius:8px;padding:9px;text-align:center;font-weight:600;font-size:13px;border:1px solid}
+  .pass{color:var(--mint);border-color:rgba(110,231,183,.35);background:rgba(110,231,183,.08)}
+  .fail{color:var(--red);border-color:rgba(196,86,75,.35);background:rgba(196,86,75,.08)}
+
+  .row{display:flex;align-items:center;gap:10px}
+  .row label{font-size:12.5px;color:var(--text2);white-space:nowrap}
+  .big{font-family:var(--mono);font-size:15px;font-weight:600;word-break:break-all}
+  .note{font-size:11.5px;color:var(--text2);line-height:1.55}
+  a{color:var(--amber)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <h1>P vs NP — Inside the Computation</h1>
+    <span class="sub">V1 · 30s</span>
+  </header>
+
+  <div class="tabs" role="group" aria-label="Mode">
+    <button id="tabFilm" aria-pressed="true">Film</button>
+    <button id="tabInspect" aria-pressed="false">Inspect</button>
+    <button id="tabScaling" aria-pressed="false">Scaling</button>
+  </div>
+
+  <div class="stagewrap">
+    <canvas id="stage" width="1080" height="1920" aria-label="Animation"></canvas>
+  </div>
+
+  <div class="controls" id="filmControls">
+    <button class="ctl primary" id="playBtn" aria-label="Pause">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="1.5" width="2.6" height="9" rx=".6"/><rect x="6.9" y="1.5" width="2.6" height="9" rx=".6"/></svg>
+    </button>
+    <button class="ctl" id="replayBtn" aria-label="Replay from start">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M12 7A5 5 0 1 1 7 2c1.7 0 3.2.85 4.1 2.15"/><path d="M11.6 1.4v3h-3"/></svg>
+    </button>
+    <input type="range" class="scrub" id="scrub" min="0" max="3000" value="0" aria-label="Timeline">
+    <span class="tc mono" id="tc">0.00 / 30.00</span>
+  </div>
+
+  <!-- INSPECT -->
+  <div class="panel hidden" id="inspectPanel">
+    <h2>Inspect — set the bits yourself</h2>
+    <div class="bits">
+      <button class="bit" data-v="0"><div class="nm">A</div><div class="vl" id="bit0">1</div></button>
+      <button class="bit" data-v="1"><div class="nm">B</div><div class="vl" id="bit1">1</div></button>
+      <button class="bit" data-v="2"><div class="nm">C</div><div class="vl" id="bit2">1</div></button>
+    </div>
+    <div class="rules" id="ruleRows"></div>
+    <div class="verdict" id="verdict">—</div>
+    <p>Every value above is computed by the same Boolean evaluator that drives the film. Five of the eight assignments satisfy this formula.</p>
+  </div>
+
+  <!-- SCALING -->
+  <div class="panel hidden" id="scalingPanel">
+    <h2>Scaling — size of the candidate space</h2>
+    <div class="row">
+      <label for="nslider">Variables <span class="mono" id="nOut">3</span></label>
+      <input type="range" class="scrub" id="nslider" min="1" max="50" value="3" style="flex:1">
+    </div>
+    <div>
+      <div class="note">Possible assignments 2<sup>n</sup></div>
+      <div class="big" id="countOut">8</div>
+    </div>
+    <p id="workOut" class="note"></p>
+    <p class="note"><strong style="color:var(--text)">This is candidate-space growth, not a solver benchmark.</strong> It counts how many assignments exist, not how many steps any particular algorithm needs. The three-variable formula in the film is not being given more variables here — this is a schematic view of larger inputs.</p>
+  </div>
+
+  <p class="note" id="footnote">
+    The formula is fixed: (A ∨ B ∨ C) ∧ (¬A ∨ B ∨ ¬C) ∧ (A ∨ ¬B ∨ ¬C). This tiny instance teaches the
+    mechanism — it is not evidence of hardness. General 3-SAT is NP-complete, but individual instances
+    can be easy. The film illustrates the open question; it does not resolve it.
+  </p>
+</div>
+
+<script>
+"use strict";
+/* ============================================================================
+   1. THE LOGIC — everything visible is derived from these functions.
+   ========================================================================= */
+const FSANS = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+const FMONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace';
+const VARS = ["A", "B", "C"];
+// literal: {v: varIndex, neg: bool}
+const CLAUSES = [
+  [{v:0,neg:false},{v:1,neg:false},{v:2,neg:false}],   // ( A ∨  B ∨  C)
+  [{v:0,neg:true },{v:1,neg:false},{v:2,neg:true }],   // (¬A ∨  B ∨ ¬C)
+  [{v:0,neg:false},{v:1,neg:true },{v:2,neg:true }]    // ( A ∨ ¬B ∨ ¬C)
+];
+const litValue    = (lit, asg) => lit.neg ? (asg[lit.v] ^ 1) : asg[lit.v];
+const litValues   = (ci, asg)  => CLAUSES[ci].map(l => litValue(l, asg));
+const clauseValue = (ci, asg)  => litValues(ci, asg).some(v => v === 1) ? 1 : 0;
+const formulaValue = (asg)     => CLAUSES.every((_, i) => clauseValue(i, asg) === 1) ? 1 : 0;
+const litText = (lit) => (lit.neg ? "¬" : "") + VARS[lit.v];
+const clauseText = (ci) => "(" + CLAUSES[ci].map(litText).join(" ∨ ") + ")";
+const idxToAsg = (i) => [(i >> 2) & 1, (i >> 1) & 1, i & 1];
+const asgToStr = (a) => a.join("");
+/** first clause (0-based) that fails, or -1 if satisfied */
+function firstFailing(asg){
+  for (let i = 0; i < CLAUSES.length; i++) if (clauseValue(i, asg) === 0) return i;
+  return -1;
+}
+/** exact 2^n via BigInt */
+const countAssignments = (n) => (1n << BigInt(n));
+const groupDigits = (bi) => bi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+/* ============================================================================
+   2. MINIMAL 3D — perspective camera, depth-sorted painter's algorithm.
+   ========================================================================= */
+const W = 1080, H = 1920;
+const FOV = 40 * Math.PI / 180;           // horizontal field of view
+const PX = 0.011;                         // world-units -> px for text
+const WPX = 0.012;                        // world-units -> px for strokes
+const sub = (a,b) => [a[0]-b[0], a[1]-b[1], a[2]-b[2]];
+const add = (a,b) => [a[0]+b[0], a[1]+b[1], a[2]+b[2]];
+const mul = (a,s) => [a[0]*s, a[1]*s, a[2]*s];
+const dot = (a,b) => a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+const cross = (a,b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+const norm = (a) => { const l = Math.hypot(a[0],a[1],a[2]) || 1; return [a[0]/l, a[1]/l, a[2]/l]; };
+
+function makeCam(pos, target){
+  const fwd = norm(sub(target, pos));
+  const right = norm(cross([0,1,0], fwd));      // world-up x fwd keeps +x on the right
+  const up = cross(fwd, right);                 // no roll
+  return { pos, fwd, right, up, f: (W/2) / Math.tan(FOV/2) };   // 40 deg horizontal
+}
+/** world -> {x,y,depth,scale} in canvas px; depth<=0 means behind the camera */
+function project(cam, p){
+  const d = sub(p, cam.pos);
+  const z = dot(d, cam.fwd);
+  if (z <= 0.05) return { x: 0, y: 0, depth: -1, scale: 0 };
+  const s = cam.f / z;
+  return { x: W/2 + dot(d, cam.right) * s, y: H/2 - dot(d, cam.up) * s, depth: z, scale: s };
+}
+
+/* render list: collected then painted far -> near */
+let RL = [];
+const push = (depth, fn) => { if (depth > 0) RL.push({ depth, fn }); };
+function flush(ctx){
+  RL.sort((a,b) => b.depth - a.depth);
+  for (const it of RL) it.fn(ctx);
+  RL = [];
+}
+
+const LIGHT = norm([-0.45, 0.82, -0.36]);
+const FILL  = norm([0.62, 0.30, 0.55]);
+function shade(hex, amt, alpha){
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, ((n>>16)&255) * amt) | 0;
+  const g = Math.min(255, ((n>>8)&255) * amt) | 0;
+  const b = Math.min(255, (n&255) * amt) | 0;
+  return alpha === undefined ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${alpha})`;
+}
+const rgba = (hex, a) => { const n = parseInt(hex.slice(1),16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; };
+
+const BOX_C = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+const BOX_F = [
+  { i:[0,1,2,3], n:[0,0,-1] }, { i:[5,4,7,6], n:[0,0,1] },
+  { i:[4,0,3,7], n:[-1,0,0] }, { i:[1,5,6,2], n:[1,0,0] },
+  { i:[3,2,6,7], n:[0,1,0] },  { i:[4,5,1,0], n:[0,-1,0] }
+];
+/** solid box with per-face lambert shading + optional edge light */
+function drawBox(cam, c, s, color, o = {}){
+  const alpha = o.alpha === undefined ? 1 : o.alpha;
+  if (alpha <= 0.01) return;
+  const pts = BOX_C.map(k => [c[0]+k[0]*s[0]/2, c[1]+k[1]*s[1]/2, c[2]+k[2]*s[2]/2]);
+  for (const f of BOX_F){
+    const ctr = [0,0,0];
+    for (const idx of f.i){ ctr[0]+=pts[idx][0]/4; ctr[1]+=pts[idx][1]/4; ctr[2]+=pts[idx][2]/4; }
+    if (dot(f.n, sub(cam.pos, ctr)) <= 0) continue;                    // backface
+    const pr = f.i.map(idx => project(cam, pts[idx]));
+    if (pr.some(p => p.depth <= 0)) continue;
+    const lam = 0.44 + 0.74 * Math.max(0, dot(f.n, LIGHT)) + 0.16 * Math.max(0, dot(f.n, FILL));
+    const pc = project(cam, ctr);
+    push(pc.depth, (g) => {
+      g.beginPath();
+      g.moveTo(pr[0].x, pr[0].y);
+      for (let i=1;i<4;i++) g.lineTo(pr[i].x, pr[i].y);
+      g.closePath();
+      g.fillStyle = shade(color, lam * (o.dim || 1), alpha);
+      g.fill();
+      if (o.edge){
+        g.strokeStyle = rgba(o.edge, (o.edgeA === undefined ? .75 : o.edgeA) * alpha);
+        g.lineWidth = Math.min(3.2, Math.max(0.8, 1.2 * pc.scale * 0.007));
+        g.stroke();
+      }
+    });
+  }
+}
+/** soft contact shadow on the floor plane */
+function contactShadow(cam, c, rx, rz, a = 0.5){
+  const p = project(cam, [c[0], FLOOR_Y + 0.01, c[2]]);
+  if (p.depth <= 0) return;
+  push(p.depth + 900, (g) => {                 // always behind geometry
+    const r = Math.max(2, rx * p.scale);
+    const gr = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+    gr.addColorStop(0, `rgba(0,0,0,${a})`);
+    gr.addColorStop(1, "rgba(0,0,0,0)");
+    g.save(); g.translate(p.x, p.y); g.scale(1, Math.max(.18, rz/rx * 0.42)); g.translate(-p.x, -p.y);
+    g.fillStyle = gr; g.beginPath(); g.arc(p.x, p.y, r, 0, 6.283); g.fill(); g.restore();
+  });
+}
+function drawWire(cam, a, b, color, width, o = {}){
+  const pa = project(cam, a), pb = project(cam, b);
+  if (pa.depth <= 0 || pb.depth <= 0) return;
+  const d = (pa.depth + pb.depth) / 2;
+  push(d, (g) => {
+    g.strokeStyle = o.alpha === undefined ? color : rgba(color, o.alpha);
+    g.lineWidth = Math.min(o.cap || 13, Math.max(o.min || 0.8, width * ((pa.scale + pb.scale)/2) * WPX));
+    g.lineCap = "round";
+    if (o.dash) g.setLineDash(o.dash.map(v => v * ((pa.scale+pb.scale)/2) * WPX));
+    g.beginPath(); g.moveTo(pa.x, pa.y); g.lineTo(pb.x, pb.y); g.stroke();
+    if (o.dash) g.setLineDash([]);
+  });
+}
+/** curved wire through a control point */
+function drawArc(cam, a, ctrl, b, color, width, o = {}){
+  const N = 14; let prev = a;
+  for (let i = 1; i <= N; i++){
+    const u = i / N, iu = 1 - u;
+    const p = [
+      iu*iu*a[0] + 2*iu*u*ctrl[0] + u*u*b[0],
+      iu*iu*a[1] + 2*iu*u*ctrl[1] + u*u*b[1],
+      iu*iu*a[2] + 2*iu*u*ctrl[2] + u*u*b[2]
+    ];
+    drawWire(cam, prev, p, color, width, o);
+    prev = p;
+  }
+}
+function glow(cam, p, radiusWorld, color, a){
+  const pr = project(cam, p);
+  if (pr.depth <= 0 || a <= 0.01) return;
+  push(pr.depth - 0.001, (g) => {
+    const r = Math.max(3, radiusWorld * pr.scale);
+    const gr = g.createRadialGradient(pr.x, pr.y, 0, pr.x, pr.y, r);
+    gr.addColorStop(0, rgba(color, a));
+    gr.addColorStop(.45, rgba(color, a * .28));
+    gr.addColorStop(1, rgba(color, 0));
+    g.fillStyle = gr; g.beginPath(); g.arc(pr.x, pr.y, r, 0, 6.283); g.fill();
+  });
+}
+/** crisp screen-space text anchored to a world point */
+function label(cam, p, text, o = {}){
+  const pr = project(cam, p);
+  if (pr.depth <= 0) return;
+  const size = Math.max(o.min || 12, Math.min(o.max || 230, (o.size || 26) * pr.scale * PX));
+  if ((o.size || 26) * pr.scale * PX < (o.min || 12) - 0.5) return;
+  push(pr.depth - (o.front ? 0.02 : 0.005), (g) => {
+    g.save();
+    g.font = `${o.weight || 600} ${size.toFixed(1)}px ${o.mono ? `${FMONO}` : `${FSANS}`}`;
+    g.textAlign = o.align || "center";
+    g.textBaseline = o.baseline || "middle";
+    if (o.shadow !== false){ g.shadowColor = "rgba(0,0,0,.92)"; g.shadowBlur = size * .5; }
+    g.fillStyle = o.alpha === undefined ? (o.color || "#EDEDEA") : rgba(o.color || "#EDEDEA", o.alpha);
+    g.fillText(text, pr.x + (o.dx || 0) * pr.scale * PX, pr.y + (o.dy || 0) * pr.scale * PX);
+    g.restore();
+  });
+}
+
+/* ============================================================================
+   3. THE WORLD — every object maps to something in the computation.
+   ========================================================================= */
+const FLOOR_Y   = -3.4;
+const XS        = [-1.25, 0, 1.25];      // conductor x for A, B, C
+const REG_Z     = 0;
+const ST_Z      = [6.2, 11.6, 17.0];     // rule stations
+const ALL_Z     = 23.2;
+const RAIL_Y    = 0;
+const PLATE_Y   = -1.55;
+const C_BG   = "#0B0B0C", C_RAISE = "#262630", C_EDGE = "#5C5C70";
+const C_TEXT = "#EDEDEA", C_DIM = "#74747C";
+const C_AMBER= "#D99B3C", C_MINT = "#6EE7B7", C_RED = "#C4564B";
+
+/* tree geometry: root feeds the registers; leaves are complete assignments */
+const TREE_Y  = -2.25;
+const TREE_Z  = [-3.2, -7.2, -11.2, -15.2];   // root, A, B, C(leaf)
+const LEAF_X  = [-4.48,-3.2,-1.92,-0.64,0.64,1.92,3.2,4.48];
+const L1_X    = [-2.56, 2.56], L2_X = [-3.84,-1.28,1.28,3.84];
+
+function drawFloor(cam, alpha){
+  if (alpha <= 0.01) return;
+  for (let z = -20; z <= 26; z += 2){
+    drawWire(cam, [-9, FLOOR_Y, z], [9, FLOOR_Y, z], "#2E2E3A", 1.1, { alpha: alpha * .6, min: .5 });
+  }
+  for (let x = -8; x <= 8; x += 2){
+    drawWire(cam, [x, FLOOR_Y, -20], [x, FLOOR_Y, 26], "#2E2E3A", 1.1, { alpha: alpha * .45, min: .5 });
+  }
+}
+
+function drawRegisters(cam, st){
+  for (let i = 0; i < 3; i++){
+    const x = XS[i];
+    contactShadow(cam, [x, 0, REG_Z], 1.0, 1.0, .55);
+    drawBox(cam, [x, -0.45, REG_Z], [0.92, 0.9, 0.92], C_RAISE, { edge: C_EDGE, edgeA: .6 });
+    const v = st.regs[i];
+    const known = v !== null;
+    label(cam, [x, -0.9, REG_Z - 0.55], VARS[i], { size: 20, color: C_DIM, weight: 600 });
+    label(cam, [x, 0.34, REG_Z], known ? String(v) : "?",
+      { size: 34, mono: true, weight: 700, color: known ? C_TEXT : C_DIM, front: true, max: 66 });
+    if (known && st.regGlow > 0) glow(cam, [x, 0.3, REG_Z], 1.1, C_AMBER, .30 * st.regGlow);
+  }
+}
+
+function drawConductors(cam, st){
+  for (let i = 0; i < 3; i++){
+    const carrying = st.regs[i] !== null;
+    drawWire(cam, [XS[i], RAIL_Y, REG_Z + 0.5], [XS[i], RAIL_Y, ALL_Z + 1.4],
+      carrying ? "#6E6E82" : "#34343E", 1.5, { min: .7 });
+  }
+}
+
+/** one clause evaluator */
+function drawStation(cam, ci, st){
+  const z = ST_Z[ci], s = st.stations[ci];
+  const lit = CLAUSES[ci];
+  contactShadow(cam, [0, 0, z], 3.0, 1.8, .6);
+  // plate
+  drawBox(cam, [0, PLATE_Y, z], [4.4, 0.30, 2.45], C_RAISE, { edge: C_EDGE, edgeA: .55, dim: s.active ? 1.18 : 1 });
+  // rule name
+  label(cam, [-1.95, PLATE_Y + 0.30, z - 0.95], "RULE " + (ci + 1),
+    { size: 15, color: s.active ? C_TEXT : C_DIM, weight: 600, align: "left" });
+
+  // three taps down from the conductors into input ports
+  for (let k = 0; k < 3; k++){
+    const l = lit[k], x = XS[l.v], pz = z - 0.85;
+    const shown = s.litShown > k / 3;
+    const raw = st.regs[l.v];
+    const val = (raw === null || !shown) ? null : litValue(l, st.regs);
+    drawWire(cam, [x, RAIL_Y, pz], [x, PLATE_Y + 0.35, pz], raw === null ? "#34343E" : "#6E6E82", 1.2, { min: .6 });
+    // NOT element sits on the tap it negates
+    if (l.neg){
+      const ny = -0.72, notOn = shown && raw !== null;
+      drawBox(cam, [x, ny, pz], [0.40, 0.40, 0.40], notOn ? "#4A3F52" : "#282832",
+        { edge: notOn ? C_AMBER : C_EDGE, edgeA: notOn ? .85 : .5 });
+      label(cam, [x, ny, pz - 0.30], "NOT", { size: 12, color: notOn ? C_AMBER : C_DIM, weight: 700, front: true });
+    }
+    // input port
+    const portOn = val !== null;
+    drawBox(cam, [x, PLATE_Y + 0.28, pz], [0.46, 0.28, 0.46], portOn ? "#33333F" : "#1E1E26",
+      { edge: portOn ? "#5A5A66" : C_EDGE, edgeA: .7 });
+    label(cam, [x, PLATE_Y + 0.60, pz], portOn ? String(val) : "·",
+      { size: 20, mono: true, weight: 700, color: portOn ? C_TEXT : C_DIM, front: true, max: 62 });
+    label(cam, [x, PLATE_Y + 0.30, pz + 0.52], litText(l),
+      { size: 13, mono: true, color: C_DIM, weight: 600 });
+  }
+  // OR body
+  const orOn = s.orShown > 0;
+  drawBox(cam, [0, PLATE_Y + 0.42, z + 0.42], [2.5, 0.52, 0.92], orOn ? "#34343F" : C_RAISE,
+    { edge: orOn ? "#6A6A78" : C_EDGE, edgeA: .7 });
+  label(cam, [0, PLATE_Y + 0.72, z + 0.42], "OR", { size: 18, weight: 700, color: orOn ? C_TEXT : C_DIM, front: true });
+  // output lamp
+  const done = s.done;
+  const col = !done ? "#1E1E26" : (s.value === 1 ? "#17453A" : "#452023");
+  const eco = !done ? C_EDGE : (s.value === 1 ? C_MINT : C_RED);
+  drawBox(cam, [0, PLATE_Y + 0.30, z + 1.12], [0.72, 0.32, 0.5], col, { edge: eco, edgeA: done ? 1 : .5 });
+  if (done){
+    glow(cam, [0, PLATE_Y + 0.4, z + 1.12], 1.5, s.value === 1 ? C_MINT : C_RED, .40);
+    label(cam, [0, PLATE_Y + 0.66, z + 1.12], String(s.value),
+      { size: 22, mono: true, weight: 700, color: s.value === 1 ? C_MINT : C_RED, front: true });
+  }
+  // result wire to the ALL station
+  if (done){
+    const a = [0, PLATE_Y + 0.30, z + 1.4];
+    const b = [XS[ci], PLATE_Y + 0.42, ALL_Z - 1.0];
+    drawArc(cam, a, [XS[ci] * 0.6, PLATE_Y - 0.2, (z + ALL_Z) / 2], b,
+      s.value === 1 ? C_MINT : C_RED, 1.1, { alpha: .55, min: .7 });
+  }
+}
+
+function drawAll(cam, st){
+  const z = ALL_Z, s = st.all;
+  contactShadow(cam, [0, 0, z], 2.6, 1.6, .6);
+  drawBox(cam, [0, PLATE_Y, z], [4.3, 0.34, 2.3], C_RAISE, { edge: C_EDGE, edgeA: .6, dim: s.done ? 1.2 : 1 });
+  for (let i = 0; i < 3; i++){
+    const on = st.stations[i].done;
+    drawBox(cam, [XS[i], PLATE_Y + 0.30, z - 1.0], [0.46, 0.28, 0.46], on ? "#33333F" : "#1E1E26",
+      { edge: on ? (st.stations[i].value === 1 ? C_MINT : C_RED) : C_EDGE, edgeA: .8 });
+    if (on) label(cam, [XS[i], PLATE_Y + 0.62, z - 1.0], String(st.stations[i].value),
+      { size: 18, mono: true, weight: 700, color: st.stations[i].value === 1 ? C_MINT : C_RED, front: true });
+  }
+  drawBox(cam, [0, PLATE_Y + 0.44, z + 0.2], [2.3, 0.56, 0.9], s.done ? "#34343F" : C_RAISE,
+    { edge: s.done ? "#6A6A78" : C_EDGE, edgeA: .75 });
+  label(cam, [0, PLATE_Y + 0.76, z + 0.2], "ALL", { size: 19, weight: 700, color: s.done ? C_TEXT : C_DIM, front: true });
+  if (s.done){
+    const c = s.value === 1 ? C_MINT : C_RED;
+    glow(cam, [0, PLATE_Y + 0.5, z + 0.2], 3.4, c, .30 * s.hold);
+    label(cam, [0, PLATE_Y + 1.5, z + 0.2], s.value === 1 ? "ALL 3 RULES PASS" : "REJECTED",
+      { size: 26, weight: 700, color: c, front: true, alpha: s.hold });
+  }
+}
+
+function drawMarker(cam, st){
+  if (!st.marker.on) return;
+  const p = st.marker.pos;
+  glow(cam, p, 1.3, C_AMBER, .46);
+  drawBox(cam, p, [0.34, 0.34, 0.34], "#8A5C1E", { edge: C_AMBER, edgeA: 1 });
+}
+
+/* --- assignment tree ------------------------------------------------------ */
+function treeNodes(){
+  return {
+    root: [0, TREE_Y, TREE_Z[0]],
+    l1: L1_X.map(x => [x, TREE_Y, TREE_Z[1]]),
+    l2: L2_X.map(x => [x, TREE_Y, TREE_Z[2]]),
+    leaf: LEAF_X.map(x => [x, TREE_Y, TREE_Z[3]])
+  };
+}
+function drawTree(cam, st){
+  const T = st.tree;
+  if (T.reveal <= 0.01) return;
+  const N = treeNodes();
+  const lvl = (k) => Math.max(0, Math.min(1, (T.reveal - k * 0.22) / 0.34));   // staggered reveal
+  const DIMC = "#55556A";
+
+  // root -> level 1  (choose A)
+  const a1 = lvl(0);
+  if (a1 > 0){
+    N.l1.forEach((p, i) => {
+      drawWire(cam, N.root, p, DIMC, 1.2, { alpha: .8 * a1, min: .6 });
+      label(cam, [(N.root[0]+p[0])/2 + (i ? .35 : -.35), TREE_Y + .42, (N.root[2]+p[2])/2], i ? "1" : "0",
+        { size: 15, mono: true, color: C_DIM, weight: 700, alpha: a1 });
+    });
+    label(cam, [0, TREE_Y + .95, TREE_Z[1] + .6], "choose A", { size: 14, color: C_DIM, alpha: a1 });
+  }
+  // level1 -> level2 (choose B)
+  const a2 = lvl(1);
+  if (a2 > 0){
+    N.l2.forEach((p, i) => {
+      drawWire(cam, N.l1[i >> 1], p, DIMC, 1.1, { alpha: .8 * a2, min: .5 });
+    });
+    label(cam, [0, TREE_Y + .95, TREE_Z[2] + .6], "choose B", { size: 14, color: C_DIM, alpha: a2 });
+  }
+  // level2 -> leaves (choose C)
+  const a3 = lvl(2);
+  if (a3 > 0){
+    N.leaf.forEach((p, i) => {
+      drawWire(cam, N.l2[i >> 1], p, DIMC, 1.1, { alpha: .8 * a3, min: .5 });
+    });
+    label(cam, [0, TREE_Y + .95, TREE_Z[3] + .6], "choose C", { size: 14, color: C_DIM, alpha: a3 });
+  }
+  // nodes
+  const nodeBox = (p, a) => drawBox(cam, p, [0.30,0.30,0.30], "#2A2A36", { edge: C_EDGE, edgeA: .7 * a, alpha: a });
+  nodeBox(N.root, Math.max(a1, 0.2));
+  if (a1 > 0) N.l1.forEach(p => nodeBox(p, a1));
+  if (a2 > 0) N.l2.forEach(p => nodeBox(p, a2));
+
+  // leaves = complete candidate assignments
+  if (a3 > 0){
+    N.leaf.forEach((p, i) => {
+      const res = T.results[i];                       // null | 'pass' | 'fail'
+      const isActive = T.active === i;
+      const col = res === "pass" ? C_MINT : res === "fail" ? C_RED : "#2A2A34";
+      const edge = res ? col : (isActive ? C_AMBER : C_EDGE);
+      drawBox(cam, p, [0.42,0.30,0.42], res === "pass" ? "#17453A" : res === "fail" ? "#452023" : "#22222C",
+        { edge, edgeA: (res || isActive) ? 1 : .55, alpha: a3 });
+      if (res || isActive) glow(cam, p, 1.0, res === "pass" ? C_MINT : res === "fail" ? C_RED : C_AMBER, .30 * a3);
+      label(cam, [p[0], TREE_Y - 0.55, p[2]], asgToStr(idxToAsg(i)),
+        { size: 21, mono: true, weight: 700, max: 58,
+          color: res === "pass" ? C_MINT : res === "fail" ? C_RED : (isActive ? C_AMBER : C_DIM),
+          alpha: a3 });
+    });
+    // the candidate currently being fed into the checker
+    if (T.active !== null){
+      const p = N.leaf[T.active];
+      drawArc(cam, p, [p[0] * .4, TREE_Y + 1.6, (p[2] + REG_Z) / 2], [0, RAIL_Y - .2, REG_Z - .7],
+        C_AMBER, 1.6, { alpha: .9 * a3, min: 1.6 });
+    }
+  }
+  // legend: dim means unvisited, not failed
+  if (T.legend > 0){
+    label(cam, [0, TREE_Y - 1.45, TREE_Z[3] - 1.0], "dim = not yet tested",
+      { size: 14, color: C_DIM, alpha: T.legend * .9 });
+  }
+}
+
+/* --- scaling: the candidate space as a subdividing bar -------------------- */
+function drawScaleBar(cam, st){
+  const S = st.scale;
+  if (S.on <= 0.01) return;
+  const n = S.n;
+  const total = countAssignments(n);
+  const cells = Math.min(64, Number(total > 64n ? 64n : total));
+  const halfW = 4.9, y = TREE_Y, z = TREE_Z[3] + 1.0;
+  const cw = (halfW * 2) / cells;
+  // funnel from the root down to the bar: n binary choices
+  const shown = Math.min(n, 6);
+  for (let k = 0; k < shown; k++){
+    const zz = TREE_Z[0] + (z - TREE_Z[0]) * ((k + 1) / (shown + 1));
+    const cnt = Math.min(32, 1 << (k + 1));
+    for (let i = 0; i < cnt; i++){
+      const x = -halfW + (halfW * 2) * ((i + .5) / cnt);
+      const px = -halfW + (halfW * 2) * ((Math.floor(i/2) + .5) / Math.max(1, cnt/2));
+      const pz = k === 0 ? TREE_Z[0] : TREE_Z[0] + (z - TREE_Z[0]) * (k / (shown + 1));
+      drawWire(cam, [px, y, pz], [x, y, zz], "#4A4A5C", 1, { alpha: .5 * S.on, min: .4 });
+    }
+  }
+  // the bar itself
+  for (let i = 0; i < cells; i++){
+    const x = -halfW + cw * (i + .5);
+    drawBox(cam, [x, y, z], [cw * 0.82, 0.26, 1.5], "#242430",
+      { edge: "#5C5C70", edgeA: .55 * S.on, alpha: S.on });
+  }
+  drawBox(cam, [0, y - .34, z], [halfW * 2 + .3, 0.10, 1.7], "#0E0E14", { edge: "#2A2A34", edgeA: .5 * S.on, alpha: S.on });
+  // labels
+  label(cam, [0, y + 1.25, z], `POSSIBLE ASSIGNMENTS: 2^${n}`,
+    { size: 30, mono: true, weight: 700, color: C_TEXT, alpha: S.on, max: 70 });
+  label(cam, [0, y + 0.72, z], groupDigits(total),
+    { size: 44, mono: true, weight: 700, color: C_AMBER, alpha: S.on, front: true, max: 120 });
+  if (total > 64n){
+    const per = total / 64n;
+    label(cam, [0, y - 1.05, z], `each cell = ${groupDigits(per)} assignments`,
+      { size: 14, mono: true, color: C_DIM, alpha: S.on });
+  }
+  label(cam, [0, y - 1.62, z], `${n} variables`, { size: 15, color: C_DIM, alpha: S.on });
+}
+
+/* ============================================================================
+   4. STATE AT TIME t — pure function; no accumulated animation state.
+   ========================================================================= */
+const DURATION = 30;
+const clamp01 = (v) => v < 0 ? 0 : v > 1 ? 1 : v;
+const smooth = (v) => { const u = clamp01(v); return u*u*(3-2*u); };
+const ramp = (t, a, b) => smooth((t - a) / (b - a));
+const lerp = (a, b, u) => a + (b - a) * u;
+const lerp3 = (a, b, u) => [lerp(a[0],b[0],u), lerp(a[1],b[1],u), lerp(a[2],b[2],u)];
+
+const SUPPLIED = [1, 1, 1];                 // the candidate handed to the checker
+const ENUM_ORDER = [0, 1];                  // 000 then 001 — the enumerator stops at the first success
+
+/* camera keyframes: [time, position, target] */
+const CAM_KEYS = [
+  [0.0,  [2.20, 3.00, -11.5], [0, -1.00, 1.5]],
+  [3.0,  [4.80, 4.40,  -9.9], [0, -1.25, 5.1]],
+  [9.4,  [4.80, 4.40,  11.5], [0, -1.25, 26.5]],
+  [10.6, [2.90, 5.40,  -8.0], [0, -1.55, 10.0]],
+  [11.8, [2.50, 6.60, -22.0], [0, -1.95, 0.0]],
+  [13.5, [2.00, 7.00, -27.5], [0, -2.08, -4.0]],
+  [15.0, [1.90, 7.20, -28.5], [0, -2.10, -4.0]],
+  [19.0, [0.80, 6.80, -26.6], [0, -2.20, -8.0]],
+  [22.0, [0.40, 7.20, -27.6], [0, -2.25, -8.5]],
+  [25.0, [0.30, 7.60, -29.0], [0, -2.20, -8.0]],
+  [30.0, [0.00, 7.00, -26.0], [0, -2.00, -7.0]]
+];
+function markerZAt(t){
+  for (const m of MARK) if (t >= m.t0 && t <= m.t1) return lerp(m.from, m.to, smooth((t-m.t0)/(m.t1-m.t0)));
+  for (let i = 0; i < 3; i++){ const e = EVAL[i]; if (t >= e.t0 && t <= e.t1) return ST_Z[i]; }
+  return t > 8.45 ? ALL_Z - 1.2 : REG_Z + 0.6;
+}
+function camAt(t){
+  // verification beat: the rig travels beside the execution marker
+  if (t >= 3.0 && t <= 9.4){
+    const zm = markerZAt(t);
+    return makeCam([4.8, 4.4, zm - 10.5], [0, -1.25, zm + 4.5]);
+  }
+  let i = 0;
+  while (i < CAM_KEYS.length - 2 && t >= CAM_KEYS[i+1][0]) i++;
+  const [t0, p0, g0] = CAM_KEYS[i], [t1, p1, g1] = CAM_KEYS[i+1];
+  const u = smooth((t - t0) / (t1 - t0));
+  return makeCam(lerp3(p0, p1, u), lerp3(g0, g1, u));
+}
+
+/* marker schedule during the verification beat */
+const MARK = [
+  { t0: 3.00, t1: 3.75, from: REG_Z + 0.6, to: ST_Z[0] - 1.1 },
+  { t0: 4.85, t1: 5.35, from: ST_Z[0] + 1.3, to: ST_Z[1] - 1.1 },
+  { t0: 6.45, t1: 6.95, from: ST_Z[1] + 1.3, to: ST_Z[2] - 1.1 },
+  { t0: 8.05, t1: 8.45, from: ST_Z[2] + 1.3, to: ALL_Z - 1.2 }
+];
+const EVAL = [ { t0: 3.75, t1: 4.85 }, { t0: 5.35, t1: 6.45 }, { t0: 6.95, t1: 8.05 } ];
+
+function stateAt(t){
+  t = Math.max(0, Math.min(DURATION, t));
+  const st = {
+    t,
+    cam: camAt(t),
+    regs: [null, null, null],
+    regGlow: 0,
+    stations: [0,1,2].map(() => ({ litShown: 0, orShown: 0, done: false, value: 0, active: false })),
+    all: { done: false, value: 0, hold: 0 },
+    marker: { on: false, pos: [0, RAIL_Y + 0.42, 0] },
+    tree: { reveal: 0, results: [null,null,null,null,null,null,null,null], active: null, legend: 0 },
+    scale: { on: 0, n: 3 },
+    floor: 0,
+    captions: [],
+    hud: null,
+    fade: 1
+  };
+  st.floor = ramp(t, 0.2, 2.0) * (1 - ramp(t, 27.0, 30.0) * 0.35);
+
+  /* ---- beat 1: enter the task (0–3) ---- */
+  if (t < 3.0){
+    const load = ramp(t, 2.45, 2.95);
+    if (load > 0.5) st.regs = SUPPLIED.slice();
+    st.regGlow = load;
+    st.captions.push({ kind: "main", text: "Can some setting satisfy every rule?", a: ramp(t,0.35,1.1) * (1 - ramp(t,2.6,3.0)) });
+  }
+
+  /* ---- beat 2: follow the checker (3–9) ---- */
+  if (t >= 3.0 && t < 9.2){
+    st.regs = SUPPLIED.slice();
+    st.regGlow = 1 - ramp(t, 3.0, 3.8);
+    // marker position
+    let placed = false;
+    for (const m of MARK){
+      if (t >= m.t0 && t <= m.t1){ st.marker.on = true; st.marker.pos = [0, RAIL_Y + .42, lerp(m.from, m.to, smooth((t-m.t0)/(m.t1-m.t0)))]; placed = true; }
+    }
+    for (let i = 0; i < 3; i++){
+      const e = EVAL[i];
+      if (t >= e.t0 && t <= e.t1){ st.marker.on = true; st.marker.pos = [0, RAIL_Y + .42, ST_Z[i]]; placed = true; }
+    }
+    if (!placed && t > 8.45){ st.marker.on = true; st.marker.pos = [0, RAIL_Y + .42, ALL_Z - 1.2]; }
+    // station evaluation — values come from the evaluator, never hard-coded
+    for (let i = 0; i < 3; i++){
+      const e = EVAL[i], s = st.stations[i];
+      const u = clamp01((t - e.t0) / (e.t1 - e.t0));
+      s.active = t >= e.t0 && t <= e.t1 + 0.2;
+      s.litShown = smooth(u / 0.45);
+      s.orShown  = u > 0.52 ? 1 : 0;
+      if (t >= e.t0 + (e.t1 - e.t0) * 0.72){ s.done = true; s.value = clauseValue(i, SUPPLIED); }
+    }
+    if (t >= 8.62){
+      st.all.done = true;
+      st.all.value = formulaValue(SUPPLIED);
+      st.all.hold = ramp(t, 8.62, 8.95);
+    }
+    if (t < 5.2) st.captions.push({ kind: "main", text: "An answer is supplied. Check it.", a: ramp(t,3.1,3.7) * (1 - ramp(t,4.7,5.2)) });
+    if (t >= 8.7) st.captions.push({ kind: "sub", text: "Verified — not searched.", a: ramp(t,8.75,9.05) * (1 - ramp(t,9.05,9.3)) });
+  }
+
+  /* ---- beat 3: remove the supplied answer (9.2–15) ---- */
+  if (t >= 9.2 && t < 15.2){
+    // fresh solver run: registers are empty again
+    st.tree.reveal = ramp(t, 11.3, 13.2);
+    st.tree.legend = ramp(t, 12.7, 13.3) * (1 - ramp(t, 14.7, 15.2));
+    // enumerator: test 000, then 001, then stop
+    const TESTS = [
+      { t0: 13.15, t1: 13.80, idx: 0 },
+      { t0: 14.00, t1: 14.90, idx: 1 }
+    ];
+    let activeIdx = null, activeAsg = null;
+    for (const te of TESTS){
+      if (t >= te.t0){
+        const asg = idxToAsg(te.idx);
+        const sat = formulaValue(asg) === 1;
+        if (t >= te.t0 + 0.34) st.tree.results[te.idx] = sat ? "pass" : "fail";
+        if (t <= te.t1){ activeIdx = te.idx; activeAsg = asg; }
+      }
+    }
+    st.tree.active = activeIdx;
+    if (activeAsg){
+      st.regs = activeAsg.slice();
+      const fail = firstFailing(activeAsg);
+      for (let i = 0; i < 3; i++){
+        const s = st.stations[i];
+        s.litShown = 1; s.orShown = 1;
+        if (fail === -1 || i <= fail){ s.done = true; s.value = clauseValue(i, activeAsg); }
+      }
+      if (fail === -1){ st.all.done = true; st.all.value = 1; st.all.hold = 1; }
+    }
+    if (t < 12.9) st.captions.push({ kind: "main", text: "Now solve without a supplied answer.", a: ramp(t,9.45,10.0) * (1 - ramp(t,12.4,12.9)) });
+    else st.captions.push({ kind: "sub", text: "One approach: test candidates.", a: ramp(t,12.95,13.4) * (1 - ramp(t,14.8,15.2)) });
+    if (t >= 13.4 && t < 14.1) st.captions.push({ kind: "tag", text: "000 — candidate rejected (Rule 1 fails)", a: ramp(t,13.45,13.7) * (1 - ramp(t,13.95,14.1)) });
+    if (t >= 14.3) st.captions.push({ kind: "tag", text: "001 — all rules pass. Stop.", a: ramp(t,14.35,14.6) * (1 - ramp(t,15.0,15.2)) });
+  }
+  if (t >= 15.2) st.tree.reveal = Math.max(0, 1 - ramp(t, 15.2, 16.2));
+
+  /* ---- beat 4: the candidate count (15.2–22) ---- */
+  if (t >= 15.2 && t < 22.4){
+    st.scale.on = ramp(t, 15.4, 16.4) * (1 - ramp(t, 21.9, 22.4));
+    // checkpoints: hold each long enough to read
+    const CP = [ [15.4,3], [16.3,4], [17.6,10], [19.0,20], [20.4,50] ];
+    let n = 3;
+    for (const [tt, nn] of CP) if (t >= tt) n = nn;
+    st.scale.n = n;
+    st.hud = { n, m: 4 * n, checks: 12 * n, a: st.scale.on };
+    st.captions.push({ kind: "main", text: "Each extra binary choice doubles the possibilities.", a: ramp(t,16.5,17.1) * (1 - ramp(t,21.4,22.0)) });
+  }
+
+  /* ---- beat 5: the distinction (22.4–25.2) ---- */
+  if (t >= 22.4 && t < 25.4){
+    st.scale.on = 0.42 * (1 - ramp(t, 24.8, 25.4));
+    st.scale.n = 50;
+    st.captions.push({ kind: "main", text: "But must we search them?", a: ramp(t,22.6,23.1) * (1 - ramp(t,24.8,25.3)) });
+    st.captions.push({ kind: "sub", text: "Brute force is only one method.", a: ramp(t,23.3,23.8) * (1 - ramp(t,24.8,25.3)) });
+    st.alt = ramp(t, 23.0, 24.0) * (1 - ramp(t, 24.9, 25.4));
+  }
+
+  /* ---- beat 6: the question (25.4–30) ---- */
+  if (t >= 25.4){
+    st.regs = [null, null, null];
+    st.final = {
+      checkA: ramp(t, 25.6, 26.3),
+      q:      ramp(t, 26.3, 27.1),
+      big:    ramp(t, 27.4, 28.2),
+      still:  ramp(t, 28.5, 29.2)
+    };
+  }
+  return st;
+}
+
+/* ============================================================================
+   5. DRAW
+   ========================================================================= */
+function drawScene(ctx, st){
+  const cam = st.cam;
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+  // subtle depth wash so the volume reads
+  const bg = ctx.createRadialGradient(W*.5, H*.42, 0, W*.5, H*.42, H*.7);
+  bg.addColorStop(0, "#07070A"); bg.addColorStop(1, "#000");
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  drawFloor(cam, st.floor);
+  drawConductors(cam, st);
+  drawRegisters(cam, st);
+  for (let i = 0; i < 3; i++) drawStation(cam, i, st);
+  drawAll(cam, st);
+  drawMarker(cam, st);
+  drawTree(cam, st);
+  drawScaleBar(cam, st);
+
+  // dashed "another algorithm?" placeholder — explicitly empty, never a magic route
+  if (st.alt > 0){
+    const a = [0, TREE_Y + 0.1, TREE_Z[0] + 1.2], b = [0, RAIL_Y - 0.3, REG_Z - 1.0];
+    drawArc(cam, a, [4.5, TREE_Y + 1.6, (a[2]+b[2])/2], b, C_AMBER, 1.0,
+      { alpha: .5 * st.alt, dash: [10, 9], min: .8 });
+    label(cam, [4.6, TREE_Y + 1.9, (a[2]+b[2])/2], "Another algorithm?",
+      { size: 17, color: C_AMBER, weight: 600, alpha: .85 * st.alt });
+  }
+  flush(ctx);
+}
+
+/* --- screen-space overlays: captions and HUD, always crisp ---------------- */
+const MARGIN = 90;
+function wrapText(ctx, text, maxW){
+  const words = text.split(" "); const lines = []; let line = "";
+  for (const w of words){
+    const test = line ? line + " " + w : w;
+    if (ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; } else line = test;
+  }
+  lines.push(line); return lines;
+}
+function drawCaptions(ctx, st){
+  const maxW = W - MARGIN * 2;
+  const MAIN_BASE = H - 336, LINE = 76, SUB_Y = H - 238, TAG_Y = H - 158;
+  const mains = st.captions.filter(c => c.kind === "main" && c.a > 0.01);
+  const subs  = st.captions.filter(c => c.kind === "sub"  && c.a > 0.01);
+  const tags  = st.captions.filter(c => c.kind === "tag"  && c.a > 0.01);
+
+  for (const c of mains){
+    ctx.save();
+    ctx.font = `600 60px ${FSANS}`;
+    const lines = wrapText(ctx, c.text, maxW);          // reflow, never shrink
+    const top = MAIN_BASE - (lines.length - 1) * LINE;
+    ctx.globalAlpha = c.a; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.shadowColor = "rgba(0,0,0,.95)"; ctx.shadowBlur = 30;
+    ctx.fillStyle = C_TEXT;
+    lines.forEach((l, i) => ctx.fillText(l, W/2, top + i * LINE));
+    ctx.restore();
+  }
+  for (const c of subs){
+    ctx.save();
+    ctx.globalAlpha = c.a; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `500 42px ${FSANS}`;
+    ctx.shadowColor = "rgba(0,0,0,.95)"; ctx.shadowBlur = 22;
+    ctx.fillStyle = C_DIM;
+    ctx.fillText(c.text, W/2, SUB_Y);
+    ctx.restore();
+  }
+  for (const c of tags){
+    ctx.save();
+    ctx.globalAlpha = c.a; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `600 38px ${FMONO}`;
+    ctx.shadowColor = "rgba(0,0,0,.95)"; ctx.shadowBlur = 22;
+    ctx.fillStyle = C_AMBER;
+    ctx.fillText(c.text, W/2, TAG_Y);
+    ctx.restore();
+  }
+}
+function drawHud(ctx, st){
+  if (!st.hud || st.hud.a <= 0.02) return;
+  const h = st.hud, x = MARGIN, y = 150, w = W - MARGIN*2;
+  ctx.save(); ctx.globalAlpha = h.a;
+  ctx.fillStyle = "rgba(11,11,12,.86)"; ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.lineWidth = 2;
+  roundRect(ctx, x, y, w, 150, 14); ctx.fill(); ctx.stroke();
+  ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  ctx.font = `600 26px ${FSANS}`; ctx.fillStyle = C_DIM;
+  ctx.fillText("CHECKER — still the same mechanism", x + 26, y + 36);
+  ctx.font = `600 30px ${FMONO}`; ctx.fillStyle = C_TEXT;
+  ctx.fillText(`illustrative input: n = ${h.n} vars,  m = ${h.m} clauses`, x + 26, y + 82);
+  ctx.font = `500 27px ${FMONO}`; ctx.fillStyle = C_MINT;
+  ctx.fillText(`one full check ≤ 3m = ${h.checks} literal reads`, x + 26, y + 122);
+  ctx.restore();
+}
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
+}
+function drawFinal(ctx, st){
+  if (!st.final) return;
+  const f = st.final;
+  ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.shadowColor = "rgba(0,0,0,.95)"; ctx.shadowBlur = 26;
+  // the two halves of the idea, held together
+  if (f.checkA > 0){
+    ctx.globalAlpha = f.checkA * (1 - f.big * 0.35);
+    ctx.font = `600 38px ${FSANS}`;
+    ctx.fillStyle = C_MINT;  ctx.fillText("Checking a supplied answer", W/2, 300);
+    ctx.fillStyle = C_DIM;   ctx.font = `500 32px ${FSANS}`; ctx.fillText("fast", W/2, 348);
+    ctx.fillStyle = C_AMBER; ctx.font = `600 38px ${FSANS}`; ctx.fillText("Solving without one", W/2, 420);
+    ctx.fillStyle = C_DIM;   ctx.font = `500 32px ${FSANS}`; ctx.fillText("unknown", W/2, 468);
+  }
+  if (f.q > 0){
+    ctx.globalAlpha = f.q * (1 - f.big);
+    ctx.font = `600 52px ${FSANS}`; ctx.fillStyle = C_TEXT;
+    const lines = wrapText(ctx, "Does efficient checking always imply efficient solving?", W - MARGIN*2);
+    lines.forEach((l,i) => ctx.fillText(l, W/2, H - 470 + i * 64));
+  }
+  if (f.big > 0){
+    ctx.globalAlpha = f.big;
+    ctx.font = `700 150px ${FSANS}`; ctx.fillStyle = C_TEXT;
+    ctx.fillText("P = NP?", W/2, H/2 + 40);
+  }
+  if (f.still > 0){
+    ctx.globalAlpha = f.still;
+    ctx.font = `500 38px ${FSANS}`; ctx.fillStyle = C_DIM;
+    ctx.fillText("Still an open question.", W/2, H/2 + 160);
+  }
+  ctx.restore();
+}
+
+/** THE deterministic entry point: same t always produces the same frame */
+function renderAt(timeInSeconds){
+  const ctx = CTX;
+  const st = stateAt(timeInSeconds);
+  drawScene(ctx, st);
+  drawHud(ctx, st);
+  drawCaptions(ctx, st);
+  drawFinal(ctx, st);
+  return st;
+}
+
+/* ============================================================================
+   6. PLAYER + MODES
+   ========================================================================= */
+const canvas = document.getElementById("stage");
+const CTX = canvas.getContext("2d");
+let mode = "film";
+let playing = true, tNow = 0, lastTs = 0;
+
+function loop(ts){
+  if (mode === "film"){
+    if (playing){
+      const dt = lastTs ? (ts - lastTs) / 1000 : 0;
+      tNow += dt;
+      if (tNow >= DURATION){ tNow = 0; }                 // loop
+      renderAt(tNow);
+      syncScrub();
+    }
+  }
+  lastTs = ts;
+  requestAnimationFrame(loop);
+}
+function syncScrub(){
+  document.getElementById("scrub").value = Math.round(tNow / DURATION * 3000);
+  document.getElementById("tc").textContent = `${tNow.toFixed(2)} / ${DURATION.toFixed(2)}`;
+}
+function setPlaying(on){
+  playing = on;
+  const b = document.getElementById("playBtn");
+  b.setAttribute("aria-label", on ? "Pause" : "Play");
+  b.innerHTML = on
+    ? '<svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="1.5" width="2.6" height="9" rx=".6"/><rect x="6.9" y="1.5" width="2.6" height="9" rx=".6"/></svg>'
+    : '<svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M3 1.8v8.4a.5.5 0 0 0 .77.42l6.3-4.2a.5.5 0 0 0 0-.84l-6.3-4.2A.5.5 0 0 0 3 1.8Z"/></svg>';
+}
+document.getElementById("playBtn").addEventListener("click", () => setPlaying(!playing));
+document.getElementById("replayBtn").addEventListener("click", () => { tNow = 0; renderAt(0); syncScrub(); });
+document.getElementById("scrub").addEventListener("input", (e) => {
+  tNow = (+e.target.value / 3000) * DURATION;
+  renderAt(tNow); syncScrub();
+});
+
+/* ---- Inspect: a frozen checker you can drive by hand ---- */
+let inspectAsg = [1, 1, 1];
+function drawInspect(){
+  const st = stateAt(6.0);                 // a known camera framing of the checker
+  st.cam = makeCam([2.9, 3.4, -9.5], [0, -0.9, 11.0]);
+  st.regs = inspectAsg.slice();
+  st.regGlow = 0.35;
+  st.marker.on = false;
+  st.tree.reveal = 0; st.scale.on = 0; st.hud = null; st.captions = []; st.final = null; st.alt = 0;
+  for (let i = 0; i < 3; i++){
+    st.stations[i] = { litShown: 1, orShown: 1, done: true, value: clauseValue(i, inspectAsg), active: false };
+  }
+  st.all = { done: true, value: formulaValue(inspectAsg), hold: 1 };
+  drawScene(CTX, st);
+  // in-frame readout
+  CTX.save(); CTX.textAlign = "center"; CTX.textBaseline = "middle";
+  CTX.shadowColor = "rgba(0,0,0,.95)"; CTX.shadowBlur = 24;
+  CTX.font = `600 46px ${FMONO}`; CTX.fillStyle = C_TEXT;
+  CTX.fillText(`A=${inspectAsg[0]}  B=${inspectAsg[1]}  C=${inspectAsg[2]}`, W/2, H - 260);
+  CTX.font = `600 52px ${FSANS}`;
+  CTX.fillStyle = st.all.value === 1 ? C_MINT : C_RED;
+  CTX.fillText(st.all.value === 1 ? "ALL 3 RULES PASS" : "CANDIDATE REJECTED", W/2, H - 180);
+  CTX.restore();
+  syncInspectPanel();
+}
+function syncInspectPanel(){
+  for (let i = 0; i < 3; i++) document.getElementById("bit" + i).textContent = inspectAsg[i];
+  const rows = document.getElementById("ruleRows");
+  rows.innerHTML = "";
+  CLAUSES.forEach((c, i) => {
+    const vals = litValues(i, inspectAsg);
+    const v = clauseValue(i, inspectAsg);
+    const d = document.createElement("div");
+    d.className = "rule";
+    d.innerHTML = `<span class="txt">${clauseText(i)} &nbsp;→&nbsp; ${vals.join(" ∨ ")}</span>
+                   <span class="res" style="color:${v ? "#6EE7B7" : "#C4564B"}">${v}</span>`;
+    rows.appendChild(d);
+  });
+  const ver = document.getElementById("verdict");
+  const f = formulaValue(inspectAsg);
+  ver.className = "verdict " + (f ? "pass" : "fail");
+  const fail = firstFailing(inspectAsg);
+  ver.textContent = f ? "Satisfied — all three rules pass" : `Candidate rejected — Rule ${fail + 1} fails`;
+}
+document.querySelectorAll(".bit").forEach(b => b.addEventListener("click", () => {
+  const i = +b.dataset.v;
+  inspectAsg[i] ^= 1;
+  drawInspect();
+}));
+
+/* ---- Scaling: candidate-space growth only ---- */
+let scaleN = 3;
+function drawScaling(){
+  const st = stateAt(19.0);
+  st.cam = makeCam([0.6, 6.8, -26.6], [0, -2.2, -8.0]);
+  st.regs = [null,null,null]; st.captions = []; st.final = null; st.alt = 0; st.tree.reveal = 0;
+  st.scale = { on: 1, n: scaleN };
+  st.hud = { n: scaleN, m: 4*scaleN, checks: 12*scaleN, a: 1 };
+  st.marker.on = false;
+  drawScene(CTX, st);
+  drawHud(CTX, st);
+  CTX.save(); CTX.textAlign = "center"; CTX.textBaseline = "middle";
+  CTX.shadowColor = "rgba(0,0,0,.95)"; CTX.shadowBlur = 22;
+  CTX.font = `500 34px ${FSANS}`; CTX.fillStyle = C_DIM;
+  CTX.fillText("candidate-space growth — not a solver benchmark", W/2, H - 200);
+  CTX.restore();
+  document.getElementById("nOut").textContent = scaleN;
+  document.getElementById("countOut").textContent = groupDigits(countAssignments(scaleN));
+  document.getElementById("workOut").textContent =
+    `For an illustrative 3-CNF input with m = ${4*scaleN} clauses, one complete check reads at most 3m = ${12*scaleN} literal occurrences. That is the work to verify one supplied candidate — not the work to find one.`;
+}
+document.getElementById("nslider").addEventListener("input", (e) => { scaleN = +e.target.value; drawScaling(); });
+
+/* ---- mode switching ---- */
+function setMode(m){
+  mode = m;
+  document.getElementById("tabFilm").setAttribute("aria-pressed", String(m === "film"));
+  document.getElementById("tabInspect").setAttribute("aria-pressed", String(m === "inspect"));
+  document.getElementById("tabScaling").setAttribute("aria-pressed", String(m === "scaling"));
+  document.getElementById("filmControls").classList.toggle("hidden", m !== "film");
+  document.getElementById("inspectPanel").classList.toggle("hidden", m !== "inspect");
+  document.getElementById("scalingPanel").classList.toggle("hidden", m !== "scaling");
+  if (m === "film"){ tNow = 0; setPlaying(true); renderAt(0); syncScrub(); }   // deterministic restart
+  if (m === "inspect"){ setPlaying(false); inspectAsg = [1,1,1]; drawInspect(); }
+  if (m === "scaling"){ setPlaying(false); scaleN = 3; document.getElementById("nslider").value = 3; drawScaling(); }
+}
+document.getElementById("tabFilm").addEventListener("click", () => setMode("film"));
+document.getElementById("tabInspect").addEventListener("click", () => setMode("inspect"));
+document.getElementById("tabScaling").addEventListener("click", () => setMode("scaling"));
+
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === " " && mode === "film"){ e.preventDefault(); setPlaying(!playing); }
+});
+
+/* ---- harness API ---- */
+window.__pvsnp = {
+  renderAt, stateAt, DURATION,
+  CLAUSES, litValue, litValues, clauseValue, formulaValue, firstFailing,
+  idxToAsg, asgToStr, countAssignments,
+  setMode, seek: (t) => { tNow = t; renderAt(t); syncScrub(); },
+  pause: () => setPlaying(false),
+  setAssignment: (a) => { inspectAsg = a.slice(); drawInspect(); },
+  setN: (n) => { scaleN = n; document.getElementById("nslider").value = n; drawScaling(); }
+};
+
+renderAt(0); syncScrub(); setPlaying(true);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
