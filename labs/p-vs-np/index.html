@@ -316,19 +316,26 @@ function glow(cam, p, radiusWorld, color, a){
     g.fillStyle = gr; g.beginPath(); g.arc(pr.x, pr.y, r, 0, 6.283); g.fill();
   });
 }
+/* while a caption is on screen, scene labels drifting into its band fade out
+   rather than colliding with it. Hero readouts opt out with keep:true. */
+let CAPTION_GUARD = 0;
+const CAPTION_BAND_Y = H - 520;
 /** crisp screen-space text anchored to a world point */
 function label(cam, p, text, o = {}){
   const pr = project(cam, p);
   if (pr.depth <= 0) return;
   const size = Math.max(o.min || 12, Math.min(o.max || 230, (o.size || 26) * pr.scale * PX));
   if ((o.size || 26) * pr.scale * PX < (o.min || 12) - 0.5) return;
+  let a = o.alpha === undefined ? 1 : o.alpha;
+  if (!o.keep && CAPTION_GUARD > 0.04 && pr.y > CAPTION_BAND_Y) a *= (1 - CAPTION_GUARD);
+  if (a <= 0.02) return;
   push(pr.depth - (o.front ? 0.02 : 0.005), (g) => {
     g.save();
     g.font = `${o.weight || 600} ${size.toFixed(1)}px ${o.mono ? `${FMONO}` : `${FSANS}`}`;
     g.textAlign = o.align || "center";
     g.textBaseline = o.baseline || "middle";
     if (o.shadow !== false){ g.shadowColor = "rgba(0,0,0,.92)"; g.shadowBlur = size * .5; }
-    g.fillStyle = o.alpha === undefined ? (o.color || "#EDEDEA") : rgba(o.color || "#EDEDEA", o.alpha);
+    g.fillStyle = rgba(o.color || "#EDEDEA", a);
     g.fillText(text, pr.x + (o.dx || 0) * pr.scale * PX, pr.y + (o.dy || 0) * pr.scale * PX);
     g.restore();
   });
@@ -371,7 +378,7 @@ function drawRegisters(cam, st){
     drawBox(cam, [x, -0.45, REG_Z], [0.92, 0.9, 0.92], C_RAISE, { edge: C_EDGE, edgeA: .6 });
     const v = st.regs[i];
     const known = v !== null;
-    label(cam, [x, -0.9, REG_Z - 0.55], VARS[i], { size: 20, color: C_DIM, weight: 600 });
+    label(cam, [x, -0.95, REG_Z - 0.6], VARS[i], { size: 30, color: C_DIM, weight: 700 });
     label(cam, [x, 0.34, REG_Z], known ? String(v) : "?",
       { size: 34, mono: true, weight: 700, color: known ? C_TEXT : C_DIM, front: true, max: 66 });
     if (known && st.regGlow > 0) glow(cam, [x, 0.3, REG_Z], 1.1, C_AMBER, .30 * st.regGlow);
@@ -395,7 +402,7 @@ function drawStation(cam, ci, st){
   drawBox(cam, [0, PLATE_Y, z], [4.4, 0.30, 2.45], C_RAISE, { edge: C_EDGE, edgeA: .55, dim: s.active ? 1.18 : 1 });
   // rule name
   label(cam, [-1.95, PLATE_Y + 0.30, z - 0.95], "RULE " + (ci + 1),
-    { size: 15, color: s.active ? C_TEXT : C_DIM, weight: 600, align: "left" });
+    { size: 24, color: s.active ? C_TEXT : C_DIM, weight: 600, align: "left" });
 
   // three taps down from the conductors into input ports
   for (let k = 0; k < 3; k++){
@@ -409,7 +416,7 @@ function drawStation(cam, ci, st){
       const ny = -0.72, notOn = shown && raw !== null;
       drawBox(cam, [x, ny, pz], [0.40, 0.40, 0.40], notOn ? "#4A3F52" : "#282832",
         { edge: notOn ? C_AMBER : C_EDGE, edgeA: notOn ? .85 : .5 });
-      label(cam, [x, ny, pz - 0.30], "NOT", { size: 12, color: notOn ? C_AMBER : C_DIM, weight: 700, front: true });
+      label(cam, [x, ny, pz - 0.34], "NOT", { size: 18, color: notOn ? C_AMBER : C_DIM, weight: 700, front: true });
     }
     // input port
     const portOn = val !== null;
@@ -418,13 +425,13 @@ function drawStation(cam, ci, st){
     label(cam, [x, PLATE_Y + 0.60, pz], portOn ? String(val) : "·",
       { size: 20, mono: true, weight: 700, color: portOn ? C_TEXT : C_DIM, front: true, max: 62 });
     label(cam, [x, PLATE_Y + 0.30, pz + 0.52], litText(l),
-      { size: 13, mono: true, color: C_DIM, weight: 600 });
+      { size: 20, mono: true, color: C_DIM, weight: 600 });
   }
   // OR body
   const orOn = s.orShown > 0;
   drawBox(cam, [0, PLATE_Y + 0.42, z + 0.42], [2.5, 0.52, 0.92], orOn ? "#34343F" : C_RAISE,
     { edge: orOn ? "#6A6A78" : C_EDGE, edgeA: .7 });
-  label(cam, [0, PLATE_Y + 0.72, z + 0.42], "OR", { size: 18, weight: 700, color: orOn ? C_TEXT : C_DIM, front: true });
+  label(cam, [0, PLATE_Y + 0.78, z + 0.42], "OR", { size: 23, weight: 700, color: orOn ? C_TEXT : C_DIM, front: true });
   // output lamp
   const done = s.done;
   const col = !done ? "#1E1E26" : (s.value === 1 ? "#17453A" : "#452023");
@@ -457,12 +464,12 @@ function drawAll(cam, st){
   }
   drawBox(cam, [0, PLATE_Y + 0.44, z + 0.2], [2.3, 0.56, 0.9], s.done ? "#34343F" : C_RAISE,
     { edge: s.done ? "#6A6A78" : C_EDGE, edgeA: .75 });
-  label(cam, [0, PLATE_Y + 0.76, z + 0.2], "ALL", { size: 19, weight: 700, color: s.done ? C_TEXT : C_DIM, front: true });
+  label(cam, [0, PLATE_Y + 0.82, z + 0.2], "ALL", { size: 23, weight: 700, color: s.done ? C_TEXT : C_DIM, front: true });
   if (s.done){
     const c = s.value === 1 ? C_MINT : C_RED;
     glow(cam, [0, PLATE_Y + 0.5, z + 0.2], 3.4, c, .30 * s.hold);
-    label(cam, [0, PLATE_Y + 1.5, z + 0.2], s.value === 1 ? "ALL 3 RULES PASS" : "CANDIDATE REJECTED",
-      { size: 26, weight: 700, color: c, front: true, alpha: s.hold });
+    label(cam, [0, PLATE_Y + 2.7, z + 0.2], s.value === 1 ? "ALL 3 RULES PASS" : "CANDIDATE REJECTED",
+      { size: 30, weight: 700, color: c, front: true, alpha: s.hold, keep: true });
   }
 }
 
@@ -497,7 +504,7 @@ function drawTree(cam, st){
       label(cam, [(N.root[0]+p[0])/2 + (i ? .35 : -.35), TREE_Y + .42, (N.root[2]+p[2])/2], i ? "1" : "0",
         { size: 15, mono: true, color: C_DIM, weight: 700, alpha: a1 });
     });
-    label(cam, [0, TREE_Y + .95, TREE_Z[1] + .6], "choose A", { size: 14, color: C_DIM, alpha: a1 });
+    label(cam, [0, TREE_Y + .95, TREE_Z[1] + .6], "choose A", { size: 22, color: C_DIM, alpha: a1 });
   }
   // level1 -> level2 (choose B)
   const a2 = lvl(1);
@@ -505,7 +512,7 @@ function drawTree(cam, st){
     N.l2.forEach((p, i) => {
       drawWire(cam, N.l1[i >> 1], p, DIMC, 1.1, { alpha: .8 * a2, min: .5 });
     });
-    label(cam, [0, TREE_Y + .95, TREE_Z[2] + .6], "choose B", { size: 14, color: C_DIM, alpha: a2 });
+    label(cam, [0, TREE_Y + .95, TREE_Z[2] + .6], "choose B", { size: 22, color: C_DIM, alpha: a2 });
   }
   // level2 -> leaves (choose C)
   const a3 = lvl(2);
@@ -513,7 +520,7 @@ function drawTree(cam, st){
     N.leaf.forEach((p, i) => {
       drawWire(cam, N.l2[i >> 1], p, DIMC, 1.1, { alpha: .8 * a3, min: .5 });
     });
-    label(cam, [0, TREE_Y + .95, TREE_Z[3] + .6], "choose C", { size: 14, color: C_DIM, alpha: a3 });
+    label(cam, [0, TREE_Y + .95, TREE_Z[3] + .6], "choose C", { size: 22, color: C_DIM, alpha: a3 });
   }
   // nodes
   const nodeBox = (p, a) => drawBox(cam, p, [0.30,0.30,0.30], "#2A2A36", { edge: C_EDGE, edgeA: .7 * a, alpha: a });
@@ -546,7 +553,7 @@ function drawTree(cam, st){
   // legend: dim means unvisited, not failed
   if (T.legend > 0){
     label(cam, [0, TREE_Y - 1.45, TREE_Z[3] - 1.0], "dim = not yet tested",
-      { size: 14, color: C_DIM, alpha: T.legend * .9 });
+      { size: 22, color: C_DIM, alpha: T.legend * .9 });
   }
 }
 
@@ -580,15 +587,15 @@ function drawScaleBar(cam, st){
   drawBox(cam, [0, y - .34, z], [halfW * 2 + .3, 0.10, 1.7], "#0E0E14", { edge: "#2A2A34", edgeA: .5 * S.on, alpha: S.on });
   // labels
   label(cam, [0, y + 1.25, z], `POSSIBLE ASSIGNMENTS: 2^${n}`,
-    { size: 30, mono: true, weight: 700, color: C_TEXT, alpha: S.on, max: 70 });
+    { size: 30, mono: true, weight: 700, color: C_TEXT, alpha: S.on, max: 70, keep: true });
   label(cam, [0, y + 0.72, z], groupDigits(total),
-    { size: 44, mono: true, weight: 700, color: C_AMBER, alpha: S.on, front: true, max: 120 });
+    { size: 44, mono: true, weight: 700, color: C_AMBER, alpha: S.on, front: true, max: 120, keep: true });
   if (total > 64n){
     const per = total / 64n;
-    label(cam, [0, y - 1.05, z], `each cell = ${groupDigits(per)} assignments`,
-      { size: 14, mono: true, color: C_DIM, alpha: S.on });
+    label(cam, [0, y + 0.30, z - 1.5], `each cell = ${groupDigits(per)} assignments`,
+      { size: 22, mono: true, color: C_DIM, alpha: S.on });
   }
-  label(cam, [0, y - 1.62, z], `${n} variables`, { size: 15, color: C_DIM, alpha: S.on });
+  label(cam, [0, y - 0.48, z - 1.5], `${n} variables`, { size: 24, color: C_DIM, alpha: S.on });
 }
 
 /* ============================================================================
@@ -862,8 +869,8 @@ function drawHud(ctx, st){
   ctx.textAlign = "left"; ctx.textBaseline = "middle";
   ctx.font = `600 26px ${FSANS}`; ctx.fillStyle = C_DIM;
   ctx.fillText("CHECKER — still the same mechanism", x + 26, y + 36);
-  ctx.font = `600 30px ${FMONO}`; ctx.fillStyle = C_TEXT;
-  ctx.fillText(`illustrative input: n = ${h.n} vars,  m = ${h.m} clauses`, x + 26, y + 82);
+  ctx.font = `600 26px ${FMONO}`; ctx.fillStyle = C_TEXT;
+  ctx.fillText(`illustrative input: n = ${h.n}, m = ${h.m} clauses`, x + 26, y + 82);
   ctx.font = `500 27px ${FMONO}`; ctx.fillStyle = C_MINT;
   ctx.fillText(`one full check ≤ 3m = ${h.checks} literal reads`, x + 26, y + 122);
   ctx.font = `500 24px ${FSANS}`; ctx.fillStyle = C_DIM;
@@ -914,6 +921,9 @@ function drawFinal(ctx, st){
 function renderAt(timeInSeconds){
   const ctx = CTX;
   const st = stateAt(timeInSeconds);
+  CAPTION_GUARD = Math.max(0,
+    ...st.captions.filter(c => c.kind !== "tag").map(c => c.a),
+    st.final ? Math.max(st.final.q, st.final.big) : 0);
   drawScene(ctx, st);
   drawHud(ctx, st);
   drawCaptions(ctx, st);
