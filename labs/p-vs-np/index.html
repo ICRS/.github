@@ -139,7 +139,8 @@
   <p class="note" id="footnote">
     The formula is fixed: (A ∨ B ∨ C) ∧ (¬A ∨ B ∨ ¬C) ∧ (A ∨ ¬B ∨ ¬C). This tiny instance teaches the
     mechanism — it is not evidence of hardness. General 3-SAT is NP-complete, but individual instances
-    can be easy. The film illustrates the open question; it does not resolve it.
+    can be easy. A full check reads at most 3m literal occurrences, which is linear in the size of the
+    encoded formula. The film illustrates the open question; it does not resolve it.
   </p>
 </div>
 
@@ -454,7 +455,7 @@ function drawAll(cam, st){
   if (s.done){
     const c = s.value === 1 ? C_MINT : C_RED;
     glow(cam, [0, PLATE_Y + 0.5, z + 0.2], 3.4, c, .30 * s.hold);
-    label(cam, [0, PLATE_Y + 1.5, z + 0.2], s.value === 1 ? "ALL 3 RULES PASS" : "REJECTED",
+    label(cam, [0, PLATE_Y + 1.5, z + 0.2], s.value === 1 ? "ALL 3 RULES PASS" : "CANDIDATE REJECTED",
       { size: 26, weight: 700, color: c, front: true, alpha: s.hold });
   }
 }
@@ -595,7 +596,6 @@ const lerp = (a, b, u) => a + (b - a) * u;
 const lerp3 = (a, b, u) => [lerp(a[0],b[0],u), lerp(a[1],b[1],u), lerp(a[2],b[2],u)];
 
 const SUPPLIED = [1, 1, 1];                 // the candidate handed to the checker
-const ENUM_ORDER = [0, 1];                  // 000 then 001 — the enumerator stops at the first success
 
 /* camera keyframes: [time, position, target] */
 const CAM_KEYS = [
@@ -701,7 +701,7 @@ function stateAt(t){
   if (t >= 9.2 && t < 15.2){
     // fresh solver run: registers are empty again
     st.tree.reveal = ramp(t, 11.9, 13.25);
-    st.tree.legend = ramp(t, 12.9, 13.4) * (1 - ramp(t, 14.7, 15.2));
+    st.tree.legend = ramp(t, 12.9, 13.4);
     // enumerator: test 000, then 001, then stop
     const TESTS = [
       { t0: 13.30, t1: 13.90, idx: 0 },
@@ -725,18 +725,19 @@ function stateAt(t){
         s.litShown = 1; s.orShown = 1;
         if (fail === -1 || i <= fail){ s.done = true; s.value = clauseValue(i, activeAsg); }
       }
-      if (fail === -1){ st.all.done = true; st.all.value = 1; st.all.hold = 1; }
+      if (fail === -1){ st.all.done = true; st.all.value = formulaValue(activeAsg); st.all.hold = 1; }
     }
     if (t < 12.9) st.captions.push({ kind: "main", text: "Now solve without a supplied answer.", a: ramp(t,9.45,10.0) * (1 - ramp(t,12.4,12.9)) });
     else st.captions.push({ kind: "sub", text: "One approach: test candidates.", a: ramp(t,12.95,13.4) * (1 - ramp(t,14.8,15.2)) });
     if (t >= 13.55 && t < 14.15) st.captions.push({ kind: "tag", text: "000 — candidate rejected (Rule 1 fails)", a: ramp(t,13.6,13.85) * (1 - ramp(t,14.0,14.15)) });
-    if (t >= 14.35) st.captions.push({ kind: "tag", text: "001 — all rules pass. Stop.", a: ramp(t,14.4,14.65) * (1 - ramp(t,15.0,15.2)) });
+    if (t >= 14.35) st.captions.push({ kind: "tag", text: "001 — all rules pass. Stop.", a: ramp(t,14.4,14.65) * (1 - ramp(t,14.8,15.0)) });
   }
   if (t >= 15.2) st.tree.reveal = Math.max(0, 1 - ramp(t, 15.2, 16.2));
+  st.tree.legend = Math.min(st.tree.legend, st.tree.reveal);   // never outlast the leaves
 
   /* ---- beat 4: the candidate count (15.2–22) ---- */
   if (t >= 15.2 && t < 22.4){
-    st.scale.on = ramp(t, 15.4, 16.4) * (1 - ramp(t, 21.9, 22.4));
+    st.scale.on = ramp(t, 15.4, 16.4) * (1 - 0.58 * ramp(t, 21.9, 22.4));   // lands on 0.42, where beat 5 resumes
     // checkpoints: hold each long enough to read
     const CP = [ [15.4,3], [16.3,4], [17.6,10], [19.0,20], [20.4,50] ];
     let n = 3;
@@ -744,6 +745,7 @@ function stateAt(t){
     st.scale.n = n;
     st.hud = { n, m: 4 * n, checks: 12 * n, a: st.scale.on };
     st.captions.push({ kind: "main", text: "Each extra binary choice doubles the possibilities.", a: ramp(t,16.5,17.1) * (1 - ramp(t,21.4,22.0)) });
+    st.captions.push({ kind: "sub", text: "Counting candidates — not counting work.", a: ramp(t,17.4,18.0) * (1 - ramp(t,21.4,22.0)) });
   }
 
   /* ---- beat 5: the distinction (22.4–25.2) ---- */
@@ -851,7 +853,7 @@ function drawHud(ctx, st){
   const h = st.hud, x = MARGIN, y = 150, w = W - MARGIN*2;
   ctx.save(); ctx.globalAlpha = h.a;
   ctx.fillStyle = "rgba(11,11,12,.86)"; ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.lineWidth = 2;
-  roundRect(ctx, x, y, w, 150, 14); ctx.fill(); ctx.stroke();
+  roundRect(ctx, x, y, w, 190, 14); ctx.fill(); ctx.stroke();
   ctx.textAlign = "left"; ctx.textBaseline = "middle";
   ctx.font = `600 26px ${FSANS}`; ctx.fillStyle = C_DIM;
   ctx.fillText("CHECKER — still the same mechanism", x + 26, y + 36);
@@ -859,6 +861,8 @@ function drawHud(ctx, st){
   ctx.fillText(`illustrative input: n = ${h.n} vars,  m = ${h.m} clauses`, x + 26, y + 82);
   ctx.font = `500 27px ${FMONO}`; ctx.fillStyle = C_MINT;
   ctx.fillText(`one full check ≤ 3m = ${h.checks} literal reads`, x + 26, y + 122);
+  ctx.font = `500 24px ${FSANS}`; ctx.fillStyle = C_DIM;
+  ctx.fillText("per candidate — not the work to find one", x + 26, y + 160);
   ctx.restore();
 }
 function roundRect(ctx, x, y, w, h, r){
@@ -1055,7 +1059,7 @@ window.__pvsnp = {
   setMode, seek: (t) => { tNow = t; renderAt(t); syncScrub(); },
   pause: () => setPlaying(false),
   setAssignment: (a) => { inspectAsg = a.slice(); drawInspect(); },
-  setN: (n) => { scaleN = n; document.getElementById("nslider").value = n; drawScaling(); }
+  setN: (n) => { scaleN = Math.max(1, Math.min(50, n|0)); document.getElementById("nslider").value = scaleN; drawScaling(); }
 };
 
 renderAt(0); syncScrub(); setPlaying(true);
